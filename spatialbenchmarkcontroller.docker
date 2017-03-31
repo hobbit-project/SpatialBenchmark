@@ -1,0 +1,10 @@
+
+FROM java
+
+ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.jar
+
+WORKDIR /SpatialBenchmark
+
+CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
+
+
