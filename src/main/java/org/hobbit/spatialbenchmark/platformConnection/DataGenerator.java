@@ -3,21 +3,29 @@ package org.hobbit.spatialbenchmark.platformConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.spatialbenchmark.data.Generator;
-import org.hobbit.spatialbenchmark.main.Main;
+import org.hobbit.spatialbenchmark.data.Worker;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.spatialbenchmark.properties.Configurations;
-import static org.hobbit.spatialbenchmark.properties.Configurations.NEW_URI_NAMESPACE;
-import static org.hobbit.spatialbenchmark.properties.Configurations.INSTANCES;
 import org.hobbit.spatialbenchmark.properties.Definitions;
-import org.hobbit.spatialbenchmark.util.SesameUtils;
-import org.slf4j.LoggerFactory;
+import org.hobbit.spatialbenchmark.util.AllocationsUtil;
+import static org.hobbit.spatialbenchmark.properties.Configurations.GENERATED_DATA_FORMAT;
+import static org.hobbit.spatialbenchmark.properties.Configurations.INSTANCES;
+import static org.hobbit.spatialbenchmark.data.Generator.call;
+import static org.hobbit.spatialbenchmark.data.Generator.configurations;
+import static org.hobbit.spatialbenchmark.data.Generator.definitions;
+import static org.hobbit.spatialbenchmark.data.Generator.randomGenerator;
 
 /**
  *
@@ -25,47 +33,204 @@ import org.slf4j.LoggerFactory;
  */
 public class DataGenerator extends AbstractDataGenerator {
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
 
-    public static Configurations configurations = new Configurations();
-    public static Definitions definitions = new Definitions();
-    protected static Random randomGenerator = new Random(0);
-    public static Generator generateData = new Generator();
+    private int numberOfDataGenerators;
     private int population;
-    private String serializationFormat;
+    public static String serializationFormat;
+    private String spatialRelation;
+    private double keepPoints;
+    private int taskId = 0;
 
-    /* Number of expected triples generated*/
-    private String DATA_GENERATOR_POPULATION;
-    private String DATA_GENERATOR_FORMAT;
+    public static Generator dataGeneration = new Generator();
 
-    public void setDATA_GENERATOR_POPULATION(String dATA_GENERATOR_POPULATION) {
-        DATA_GENERATOR_POPULATION = dATA_GENERATOR_POPULATION;
-    }
+    public static String testPropertiesFile = System.getProperty("user.dir") + File.separator + "test.properties";
+    public static String definitionsPropertiesFile = System.getProperty("user.dir") + File.separator + "definitions.properties";
+    public static String datasetsPath = System.getProperty("user.dir") + File.separator + "datasets";
+    public static String givenDatasetsPath = System.getProperty("user.dir") + File.separator + "datasets" + File.separator + "givenDatasets";
 
-    public void setDATA_GENERATOR_FORMAT(String dATA_GENERATOR_FORMAT) {
-        DATA_GENERATOR_FORMAT = dATA_GENERATOR_FORMAT;
-    }
-
-    public String getDATA_GENERATOR_POPULATION() {
-        return DATA_GENERATOR_POPULATION;
-    }
-
-    public String getDATA_GENERATOR_FORMAT() {
-        return DATA_GENERATOR_FORMAT;
-    }
+    private Task task;
 
     @Override
     public void init() throws Exception {
+        LOGGER.info("Initializing Data Generator '" + getGeneratorId() + "'");
         // Always init the super class first!
-        LOGGER.info("start DataGenerator init");
+        LOGGER.info("BEFORE super.init() of DataGenerator");
         super.init();
-        LOGGER.info("finish DataGenerator init");
 
-        LOGGER.info("start DataGenerator init from env");
+        LOGGER.info("AFTER super.init() of DataGenerator");
         initFromEnv();
-        LOGGER.info("finish DataGenerator init from env");
-        // call data generation
-        generateData();
+
+        LOGGER.info("reInitializeProperties...");
+        reInitializeProperties();
+
+        task = new Task(Integer.toString(taskId++), null, null);
+
+    }
+
+    @Override
+    protected void generateData() throws Exception {
+        // Create your data inside this method. You might want to use the
+        // id of this data generator and the number of all data generators
+        // running in parallel.
+
+        LOGGER.info("Generate data.. ");
+        try {
+            //to filescount de xreiazetai logika
+            //episis to id pou allaza vasi tou generator?
+            //to task id? tsekare ayta!!!!
+            //to generator id??
+
+//            LOGGER.info("filesCount " + filesCount);
+            LOGGER.info("datasetsPath " + datasetsPath);
+            LOGGER.info("serializationFormat " + serializationFormat);
+
+            Worker worker = new Worker(datasetsPath, serializationFormat);
+            LOGGER.info("before worker execute ");
+            worker.execute();
+            LOGGER.info("Worker is done! ");
+
+            LOGGER.info("Now we have produced source, target and gs ");
+
+//Error response from daemon: 
+// open /hdd/docker/containers/9112d192614bb76730f33863a6d1f47746155d22f48c7f156f265b07e446732f/9112d192614bb76730f33863a6d1f47746155d22f48c7f156f265b07e446732f-json.log: 
+// no such file or directory
+//document doesn't start with a valid json element : null
+            LOGGER.info("before sourcePath");
+            File sourcePath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
+            LOGGER.info("sourcePath  " + Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
+            ArrayList<File> sourceFiles = new ArrayList<File>(Arrays.asList(sourcePath.listFiles()));
+            LOGGER.info("sourcePath " + datasetsPath + File.separator + "SourceDatasets");
+
+            LOGGER.info("before targetPath");
+            File targetPath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "TargetDatasets");
+            ArrayList<File> targetFiles = new ArrayList<File>(Arrays.asList(targetPath.listFiles()));
+            LOGGER.info("targetPath " + datasetsPath + File.separator + "TargetDatasets");
+//mipos na pairno mono auta pou teleionoun me to relation?
+
+            ByteArrayOutputStream dataBos = null;
+            ByteArrayOutputStream tasksBos = null;
+
+            //exoun paraxthei source, target kai gs alla ta parakato loggers deixnoun oti to size einai 0
+            //vasika tupose to periexomeno! 
+            //mipos thelei / sto telos?
+            LOGGER.info("sourceFiles size " + sourceFiles.size());
+            LOGGER.info("targetFiles size " + targetFiles.size());
+
+            // send generated data to system adapter
+            // all data have to be sent before sending the first query to system adapter
+            for (File file : sourceFiles) {
+                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
+                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
+
+                dataBos = new ByteArrayOutputStream();
+                dataBos.write(fileNameBytes.length);
+                dataBos.write(fileNameBytes);
+                dataBos.write(fileContentBytes);
+                String sentFilePath = new String(fileNameBytes);
+
+//                 LOGGER.info("SOS I COMMENTED OUT sendDataToSystemAdapter");
+                sendDataToSystemAdapter(dataBos.toByteArray());
+                LOGGER.info(sentFilePath + " sent to System Adapter.");
+
+            }
+            LOGGER.info("Source data successfully sent to System Adapter.");
+
+            File gsPath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
+//File gsPath = new File("./datasets/GoldStandards");
+            LOGGER.info("DATAGENERATOR gsPath " + gsPath);
+            ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
+            LOGGER.info("DATAGENERATOR gsFiles.size() " + gsFiles.size());
+
+            //mipos to signal kanei kati? paremvainei?
+            LOGGER.info("THA DIAVASO TA GS");
+            ByteArrayOutputStream gsBos = null;
+            // send generated data to system adapter
+            // all data have to be sent before sending the first query to system adapter
+
+            //mipos an einai pano apo ena file exo thema? sto send kai to set?
+            for (File file : gsFiles) {
+                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
+                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
+
+                gsBos = new ByteArrayOutputStream();
+                gsBos.write(fileNameBytes.length);
+                gsBos.write(fileNameBytes);
+                gsBos.write(fileContentBytes);
+//                String sentFilePath = new String(fileNameBytes);
+
+                task.setExpectedAnswers(fileNameBytes);
+            }
+            LOGGER.info("Gold Standard successfully added to Task.");
+
+            // send generated tasks along with their expected answers to task generator
+            for (File file : targetFiles) {
+                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
+                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
+
+                tasksBos = new ByteArrayOutputStream();
+                tasksBos.write(fileNameBytes.length);
+                tasksBos.write(fileNameBytes);
+                tasksBos.write(fileContentBytes);
+//                String sentFilePath = new String(fileNameBytes);
+
+                task.setTarget(fileNameBytes);
+
+                byte[] data = SerializationUtils.serialize(task);
+                sendDataToTaskGenerator(data);
+//                sendDataToTaskGenerator(tasksBos.toByteArray());
+
+//                LOGGER.info("TARGET DATA BYTE ARRAY " + Arrays.toString(tasksBos.toByteArray()));
+//                String s = new String(tasksBos.toByteArray());
+//                LOGGER.info("Source Text Decrypted : " + s);
+            }
+
+//            for (Task task : tasks) {
+//                byte[] data = SerializationUtils.serialize(task);
+//                sendDataToTaskGenerator(data);
+//                LOGGER.info("Task " + task.getTaskId() + " sent to Task Generator.");
+//            }
+            LOGGER.info("Target data successfully sent to Task Generator. - TASK ");
+
+            LOGGER.info("****** dataGeneration.configurations == null " + (dataGeneration.configurations == null));
+            LOGGER.info("******* Generator.configurations == null " + (Generator.configurations == null));
+
+//            LOGGER.info("EGRAPSE TO GS STO BYTE[]");
+//            //todo tasks!!!!?!!!?
+//            //send gold standard ?
+//            //energopoise ta alla tasks
+        } catch (Exception e) {
+            LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
+        }
+
+//        int dataGeneratorId = getGeneratorId();
+//        int numberOfGenerators = getNumberOfGenerators();
+//
+//        byte[] data;
+//        while(notEnoughDataGenerated) {
+//            // Create your data here
+//            data = ...
+//
+//            // the data can be sent to the task generator(s) ...
+//            sendDataToTaskGenerator(data);
+//            // ... and/or to the system
+//            sendDataToSystemAdapter(data);
+//        }
+    }
+
+//    @Override
+//    public void close() throws IOException {
+//        super.close();
+//    }
+    public void initFromEnv() {
+        LOGGER.info("Getting Data Generator's properites from the environment...");
+
+        Map<String, String> env = System.getenv();
+        serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
+        population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
+        numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
+        spatialRelation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
+        keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
     }
 
     /**
@@ -101,147 +266,60 @@ public class DataGenerator extends AbstractDataGenerator {
         return paramType;
     }
 
-    public void initFromEnv() {
-        LOGGER.info("Getting Data Generator's properites from the environment...");
+    /*
+	 * Update SPB configuration files that are necessary for data generation
+     */
+    public void reInitializeProperties() throws IOException {
+        LOGGER.info("start method reInitializeProperties()");
+//        int numberOfGenerators = getNumberOfGenerators();
+        int generatorId = getGeneratorId();
+//        dataGeneration = new Generator();
+        LOGGER.info("reInitializeProperties 1 ");
+        loadPropertiesConfigurationFiles();
 
-        Map<String, String> env = System.getenv();
+        definitions.initializeAllocations(randomGenerator);
 
-        /*   Assigns the corresponding values to fields whose values are defined by the platform's GUI.
-        Population */
-        if (!env.containsKey(PlatformConstants.GENERATED_POPULATION)) {
-            LOGGER.error(
-                    "Couldn't get \"" + PlatformConstants.GENERATED_POPULATION + "\" from the properties. Aborting.");
-            System.exit(1);
+        // re-initialize test.properties file that is required for data generation
+        configurations.setStringProperty(INSTANCES, String.valueOf(population));
+        configurations.setStringProperty(GENERATED_DATA_FORMAT, serializationFormat);
+        configurations.setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
+        configurations.setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
+        LOGGER.info("reInitializeProperties 2 ");
+        //todo : check if keep points < 1.0
+
+        LOGGER.info("keepPoints " + keepPoints);
+
+        ArrayList<Double> points = new ArrayList<Double>();
+        points.add(keepPoints);
+        points.add(1.0 - keepPoints);
+        Random random = new Random();
+        Definitions.keepPointsAllocation = new AllocationsUtil(points, random);
+
+        LOGGER.info("reInitializeProperties 3 ");
+        ArrayList<Double> relation = new ArrayList<Double>();
+        for (int i = 0; i < 10; i++) {
+            relation.add(0.0);
         }
-        setDATA_GENERATOR_POPULATION(env.get(PlatformConstants.GENERATED_POPULATION));
+        relation.add(spatialRelation.indexOf(spatialRelation), 1.0);
+        Definitions.spatialRelationsAllocation = new AllocationsUtil(relation, random);
 
-        /* output data format */
-        if (!env.containsKey(PlatformConstants.GENERATED_DATA_FORMAT)) {
-            LOGGER.error(
-                    "Couldn't get \"" + PlatformConstants.GENERATED_DATA_FORMAT + "\" from the properties. Aborting.");
-            System.exit(1);
-        }
-        setDATA_GENERATOR_FORMAT(env.get(PlatformConstants.GENERATED_DATA_FORMAT));
+        call.spatialRelationsCases();
+        Generator.transform = call.getSpatialRelationsConfiguration();
 
-        population = getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
-        serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
-        
-      
-        LOGGER.info("population " +population);
-        LOGGER.info("serializationFormat " +serializationFormat);
-    }
-    
-    
-    @Override
-    // This method is used for sending the already generated data, tasks and gold standard
-    // to the appropriate components.
-    protected void generateData() throws Exception {
-        // Create your data inside this method. You might want to use the
-        // id of this data generator and the number of all data generators
-        // running in parallel.
-        int dataGeneratorId = getGeneratorId();
-        int numberOfGenerators = getNumberOfGenerators();
+        LOGGER.info("-points " + points.toString());
+        LOGGER.info("-Definitions.keepPointsAllocation.getAllocation() " + Definitions.keepPointsAllocation.getAllocation());
 
-        //read properties file
-        Main.loadPropertiesFile();
-        //change desired properties 
-        DATA_GENERATOR_POPULATION = "10"; //edo tha kalestei to mimicking?! sigoura pantos to population de tha einai auto
+        LOGGER.info("-logger from data generator: " + Generator.transform);
+        LOGGER.info("-relation " + relation.toString());
+        LOGGER.info("-Definitions.spatialRelationsAllocation.getAllocation() " + Definitions.spatialRelationsAllocation.getAllocation());
 
-        Main.getConfigurations().getProperties().setProperty(INSTANCES, DATA_GENERATOR_POPULATION); //population
-
-        //to add the id on the folders of the generated data, add the line below
-//        Main.getConfigurations().getProperties().setProperty(DATASETS_PATH, DATASETS_PATH+"/" + dataGeneratorId + "/"); 
-        Main.getConfigurations().getProperties().setProperty(NEW_URI_NAMESPACE, Main.getConfigurations().getString(Configurations.NEW_URI_NAMESPACE) + dataGeneratorId + "/");
-
-        //run data,task and gs generation
-        runDataGeneration();
-        
-        String[] extensions = new String[]{SesameUtils.parseRdfFormat(Main.getConfigurations().getString(Configurations.GENERATED_DATA_FORMAT)).toString()};
-
-        File dataPath = new File(Main.getConfigurations().getString(Configurations.DATASETS_PATH) + "/SourceDatasets");
-        List<File> dataFiles = (List<File>) FileUtils.listFiles(dataPath, extensions, true);
-
-        ByteArrayOutputStream dataBos = null;
-
-        File taskPath = new File(Main.getConfigurations().getString(Configurations.DATASETS_PATH) + "/TargetDatasets");
-        List<File> taskFiles = (List<File>) FileUtils.listFiles(taskPath, extensions, true);
-        
-        ByteArrayOutputStream tasksBos = null;
-        
-        File gsPath = new File(Main.getConfigurations().getString(Configurations.DATASETS_PATH) + "/GoldStandards");
-        List<File> gsFiles = (List<File>) FileUtils.listFiles(gsPath, extensions, true);
-        
-        ByteArrayOutputStream gsBos = null;
-
-        try {
-            // send generated data to system adapter
-            // all data have to be sent before sending the first query to system adapter
-            for (File file : dataFiles) {
-                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
-                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
-
-                dataBos = new ByteArrayOutputStream();
-                dataBos.write(fileNameBytes.length);
-                dataBos.write(fileNameBytes);
-//                dataBos.write(fileContentBytes.length);
-                dataBos.write(fileContentBytes);
-                String sentFilePath = new String(fileNameBytes);
-
-//                sendDataToSystemAdapter(dataBos.toByteArray());
-                LOGGER.info(sentFilePath + " sent to System Adapter.");
-            }
-            LOGGER.info("All generated data successfully sent to System Adapter.");
-
-            // send generated tasks along with their expected answers to task generator
-            for (File file : taskFiles) {
-                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
-                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
-
-                tasksBos = new ByteArrayOutputStream();
-                tasksBos.write(fileNameBytes.length);
-                tasksBos.write(fileNameBytes);
-//                tasksBos.write(fileContentBytes.length);
-                tasksBos.write(fileContentBytes);
-//                String sentFilePath = new String(fileNameBytes);
-
-                //fix this tasks
-                sendDataToTaskGenerator(tasksBos.toByteArray());
-               LOGGER.info("Task ??? sent to Task Generator.");
-            }
-            LOGGER.info("All generated tasks successfully sent to Task Generator.");
-            
-            
-            
-//            for (File file : gsFiles) {
-//                byte[] fileNameBytes = RabbitMQUtils.writeString(file.getAbsolutePath());
-//                byte[] fileContentBytes = FileUtils.readFileToByteArray(file);
-//
-//                gsBos = new ByteArrayOutputStream();
-//                gsBos.write(fileNameBytes.length);
-//                gsBos.write(fileNameBytes);
-//                gsBos.write(fileContentBytes.length);
-//                gsBos.write(fileContentBytes);
-//                String sentFilePath = new String(fileNameBytes);
-//
-//                //where to send to gs?
-//            }
-            
-        } catch (Exception e) {
-            LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
-        }
+        LOGGER.info("-getConfigurations() GENERATED_DATA_FORMAT " + configurations.getProperties().getProperty(GENERATED_DATA_FORMAT));
+        LOGGER.info("-spatialRelation.indexOf(spatialRelation) " + spatialRelation.indexOf(spatialRelation));
     }
 
-    public void runDataGeneration() throws IOException {
-        Main.start();
-    }
-
-    @Override
-    public void close() throws IOException {
-        // Free the resources you requested here
-        //...
-
-        // Always close the super class after yours!
-        super.close();
+    public static void loadPropertiesConfigurationFiles() throws IOException {
+        configurations.loadFromFile(testPropertiesFile);
+        definitions.loadFromFile(configurations.getString(Configurations.DEFINITIONS_PATH));
     }
 
 }

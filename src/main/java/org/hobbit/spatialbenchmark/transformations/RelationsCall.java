@@ -84,6 +84,7 @@ public class RelationsCall {
         }
     }
 
+//EQUALS, DISJOINT, TOUCHES, CONTAINS, COVERS, INTERSECTS, WITHIN, COVERED_BY, CROSSES, OVERLAPS
     public void spatialRelationsCases() {
         initializeSpatialRelationsEntity();
         spatialRelationTransformation = null;

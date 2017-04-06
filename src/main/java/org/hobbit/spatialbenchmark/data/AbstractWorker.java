@@ -1,9 +1,13 @@
 package org.hobbit.spatialbenchmark.data;
 
 import org.openrdf.model.Model;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWorker extends Generator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorker.class);
+    
     public static final String RELATION = transform.getClass().getSimpleName();
     public static final String SOURCE_FILENAME = "%s%ssource" + transform.getClass().getSimpleName() + "-%04d.";
     public static final String TARGET_FILENAME = "%s%starget" + transform.getClass().getSimpleName() + "-%04d.";

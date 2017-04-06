@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE LIMES SYSTEM "limes.dtd">
+<LIMES>
+
+    <PREFIX>
+        <NAMESPACE>http://www.w3.org/2002/07/owl#</NAMESPACE>
+        <LABEL>owl</LABEL>
+    </PREFIX>
+     <PREFIX>
+        <NAMESPACE>http://www.tomtom.com/ontologies/traces#</NAMESPACE>
+        <LABEL>tomtom</LABEL>
+	</PREFIX>
+	<PREFIX>
+		<NAMESPACE>http://strdf.di.uoa.gr/ontology#</NAMESPACE>
+        <LABEL>strdf</LABEL>
+    </PREFIX>
+    <SOURCE>
+        <ID>s</ID>
+		<!--do not add file extension-->
+        <ENDPOINT>./datasets/SourceDatasets/sourceOVERLAPS-0001</ENDPOINT>
+        <VAR>?x</VAR>
+        <PAGESIZE>-1</PAGESIZE>
+        <RESTRICTION>?x a tomtom:Trace</RESTRICTION>
+		<PROPERTY>strdf:hasGeometry RENAME geometry</PROPERTY> 
+		<!--<TYPE>NT</TYPE> -->
+    </SOURCE>
+    <TARGET>
+        <ID>t</ID>
+		<!--do not add file extension-->
+        <ENDPOINT>./datasets/TargetDatasets/targetOVERLAPS-0001</ENDPOINT>
+        <VAR>?y</VAR>
+        <PAGESIZE>-1</PAGESIZE>
+        <RESTRICTION>?y a tomtom:Trace</RESTRICTION>
+		<PROPERTY>strdf:hasGeometry RENAME geometry</PROPERTY> 
+		<!--<TYPE>NT</TYPE> -->
+    </TARGET>
+	<METRIC>Top_Overlaps(x.geometry, y.geometry)</METRIC>
+     <ACCEPTANCE>
+        <THRESHOLD>1.0</THRESHOLD>
+       <FILE>./datasets/GoldStandards/overlaps_mapping.nt</FILE>
+        <RELATION>owl:sameAs</RELATION>
+    </ACCEPTANCE>
+    <REVIEW>
+        <THRESHOLD>1.0</THRESHOLD>
+        <FILE>./datasets/GoldStandards/overlaps_absolute_mapping_almost.nt</FILE>
+        <RELATION>owl:sameAs</RELATION>
+    </REVIEW> 
+
+    <EXECUTION>
+        <REWRITER>default</REWRITER>
+        <PLANNER>default</PLANNER>
+        <ENGINE>default</ENGINE>
+    </EXECUTION>
+
+    <OUTPUT>TAB</OUTPUT>
+</LIMES>

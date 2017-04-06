@@ -5,6 +5,16 @@ ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.
 
 WORKDIR /SpatialBenchmark
 
+COPY test.properties /SpatialBenchmark/
+
+COPY definitions.properties /SpatialBenchmark/
+
+COPY datasets/* /SpatialBenchmark/datasets/
+
+COPY datasets/givenDatasets/* /SpatialBenchmark/datasets/givenDatasets/
+
+COPY datasets/topologicalConfigs/* /SpatialBenchmark/datasets/topologicalConfigs/
+
 CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
 
 

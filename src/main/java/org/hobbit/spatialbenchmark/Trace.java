@@ -47,6 +47,7 @@ public class Trace {
         trace.add(id, rdfType, Trace);
         
         LineString line = geometryFactory.createLineString(pointsOfTrace.toArray(new Coordinate[]{}));
+//        System.out.println("line " +Arrays.toString(pointsOfTrace.toArray(new Coordinate[]{})));
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(line.toText(), WKT);
         
         trace.add(id, ValueFactoryImpl.getInstance().createURI(stRDF + "hasGeometry"), geometryValue);
@@ -63,8 +64,20 @@ public class Trace {
         return this.id;
     }
 
+//    //setter
+//    public void setPointsOfTrace(ArrayList<Coordinate> p) {
+//        this.pointsOfTrace = p;
+//    }
+//
     public void addPointsOfTrace(Coordinate p) {
         this.pointsOfTrace.add(p);
     }
 
+//    public void addPointsOfTrace(int index, Coordinate p) {
+//        this.pointsOfTrace.add(index, p);
+//    }
+//
+//    public int size() {
+//        return this.pointsOfTrace.size();
+//    }
 }

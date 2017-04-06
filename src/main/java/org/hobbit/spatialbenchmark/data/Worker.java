@@ -13,7 +13,6 @@ import org.aksw.limes.core.controller.ResultMappings;
 import org.apache.commons.io.FileUtils;
 import org.hobbit.spatialbenchmark.data.goldstandard.RADONController;
 import org.hobbit.spatialbenchmark.data.goldstandard.oaei.OAEIRDFAlignmentFormat;
-import org.hobbit.spatialbenchmark.main.Main;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
@@ -33,6 +32,8 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Worker extends AbstractWorker {
 
@@ -40,27 +41,31 @@ public class Worker extends AbstractWorker {
     protected long totalTriplesForWorker;
     protected String destinationPath;
     protected String serializationFormat;
-    protected AtomicLong filesCount;
 
-    public Worker(AtomicLong filesCount, String destinationPath, String serializationFormat) {
-        this.filesCount = filesCount;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
+
+    public Worker(String destinationPath, String serializationFormat) {
+        LOGGER.info("Worker constructor");
+//        this.filesCount = filesCount;
         this.destinationPath = destinationPath;
         this.serializationFormat = serializationFormat;
     }
 
     @Override
     public void execute() throws Exception {
+LOGGER.info("Worker 1");
         FileOutputStream sourceFos = null;
         FileOutputStream targetFos = null;
         FileOutputStream gsFos = null;
         FileOutputStream oaeiGSFos = null;
         RDFFormat rdfFormat = SesameUtils.parseRdfFormat(serializationFormat);
-
+LOGGER.info("Worker 2");
         String sourceDestination = destinationPath + "/SourceDatasets";
         String targetDestination = destinationPath + "/TargetDatasets";
         String goldStandardDestination = destinationPath + "/GoldStandards";
         String OAEIGoldStandardDestination = destinationPath + "/OAEIGoldStandards";
-
+        
         File theFileS = new File(sourceDestination);
         theFileS.mkdirs();
         FileUtils.cleanDirectory(theFileS); // will create a folder for the transformed data if not exists                     
@@ -76,24 +81,42 @@ public class Worker extends AbstractWorker {
         File theFileOAEIGS = new File(OAEIGoldStandardDestination);
         theFileOAEIGS.mkdirs();
         FileUtils.cleanDirectory(theFileOAEIGS);
-
+LOGGER.info("Worker 3");
         long currentFilesCount = filesCount.incrementAndGet();
         String sourceFileName = String.format(SOURCE_FILENAME + rdfFormat.getDefaultFileExtension(), sourceDestination, File.separator, currentFilesCount);
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), OAEIGoldStandardDestination, File.separator, currentFilesCount);
+//        LoadGivenData loadData = new LoadGivenData();
+//        Repository repository = loadData.LoadDatasetsFromFile();
+//        RepositoryConnection con = repository.getConnection();
+//        if (con.size() <= Main.getConfigurations().getInt(Configurations.TOTAL_TRIPLES)) {
+//            targetTriples = con.size();
+//        } else {
+//            targetTriples = Main.getConfigurations().getInt(Configurations.TOTAL_TRIPLES); //or target size that user gave
+//        }
+//        System.out.println("targetTriples " + targetTriples);
 
-        RDFFormat format = RDFFormat.TURTLE; //fix format
-        String path = Main.getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
+LOGGER.info("Worker 4");
+        RDFFormat format = RDFFormat.TURTLE; //to format tha diaforetiko, analoga to retrieve apo to mimicking?
+        String path = configurations.getString(Configurations.GIVEN_DATASETS_PATH);
+        //String path = destinationPath + "/givenDatasets/";
         List<File> collectedFiles = new ArrayList<File>();
-
+//        Repository repository = new SailRepository(new MemoryStore());
         RepositoryConnection con = null;
-
+//
+//        repository.initialize();
+//        con = repository.getConnection();
+LOGGER.info("Worker 5");
         //each file is an instance
         FileUtil.collectFilesList(path, collectedFiles, "*", true);
+        //List<File> files = collectedFiles;
+        //episis auto mallon de tha einai etsi, diladi ana file! 
+        // na kano generate me to mimicking osa xreiazomai kai retrieve ola?
+        //episis na ta kratao stin cache?! pos to exoun kanei sto limes?
+        //i kleanthi pos to exei kanei?
+        int numOfInstances = configurations.getInt(Configurations.INSTANCES);
 
-        int numOfInstances = Main.getConfigurations().getInt(Configurations.INSTANCES);
-
-        if ((Main.getConfigurations().getInt(Configurations.INSTANCES) > collectedFiles.size()) || (Main.getConfigurations().getInt(Configurations.INSTANCES) == 0)) {
+        if ((configurations.getInt(Configurations.INSTANCES) > collectedFiles.size()) || (configurations.getInt(Configurations.INSTANCES) == 0)) {
             numOfInstances = collectedFiles.size();
         }
         try {
@@ -107,17 +130,22 @@ public class Worker extends AbstractWorker {
                 repository.initialize();
                 con = repository.getConnection();
                 con.add(collectedFiles.get(i), "", format);
+//                System.out.println("con size " + con.size());
                 System.out.println("i " + i + " " + collectedFiles.get(i).getName());
+//            System.out.println("numOfInstances " + numOfInstances);
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
                         + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }";
+//                        + "LIMIT " + numOfInstances;
 
                 TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryNumInstances);
                 TupleQueryResult result = query.evaluate();
 
+//            while (result.hasNext() && targetTriples > 0) {
                 BindingSet nextResult = result.next();
                 String traceID = nextResult.getBinding("s").getValue().stringValue();
+//                System.out.println("traceID: " + traceID);
 
                 //retrieve long, lat from given datasets
                 String queryString
@@ -169,7 +197,7 @@ public class Worker extends AbstractWorker {
                     givenInstanceModel.add(statement);
                 }
             }
-
+LOGGER.info("Worker 6");
             //oaei gold standard
             OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
 
@@ -179,12 +207,14 @@ public class Worker extends AbstractWorker {
 
             for (HashMap.Entry<String, HashMap<String, Double>> entry : mappings.entrySet()) {
                 String source = entry.getKey();
+//                System.out.println("source " + source);
                 for (HashMap.Entry<String, Double> innerEntry : entry.getValue().entrySet()) {
                     String target = innerEntry.getKey();
+//                    System.out.println("target " + target);
                     oaeiRDF.addMapping2Output(source, target, RELATION, 1.0);
                 }
             }
-
+LOGGER.info("WORKER 5");
             try {
                 oaeiRDF.saveOutputFile();
             } catch (Exception e) {

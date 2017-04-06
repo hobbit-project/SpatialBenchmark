@@ -183,4 +183,12 @@ public class Configurations {
         return this.properties;
     }
 
+    public void setIntProperty(String key, int value) {
+        properties.setProperty(key, Integer.toString(value));
+    }
+
+    public void setStringProperty(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
 }

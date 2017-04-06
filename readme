@@ -1,0 +1,48 @@
+1. Follow instructions from: 
+https://github.com/hobbit-project/platform
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+2. follow instructions below:
+
+from my point of view, the best way to test the benchmark is to deploy the platform locally.
+
+However, I understand your concerns regarding keycloak and I agree that we might want to have an easier way to debug implementations, in the future. At the moment, I can offer you an easy workaround to start your benchmark locally without using keycloak and the Hobbit GUI.
+
+1. Create the benchmark.ttl and system.ttl files and upload them to the git of the platform. (unfortunately, we can not start benchmarks or systems that are not in the git as described in https://git.informatik.uni-leipzig.de/hobbit/platform/issues/11)
+
+2. Checkout the platform and deploy it locally (without keycloak).
+
+3. Create a ttl file containing the parameters of your experiment. You can take a look into src/test/resources/exampleExperiment.ttl and replace the triples with the parameters you want to use for your test run (and the benchmark and system URIs with your URIs).
+
+4. Open the directory platform/platform-controller and edit the test_cmd.sh file.
+Replace the following parameter with the URI of your benchmark
+-e "BENCHMARK=http://example.org/GerbilBenchmark"
+Replace the following parameter with the URI of your system that you are using for your tests
+-e "SYSTEM=http://example.org/DummySystemInstance1"
+Replace the following parameter with the path to your experiment parameter file created in step 3
+-e "BENCHMARK_PARAM_FILE=src/test/resources/exampleExperiment.ttl"
+ 
+5. on the command line, execute test_cmd.sh
+This creates a Docker container connected to the platform network.
+navigate to /usr/src/app
+This directory contains the platform-controller directory in which you started the test_cmd.sh script
+execute test_start_benchmark.sh
+This will start a java program that connects to RabbitMQ, sends a request to execute the defined benchmark to the platform controller and waits for the response. As response the ID of the experiment should be printed.
+
+After that, your locally deployed platform should execute the benchmark. 
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+3. make sure to build the benchmarka and the docker images of the benchmark every time you change the source code
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+on platform/platform-controller test_cmd.sh fill:  
+ 
+docker run -it --rm --network="hobbit-core" -v `pwd`:/usr/src/app -e "HOBBIT_RABBIT_HOST=rabbit" -e "BENCHMARK=http://w3id.org/bench#Spatial" -e "SYSTEM=http://w3id.org/system#limesV1" -e "BENCHMARK_PARAM_FILE=src/test/resources/experiment.ttl" -e "USERNAME=jsaveta11" maven bash
+
+
+experiment.ttl is on platform folder
