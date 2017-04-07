@@ -13,7 +13,7 @@ COPY datasets/* /SpatialBenchmark/datasets/
 
 COPY datasets/givenDatasets/* /SpatialBenchmark/datasets/givenDatasets/
 
-COPY datasets/topologicalConfigs/* /SpatialBenchmark/datasets/topologicalConfigs/
+COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
 CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
 
