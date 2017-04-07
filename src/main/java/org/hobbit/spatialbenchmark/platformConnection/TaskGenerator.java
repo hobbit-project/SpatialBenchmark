@@ -5,9 +5,11 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractTaskGenerator;
+import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,56 +23,59 @@ public class TaskGenerator extends AbstractTaskGenerator {
 
     @Override
     public void init() throws Exception {
-        LOGGER.info("MPIKE STO INIT TOU TASK GENERATOR");
-
+        LOGGER.info("Initializing Task Generators...");
         super.init();
-
-        LOGGER.info("TELEIWSE TO INIT TOU TASK GENERATOR");
+        LOGGER.info("Task Generators initialized successfully.");
     }
 
     @Override
     protected void generateTask(byte[] data) throws Exception {
         try {
-            LOGGER.info("MPIKE STO generateTask TOU TASK GENERATOR");
             // Create tasks based on the incoming data inside this method.
             // You might want to use the id of this task generator and the
             // number of all task generators running in parallel.
 //        int dataGeneratorId = getGeneratorId();
 //        int numberOfGenerators = getNumberOfGenerators();
+
             // Create an ID for the task
-            String taskId = getNextTaskId();
-            LOGGER.info("taskId " + taskId);
-
             Task task = (Task) SerializationUtils.deserialize(data);
-            LOGGER.info("Task " + task.getTaskId() + " received from Data Generator");
+            String taskId = task.getTaskId(); //getNextTaskId();
+            String taskRelation = task.getRelation();
 
-            byte[] taskData = task.getTarget();
+            byte[] target = task.getTarget();
+            ByteBuffer taskBuffer = ByteBuffer.wrap(target);
+            String format = RabbitMQUtils.readString(taskBuffer);
+            String path = RabbitMQUtils.readString(taskBuffer);
+            byte[] targetData = RabbitMQUtils.readByteArray(taskBuffer);
             
-            LOGGER.info("target sto taskData");
-            LOGGER.info("eimai ston task generator TASK DATA " + Arrays.toString(taskData));
-            
+
+            byte[][] taskDataArray = new byte[4][];
+            taskDataArray[0] = RabbitMQUtils.writeString(taskRelation);
+            taskDataArray[1] = RabbitMQUtils.writeString(format);
+            taskDataArray[2] = RabbitMQUtils.writeString(path);
+            taskDataArray[3] = targetData;
+            byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
+
             byte[] expectedAnswerData = task.getExpectedAnswers();
-            
-            LOGGER.info("eimai ston task generator GS DATA " + Arrays.toString(expectedAnswerData));
-            LOGGER.info("GS sto expectedAnswerData");
+
             // Send the task to the system (and store the timestamp)
             long timestamp = System.currentTimeMillis();
             sendTaskToSystemAdapter(taskId, taskData);
-            LOGGER.info("EKANA TO sendTaskToSystemAdapter(taskId, taskData)");
+            LOGGER.info("Task " + taskId + " sent to System Adapter.");
 
             // Send the expected answer to the evaluation store
             sendTaskToEvalStorage(taskId, timestamp, expectedAnswerData);
-            LOGGER.info("sendTaskToEvalStorage(taskId, timestamp, expectedAnswerData)");
+            LOGGER.info("Expected answers of task " + taskId + " sent to Evaluation Storage.");
+
         } catch (Exception e) {
             LOGGER.error("Exception caught while reading the tasks and their expected answers", e);
         }
-        LOGGER.info("TELEIWSE TO generateTask TOU TASK GENERATOR");
     }
 
-//    @Override
-//    public void close() throws IOException {
-//        // Free the resources you requested here
-//        // Always close the super class after yours!
-//        super.close();
-//    }
+    @Override
+    public void close() throws IOException {
+        LOGGER.info("Closign Task Generator...");
+        super.close();
+        LOGGER.info("Task Genererator closed successfully.");
+    }
 }

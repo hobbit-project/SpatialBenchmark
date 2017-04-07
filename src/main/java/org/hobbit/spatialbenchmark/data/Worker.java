@@ -54,13 +54,12 @@ public class Worker extends AbstractWorker {
 
     @Override
     public void execute() throws Exception {
-LOGGER.info("Worker 1");
         FileOutputStream sourceFos = null;
         FileOutputStream targetFos = null;
         FileOutputStream gsFos = null;
         FileOutputStream oaeiGSFos = null;
         RDFFormat rdfFormat = SesameUtils.parseRdfFormat(serializationFormat);
-LOGGER.info("Worker 2");
+
         String sourceDestination = destinationPath + "/SourceDatasets";
         String targetDestination = destinationPath + "/TargetDatasets";
         String goldStandardDestination = destinationPath + "/GoldStandards";
@@ -81,7 +80,7 @@ LOGGER.info("Worker 2");
         File theFileOAEIGS = new File(OAEIGoldStandardDestination);
         theFileOAEIGS.mkdirs();
         FileUtils.cleanDirectory(theFileOAEIGS);
-LOGGER.info("Worker 3");
+
         long currentFilesCount = filesCount.incrementAndGet();
         String sourceFileName = String.format(SOURCE_FILENAME + rdfFormat.getDefaultFileExtension(), sourceDestination, File.separator, currentFilesCount);
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
@@ -96,7 +95,7 @@ LOGGER.info("Worker 3");
 //        }
 //        System.out.println("targetTriples " + targetTriples);
 
-LOGGER.info("Worker 4");
+
         RDFFormat format = RDFFormat.TURTLE; //to format tha diaforetiko, analoga to retrieve apo to mimicking?
         String path = configurations.getString(Configurations.GIVEN_DATASETS_PATH);
         //String path = destinationPath + "/givenDatasets/";
@@ -106,7 +105,7 @@ LOGGER.info("Worker 4");
 //
 //        repository.initialize();
 //        con = repository.getConnection();
-LOGGER.info("Worker 5");
+
         //each file is an instance
         FileUtil.collectFilesList(path, collectedFiles, "*", true);
         //List<File> files = collectedFiles;
@@ -197,7 +196,7 @@ LOGGER.info("Worker 5");
                     givenInstanceModel.add(statement);
                 }
             }
-LOGGER.info("Worker 6");
+
             //oaei gold standard
             OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
 
@@ -214,7 +213,6 @@ LOGGER.info("Worker 6");
                     oaeiRDF.addMapping2Output(source, target, RELATION, 1.0);
                 }
             }
-LOGGER.info("WORKER 5");
             try {
                 oaeiRDF.saveOutputFile();
             } catch (Exception e) {

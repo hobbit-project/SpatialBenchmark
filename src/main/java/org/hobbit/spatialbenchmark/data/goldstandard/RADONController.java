@@ -32,7 +32,7 @@ public class RADONController extends Controller {
 
     public RADONController(RDFFormat rdfFormat) {
         String[] args = new String[1];
-        args[0] = Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
+        args[0] = Generator.configurations.getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
 
         //den vlepei to path tou resources 
 //        args[0] = "topologicalConfigs/config" + RELATION + ".xml";
@@ -44,6 +44,7 @@ public class RADONController extends Controller {
         config.getTargetInfo().setType(rdfFormat.getDefaultFileExtension().toUpperCase());
 
         config.setAcceptanceFile(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "mappings.nt");
+        config.setVerificationFile(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "absolute_mapping_almost.nt");
 
 //        System.out.println("config " + config.toString());
         //keep mappings for the oaei format
@@ -53,7 +54,6 @@ public class RADONController extends Controller {
         //delete cache folder 
         File folder = new File("./cache/");
         FileUtil.removeDirectory(folder);
-        
 
     }
 

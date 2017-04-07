@@ -21,13 +21,15 @@ public class RelationsCall {
     public RelationsCall() {
     }
 
-    private static enum spatialRelation {
+    public static enum spatialRelation {
         EQUALS, DISJOINT, TOUCHES, CONTAINS, COVERS, INTERSECTS, WITHIN, COVERED_BY, CROSSES, OVERLAPS
     }
 
     private static enum KeepPoints {
         KEEP, REMOVE
     }
+
+
 
     private void initializeSpatialRelationsEntity() {
         try {

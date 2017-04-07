@@ -14,8 +14,12 @@ import org.hobbit.core.components.AbstractEvaluationModule;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.vocab.HOBBIT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EvaluationModule extends AbstractEvaluationModule {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvaluationModule.class);
 
     /* Experiment key */
     private String EVALUATION_PARAMETER_KEY; // NUMBER OF BATCHES
@@ -89,6 +93,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
     @Override
     public void init() throws Exception {
+        LOGGER.info("Initializing Evaluation Module...");
         super.init();
 
         Map<String, String> env = System.getenv();
@@ -165,7 +170,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
             String source = answer.split(" ")[0];
             String relation = answer.split(" ")[1];
             String target = answer.split(" ")[2];
-            received.put(source, target); 
+            received.put(source, target);
         }
 
         int truePositives = 0;

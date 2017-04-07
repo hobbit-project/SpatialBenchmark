@@ -10,11 +10,13 @@ import java.io.Serializable;
 public class Task implements Serializable {
 	
 	private String taskId;
+        private String relation;
 	private byte[] target;
 	private byte[] expectedAnswers;
 	
-	public Task(String id, byte[] target, byte[] expectedAnswers) {
+	public Task(String id, String relation, byte[] target, byte[] expectedAnswers) {
 		this.taskId = id;
+                this.relation = relation;
 		this.target = target;
 		this.expectedAnswers = expectedAnswers;
 	}
@@ -26,14 +28,14 @@ public class Task implements Serializable {
 	public String getTaskId() {
 		return this.taskId;
 	}
+        
+        public void setRelation(String relation) {
+		this.relation = relation;
+	}
 	
-//	public void setQuery(String query) {
-//		this.target = query;
-//	}
-//	
-//	public String getQuery() {
-//		return this.target;
-//	}
+	public String getRelation() {
+		return this.relation;
+	}
 	
         public void setTarget(byte[] res) {
 		this.target =  res;

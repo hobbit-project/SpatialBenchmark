@@ -24,6 +24,7 @@ public class Configurations {
     public static final String INSTANCES = "instances";
     public static final String ENDPOINT_URL = "endpointURL";
     public static final String DATASETS_PATH = "datasetsPath";
+    public static final String CONFIGS_PATH = "configsPath";
     public static final String GIVEN_DATASETS_PATH = "givenDatasetsPath";
     public static final String DEFINITIONS_PATH = "definitionsPath";
     public static final String GENERATED_DATA_FORMAT = "generatedDataFormat";
@@ -39,6 +40,7 @@ public class Configurations {
         properties.setProperty(INSTANCES, "10");
         properties.setProperty(ENDPOINT_URL, "");
         properties.setProperty(DATASETS_PATH, "./datasets");
+        properties.setProperty(CONFIGS_PATH, "./configs");
         properties.setProperty(GIVEN_DATASETS_PATH, "./datasets/givenDatasets");
         properties.setProperty(DEFINITIONS_PATH, "./definitions.properties");
         properties.setProperty(GENERATED_DATA_FORMAT, "turtle");
