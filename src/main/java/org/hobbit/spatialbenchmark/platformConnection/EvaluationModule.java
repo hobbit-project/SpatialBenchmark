@@ -152,9 +152,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
         this.totalFalsePositives += falsePositives;
         this.totalTruePositives += truePositives;
 
-        System.out.println("this.totalFalseNegatives " + this.totalFalseNegatives);
-        System.out.println("this.totalFalsePositives " + this.totalFalsePositives);
-        System.out.println("this.totalTruePositives " + this.totalTruePositives);
+        LOGGER.info("this.totalFalseNegatives " + this.totalFalseNegatives);
+        LOGGER.info("this.totalFalsePositives " + this.totalFalsePositives);
+        LOGGER.info("this.totalTruePositives " + this.totalTruePositives);
     }
 
 
