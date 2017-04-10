@@ -5,14 +5,6 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractBenchmarkController;
@@ -35,6 +27,8 @@ public class BenchmarkController extends AbstractBenchmarkController {
     private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
     private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
 
+    private String[] envVariablesEvaluationModule = null;
+
     @Override
     public void init() throws Exception {
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -53,6 +47,14 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.GENERATED_DATA_FORMAT + "=" + serializationFormat,
             PlatformConstants.SPATIAL_RELATION + "=" + spatialRelation,
             PlatformConstants.KEEP_POINTS + "=" + keepPoints
+        };
+
+        // get KPIs for evaluation module
+        this.envVariablesEvaluationModule = new String[]{
+            PlatformConstants.EVALUATION_RECALL + "=" + "http://w3id.org/bench#recall",
+            PlatformConstants.EVALUATION_PRECISION + "=" + "http://w3id.org/bench#precision",
+            PlatformConstants.EVALUATION_FMEASURE + "=" + "http://w3id.org/bench#fmeasure",
+            PlatformConstants.EVALUATION_DELAY + "=" + "http://w3id.org/bench#delay"
         };
 
         // Create data generators
@@ -135,19 +137,24 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Waiting for the system to terminate.");
         waitForSystemToFinish();
         LOGGER.info("System terminated.");
-
+        
+        ///////////////////////working until here 
+        
         // create the evaluation module
-        String[] envVariablesEvaluationModule = new String[] { };
-        createEvaluationModule(EVALUATION_MODULE_CONTAINER_IMAGE, envVariablesEvaluationModule);
-      
+        LOGGER.info("Will now create the evaluation module.");
+
+        createEvaluationModule(EVALUATION_MODULE_CONTAINER_IMAGE, this.envVariablesEvaluationModule);
+        LOGGER.info("Evaluation module was created.");
+
         // wait for the evaluation to finish
         LOGGER.info("Waiting for the evaluation to finish.");
         waitForEvalComponentsToFinish();
         LOGGER.info("Evaluation finished.");
-//        
-//        // Send the resultModul to the platform controller and terminate
+
+        
+        // Send the resultModule to the platform controller and terminate
 //        sendResultModel(this.resultModel);
 //        LOGGER.info("Evaluated results sent to the platform controller.");
     }
-    
+
 }
