@@ -5,13 +5,10 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection.systems;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
@@ -56,7 +53,6 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         ByteBuffer dataBuffer = ByteBuffer.wrap(data);
         // read the file path
         dataFormat = RabbitMQUtils.readString(dataBuffer);
-        LOGGER.info("dataFormat " + dataFormat);
         receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
         byte[] receivedGeneratedData = RabbitMQUtils.readByteArray(dataBuffer);
         try {
@@ -64,14 +60,15 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         } catch (IOException ex) {
             java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        // read the file contents
-        LOGGER.info("receivedFilePath DATA data " + receivedGeneratedDataFilePath + " !!!");
+
+        LOGGER.info("Received data from receiveGeneratedData..");
 
     }
 
     @Override
     public void receiveGeneratedTask(String taskId, byte[] data) {
         LOGGER.info("Starting receiveGeneratedTask..");
+        LOGGER.info("Task " + taskId + " received from task generator");
         try {
 
             ByteBuffer taskBuffer = ByteBuffer.wrap(data);
@@ -81,28 +78,19 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
 
             // read the file path
             taskFormat = RabbitMQUtils.readString(taskBuffer);
-            LOGGER.info("taskFormat " + taskFormat);
             String receivedGeneratedTaskFilePath = RabbitMQUtils.readString(taskBuffer);
             byte[] receivedGeneratedTask = RabbitMQUtils.readByteArray(taskBuffer);
-            LOGGER.info("receivedFilePath task " + receivedGeneratedTaskFilePath + " !!!");
-            try {
-                FileUtils.writeByteArrayToFile(new File(receivedGeneratedTaskFilePath), receivedGeneratedTask);
-            } catch (IOException ex) {
-                java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
-            }
+
+            FileUtils.writeByteArrayToFile(new File(receivedGeneratedTaskFilePath), receivedGeneratedTask);
+
+            LOGGER.info("Received task from receiveGeneratedTask..");
 
             limesController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
-
-            LOGGER.info("teleiosa to limes controller");
-
-//            BufferedReader br = new BufferedReader(new FileReader(resultsFile));
-//            for (String line; (line = br.readLine()) != null;) {
-//                LOGGER.info("results 2: " + line);
-//            }
             byte[][] resultsArray = new byte[1][];
             resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
             byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
             try {
+
                 sendResultToEvalStorage(taskId, results);
                 LOGGER.info("Results sent to evaluation storage.");
             } catch (IOException e) {
@@ -117,7 +105,6 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
 
         LOGGER.info("Started limesController.. ");
 
-//        LOGGER.info("./configs/topologicalConfigs/config" + relation + ".xml");
         String[] args = new String[1];
         args[0] = "./configs/topologicalConfigs/config" + relation + ".xml";
 
@@ -138,14 +125,13 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         config.setAcceptanceFile(resultsFile);
         config.setVerificationFile("./datasets/LimesSystemAdapterResults/" + relation + "absolute_mapping_almost.nt");
 
-//        LOGGER.info("config " + config.toString());
         mappings = getMapping(config);
         writeResults(mappings, config);
 
         //delete cache folder 
         File folder = new File("./cache/");
         FileUtil.removeDirectory(folder);
-        
+
         LOGGER.info("limesController finished..");
     }
 
