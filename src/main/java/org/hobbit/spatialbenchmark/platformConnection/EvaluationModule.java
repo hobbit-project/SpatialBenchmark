@@ -204,10 +204,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
             this.experimentUri = env.get(Constants.HOBBIT_EXPERIMENT_URI_KEY);
         }
 
-        //ego thelo na metriso ton xrono pou kanei na epistrepsei apotelesmata
-//        double delay = (double) this.getSumTaskDelay() / (double) this.getTaskCounter();
-        
-        // compute macro and micro averages KPIs
+
+//        double delay = time to finish the mapping 
+       
         double recall = (double) this.totalTruePositives
                 / (double) (this.totalTruePositives + this.totalFalseNegatives);
         double precision = (double) this.totalTruePositives
