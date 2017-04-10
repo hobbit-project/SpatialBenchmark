@@ -54,7 +54,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_RECALL + "=" + "http://w3id.org/bench#recall",
             PlatformConstants.EVALUATION_PRECISION + "=" + "http://w3id.org/bench#precision",
             PlatformConstants.EVALUATION_FMEASURE + "=" + "http://w3id.org/bench#fmeasure",
-            PlatformConstants.EVALUATION_DELAY + "=" + "http://w3id.org/bench#delay"
+            PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
 
         // Create data generators
@@ -137,9 +137,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Waiting for the system to terminate.");
         waitForSystemToFinish();
         LOGGER.info("System terminated.");
-        
-        ///////////////////////working until here 
-        
+                
         // create the evaluation module
         LOGGER.info("Will now create the evaluation module.");
 
@@ -151,10 +149,9 @@ public class BenchmarkController extends AbstractBenchmarkController {
         waitForEvalComponentsToFinish();
         LOGGER.info("Evaluation finished.");
 
-        
         // Send the resultModule to the platform controller and terminate
-//        sendResultModel(this.resultModel);
-//        LOGGER.info("Evaluated results sent to the platform controller.");
+        sendResultModel(this.resultModel);
+        LOGGER.info("Evaluated results sent to the platform controller.");
     }
 
 }
