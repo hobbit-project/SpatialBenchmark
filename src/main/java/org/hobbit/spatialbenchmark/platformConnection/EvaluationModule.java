@@ -1,6 +1,7 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
@@ -93,14 +94,12 @@ public class EvaluationModule extends AbstractEvaluationModule {
     protected void evaluateResponse(byte[] expectedData, byte[] receivedData, long taskSentTimestamp,
             long responseReceivedTimestamp) throws Exception {
 
-
         time_performance = (responseReceivedTimestamp - taskSentTimestamp) / 1000l;
         LOGGER.info("time_performance in seconds! (divided by 1000) " + time_performance);
 
 //        this.sumTaskDelay += delay;
         //expected data come from data generator and received data come from system adapter
         //make sure you know that the results coming from the system adapter have the same format
-        
         // read expected data
         LOGGER.info("Read expected data");
         ByteBuffer buffer = ByteBuffer.wrap(expectedData);
@@ -108,6 +107,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
         String path = RabbitMQUtils.readString(buffer);
 
         byte[] expected = RabbitMQUtils.readByteArray(buffer);
+//        LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
 
         //handle empty results! 
         String[] dataAnswers = null;
@@ -118,30 +118,33 @@ public class EvaluationModule extends AbstractEvaluationModule {
         HashMap<String, String> expectedMap = new HashMap<String, String>();
         if (dataAnswers != null && dataAnswers.length > 0) {
             for (String answer : dataAnswers) {
-                String source = answer.split("\t")[0];
-                String target = answer.split("\t")[1];
-                expectedMap.put(source, target);
+                answer = answer.trim();
+                String source = answer.split(">")[0];
+                String target = answer.split(">")[1];
+                expectedMap.put(source + ">", target + ">");
             }
-            LOGGER.info("expected data into the map");
+            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
         }
+
+//        LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 
         // read received data
         LOGGER.info("Read received data");
         //handle empty results! 
         String[] receivedDataAnswers = null;
-        if (receivedData != null && receivedData.length > 0) {
+        if (receivedData.length > 0) {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
         HashMap<String, String> receivedMap = new HashMap<String, String>();
 
-        if (receivedDataAnswers.length > 0) {
+        if (receivedDataAnswers != null && receivedDataAnswers.length > 0) {
             for (String answer : receivedDataAnswers) {
-
-                String source = answer.split("\t")[0];
-                String target = answer.split("\t")[1];
-                receivedMap.put(source, target);
+                answer = answer.trim();
+                String source = answer.split(">")[0];
+                String target = answer.split(">")[1];
+                receivedMap.put(source + ">", target + ">");
             }
-            LOGGER.info("received data into the map");
+            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
         }
 
         //TODO: check this again
