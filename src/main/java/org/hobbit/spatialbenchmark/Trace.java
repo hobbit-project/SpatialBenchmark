@@ -24,7 +24,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 public class Trace {
 
     private Resource id;
-    public ArrayList<Coordinate> pointsOfTrace;
+    private ArrayList<Coordinate> pointsOfTrace;
     private static final URI rdfType = ValueFactoryImpl.getInstance().createURI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
     private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
     private static final String stRDF = "http://strdf.di.uoa.gr/ontology#";
@@ -34,7 +34,7 @@ public class Trace {
         this.id = id;
         this.pointsOfTrace = pointsOfTrace;
     }
-    
+
     public Trace(Resource id, Coordinate[] pointsOfTrace) {
         this.id = id;
         this.pointsOfTrace = new ArrayList<Coordinate>(Arrays.asList(pointsOfTrace));
@@ -45,11 +45,10 @@ public class Trace {
         Model trace = new LinkedHashModel();
 
         trace.add(id, rdfType, Trace);
-        
+
         LineString line = geometryFactory.createLineString(pointsOfTrace.toArray(new Coordinate[]{}));
-//        System.out.println("line " +Arrays.toString(pointsOfTrace.toArray(new Coordinate[]{})));
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(line.toText(), WKT);
-        
+
         trace.add(id, ValueFactoryImpl.getInstance().createURI(stRDF + "hasGeometry"), geometryValue);
 
         return trace;
@@ -64,20 +63,8 @@ public class Trace {
         return this.id;
     }
 
-//    //setter
-//    public void setPointsOfTrace(ArrayList<Coordinate> p) {
-//        this.pointsOfTrace = p;
-//    }
-//
     public void addPointsOfTrace(Coordinate p) {
         this.pointsOfTrace.add(p);
     }
 
-//    public void addPointsOfTrace(int index, Coordinate p) {
-//        this.pointsOfTrace.add(index, p);
-//    }
-//
-//    public int size() {
-//        return this.pointsOfTrace.size();
-//    }
 }

@@ -13,17 +13,16 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.spatialbenchmark.data.Generator;
+import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
+import static org.hobbit.spatialbenchmark.data.Generator.getDefinitions;
+import static org.hobbit.spatialbenchmark.data.Generator.getRandom;
+import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
+import static org.hobbit.spatialbenchmark.data.Generator.setSpatialTransformation;
 import org.hobbit.spatialbenchmark.data.Worker;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import org.hobbit.spatialbenchmark.properties.Definitions;
 import org.hobbit.spatialbenchmark.util.AllocationsUtil;
-import static org.hobbit.spatialbenchmark.properties.Configurations.GENERATED_DATA_FORMAT;
-import static org.hobbit.spatialbenchmark.properties.Configurations.INSTANCES;
-import static org.hobbit.spatialbenchmark.data.Generator.call;
-import static org.hobbit.spatialbenchmark.data.Generator.configurations;
-import static org.hobbit.spatialbenchmark.data.Generator.definitions;
-import static org.hobbit.spatialbenchmark.data.Generator.randomGenerator;
 import org.hobbit.spatialbenchmark.transformations.RelationsCall.spatialRelation;
 
 /**
@@ -34,7 +33,7 @@ public class DataGenerator extends AbstractDataGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
 
-    private int numberOfDataGenerators; //use this
+    private int numberOfDataGenerators; //TODO: use this
     private int population;
     public static String serializationFormat;
     private String relation;
@@ -76,18 +75,16 @@ public class DataGenerator extends AbstractDataGenerator {
         LOGGER.info("Generate data.. ");
         try {
 
-            Worker worker = new Worker(datasetsPath, serializationFormat);
+            Worker worker = new Worker();
             worker.execute();
 
-            LOGGER.info("Now we have produced source, target and gs ");
-
-            File sourcePath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
+            File sourcePath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
             ArrayList<File> sourceFiles = new ArrayList<File>(Arrays.asList(sourcePath.listFiles()));
 
-            File targetPath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "TargetDatasets");
+            File targetPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "TargetDatasets");
             ArrayList<File> targetFiles = new ArrayList<File>(Arrays.asList(targetPath.listFiles()));
 
-            File gsPath = new File(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
+            File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
 
             // send generated data to system adapter
@@ -104,20 +101,20 @@ public class DataGenerator extends AbstractDataGenerator {
                 LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
 
             }
-            LOGGER.info("Source data successfully sent to System Adapter.");
 
             for (File file : gsFiles) {
                 byte[][] generatedFileArray = new byte[3][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
+                LOGGER.info("file.getAbsolutePath() gs " + file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
 
                 task.setExpectedAnswers(generatedFile);
+                LOGGER.info("Gold Standard successfully added to Task.");
             }
-            LOGGER.info("Gold Standard successfully added to Task.");
 
             // send generated tasks along with their expected answers to task generator
             for (File file : targetFiles) {
@@ -134,9 +131,8 @@ public class DataGenerator extends AbstractDataGenerator {
                 byte[] data = SerializationUtils.serialize(task);
 
                 sendDataToTaskGenerator(data);
+                LOGGER.info("Target data successfully sent to Task Generator.");
             }
-
-            LOGGER.info("Target data successfully sent to Task Generator.");
 
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
@@ -194,15 +190,16 @@ public class DataGenerator extends AbstractDataGenerator {
 //        int generatorId = getGeneratorId();
         loadPropertiesConfigurationFiles();
 
-        definitions.initializeAllocations(randomGenerator);
+        getDefinitions().initializeAllocations(getRandom());
 
         // re-initialize test.properties file that is required for data generation
-        configurations.setStringProperty(INSTANCES, String.valueOf(population));
-        configurations.setStringProperty(GENERATED_DATA_FORMAT, serializationFormat);
-        configurations.setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
-        configurations.setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
 
-        //todo : check if keep points < 1.0
+        getConfigurations().setStringProperty(Configurations.INSTANCES, String.valueOf(population));
+        getConfigurations().setStringProperty(Configurations.GENERATED_DATA_FORMAT, serializationFormat);
+        getConfigurations().setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
+        getConfigurations().setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
+
+        //TODO : check if keep points < 1.0
         ArrayList<Double> points = new ArrayList<Double>();
         points.add(keepPoints);
         points.add(1.0 - keepPoints);
@@ -215,18 +212,18 @@ public class DataGenerator extends AbstractDataGenerator {
         }
 
         int index = spatialRelation.valueOf(relation).ordinal();
-        LOGGER.info("index " + index);
         relationArrayList.add(index, 1.0);
-        LOGGER.info("relation " + relationArrayList);
         Definitions.spatialRelationsAllocation = new AllocationsUtil(relationArrayList, random);
 
-        call.spatialRelationsCases();
-        Generator.transform = call.getSpatialRelationsConfiguration();
+        getRelationsCall().spatialRelationsCases();
+        setSpatialTransformation(getRelationsCall().getSpatialRelationsConfiguration());
+
     }
 
     public static void loadPropertiesConfigurationFiles() throws IOException {
-        configurations.loadFromFile(testPropertiesFile);
-        definitions.loadFromFile(configurations.getString(Configurations.DEFINITIONS_PATH));
+        getConfigurations().loadFromFile(testPropertiesFile);
+        getDefinitions().loadFromFile(definitionsPropertiesFile);
+        //getDefinitions().loadFromFile(configurations.getString(Configurations.DEFINITIONS_PATH));
     }
 
     @Override

@@ -17,14 +17,15 @@ import org.hobbit.spatialbenchmark.transformations.SpatialTransformation;
  */
 public class Generator {
 
-    public static AtomicLong filesCount = new AtomicLong(0);
-    public static SpatialTransformation transform;
-    public static Configurations configurations;
-    public static Definitions definitions ;
-    public static Random randomGenerator;//is important not to remove seed from random (deterministic)
-    public static RelationsCall call;
+    private static AtomicLong filesCount = new AtomicLong(0);
+    private static SpatialTransformation transform;
+    private static Configurations configurations;
+    private static Definitions definitions;
+    private static Random randomGenerator;//is important not to remove seed from random (deterministic)
+    private static RelationsCall call;
 
     public Generator() {
+
         configurations = new Configurations();
         definitions = new Definitions();
         randomGenerator = new Random(0);//is important not to remove seed from random (deterministic)
@@ -32,34 +33,58 @@ public class Generator {
 
     }
 
-//    public Configurations getConfigurations() {
-//        return configurations;
-//    }
-//
-//    public Definitions getDefinitions() {
-//        return definitions;
-//    }
-    public void setConfigurations(Configurations conf) {
+    public static Random getRandom() {
+        return randomGenerator;
+    }
+
+    public static AtomicLong getAtomicLong() {
+        return filesCount;
+    }
+
+    public static RelationsCall getRelationsCall() {
+        return call;
+    }
+
+    public static Configurations getConfigurations() {
+        return configurations;
+    }
+
+    public static Definitions getDefinitions() {
+        return definitions;
+    }
+
+    public static SpatialTransformation getSpatialTransformation() {
+        return transform;
+    }
+
+    public static void setRelationsCall(RelationsCall c) {
+        call = c;
+    }
+
+    public static void setConfigurations(Configurations conf) {
         configurations = conf;
     }
 
-    public void setDefinitions(Definitions def) {
+    public static void setDefinitions(Definitions def) {
         definitions = def;
     }
 
-    public void loadPropertiesFile() throws IOException {
-        configurations.loadFromFile("test.properties");
+    public static void setSpatialTransformation(SpatialTransformation tr) {
+        transform = tr;
+    }
+
+    public static void loadPropertiesFile(String file) throws IOException {
+        configurations.loadFromFile(file);
     }
 
     public void exec() {
         try {
+
             call.spatialRelationsCases();
             transform = call.getSpatialRelationsConfiguration();
+            System.out.println("exec configurations instances " + getConfigurations().getString(Configurations.INSTANCES));
 
-            String destinationPath = configurations.getString(Configurations.DATASETS_PATH);
-            String serializationFormat = configurations.getString(Configurations.GENERATED_DATA_FORMAT);
-            Worker worker = new Worker(destinationPath, serializationFormat);
-
+            Worker worker = new Worker();
             worker.execute();
 
         } catch (Exception ex) {

@@ -31,19 +31,19 @@ public class Configurations {
     public static final String NEW_URI_NAMESPACE = "newURInamespace";
     public static final String LOAD_ONTOLOGIES = "loadOntologies";
     public static final String CLEAR_DATABASE = "clearDatabase";
-    private final Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
     /**
      * Initialise and set default values for parameters that make sense.
      */
     public Configurations() {
-        properties.setProperty(INSTANCES, "10");
+        properties.setProperty(INSTANCES, "111");
         properties.setProperty(ENDPOINT_URL, "");
         properties.setProperty(DATASETS_PATH, "./datasets");
         properties.setProperty(CONFIGS_PATH, "./configs");
         properties.setProperty(GIVEN_DATASETS_PATH, "./datasets/givenDatasets");
         properties.setProperty(DEFINITIONS_PATH, "./definitions.properties");
-        properties.setProperty(GENERATED_DATA_FORMAT, "turtle");
+        properties.setProperty(GENERATED_DATA_FORMAT, "n3");
         properties.setProperty(NEW_URI_NAMESPACE, "http://www.hobbit.eu/");
         properties.setProperty(LOAD_ONTOLOGIES, "true");
         properties.setProperty(CLEAR_DATABASE, "false");

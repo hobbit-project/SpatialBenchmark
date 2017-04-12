@@ -1,7 +1,6 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
@@ -31,11 +30,12 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
     private Model finalModel = ModelFactory.createDefaultModel();
 
-    private int totalTruePositives = 0;
-    private int totalFalsePositives = 0;
-    private int totalFalseNegatives = 0;
+    private int truePositives = 0;
+    private int falsePositives = 0;
+    private int falseNegatives = 0;
 
-    private long time_performance = 0;
+    private double time_perfomance = 0;
+    public long time_performance = 0;
 
     private boolean flag = true;
 
@@ -93,76 +93,130 @@ public class EvaluationModule extends AbstractEvaluationModule {
     protected void evaluateResponse(byte[] expectedData, byte[] receivedData, long taskSentTimestamp,
             long responseReceivedTimestamp) throws Exception {
 
-        LOGGER.info("EvaluationModule evaluateResponse");
-        LOGGER.info("taskSentTimestamp " + taskSentTimestamp);
-        LOGGER.info("responseReceivedTimestamp " + responseReceivedTimestamp);
 
+        time_performance = (responseReceivedTimestamp - taskSentTimestamp) / 1000l;
+        LOGGER.info("time_performance in seconds! (divided by 1000) " + time_performance);
+
+//        this.sumTaskDelay += delay;
+        //expected data come from data generator and received data come from system adapter
+        //make sure you know that the results coming from the system adapter have the same format
+        
         // read expected data
-        LOGGER.info("read expected data");
+        LOGGER.info("Read expected data");
         ByteBuffer buffer = ByteBuffer.wrap(expectedData);
         String format = RabbitMQUtils.readString(buffer);
         String path = RabbitMQUtils.readString(buffer);
 
         byte[] expected = RabbitMQUtils.readByteArray(buffer);
-        String[] dataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
+
+        //handle empty results! 
+        String[] dataAnswers = null;
+        if (expected.length > 0) {
+            dataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
+        }
 
         HashMap<String, String> expectedMap = new HashMap<String, String>();
-        for (String answer : dataAnswers) {
-            String source = answer.split("\t")[0];
-            String target = answer.split("\t")[1];
-            expectedMap.put(source, target);
+        if (dataAnswers != null && dataAnswers.length > 0) {
+            for (String answer : dataAnswers) {
+                String source = answer.split("\t")[0];
+                String target = answer.split("\t")[1];
+                expectedMap.put(source, target);
+            }
+            LOGGER.info("expected data into the map");
         }
-        LOGGER.info("expected data into the map");
 
         // read received data
-        String[] receivedDataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
-        HashMap<String, String> receivedMap = new HashMap<String, String>();
-        for (String answer : receivedDataAnswers) {
-            String source = answer.split("\t")[0];
-            String target = answer.split("\t")[1];
-            receivedMap.put(source, target);
+        LOGGER.info("Read received data");
+        //handle empty results! 
+        String[] receivedDataAnswers = null;
+        if (receivedData != null && receivedData.length > 0) {
+            receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
-        LOGGER.info("received data into the map");
-        
-        int truePositives = 0;
-        int falsePositives = 0;
-        int falseNegatives = 0;
+        HashMap<String, String> receivedMap = new HashMap<String, String>();
 
-        boolean found = false;
-        boolean isPositive = true;
-        for (Map.Entry<String, String> entry : receivedMap.entrySet()) {
-            String variable = entry.getKey();
-            String receivedAnswer = entry.getValue();
-            if (!receivedAnswer.equals(expectedMap.get(variable))) {
-                isPositive = false;
-                break;
+        if (receivedDataAnswers.length > 0) {
+            for (String answer : receivedDataAnswers) {
+
+                String source = answer.split("\t")[0];
+                String target = answer.split("\t")[1];
+                receivedMap.put(source, target);
+            }
+            LOGGER.info("received data into the map");
+        }
+
+        //TODO: check this again
+        for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+            String expectedKey = expectedEntry.getKey();
+            String expectedValue = expectedEntry.getValue();
+
+            boolean tpFound = false;
+            for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
+                tpFound = false;
+                String receivedKey = receivedEntry.getKey();
+                String receivedValue = receivedEntry.getValue();
+
+                if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
+                    tpFound = true;
+                    break;
+                }
+//                else {
+//                    tpFound = false;
+//                    break;
+//                }
+            }
+            if (tpFound == true) {
+                truePositives++;
+            } else {
+                falseNegatives++;
             }
         }
-        if (isPositive == true) {
-            truePositives++;
-            found = true;
-        } else if (isPositive == false) {
-            falsePositives++;
-        }
-        if (found == false) {
-            falseNegatives++;
-        }
+        // what is not TP in the received answers, is a FP
+        falsePositives = receivedMap.size() - truePositives;
 
-        this.totalFalseNegatives += falseNegatives;
-        this.totalFalsePositives += falsePositives;
-        this.totalTruePositives += truePositives;
+        LOGGER.info("truePositives " + truePositives);
+        LOGGER.info("falsePositives " + falsePositives);
+        LOGGER.info("falseNegatives " + falseNegatives);
 
-        LOGGER.info("this.totalFalseNegatives " + this.totalFalseNegatives);
-        LOGGER.info("this.totalFalsePositives " + this.totalFalsePositives);
-        LOGGER.info("this.totalTruePositives " + this.totalTruePositives);
     }
-
 
     @Override
-    protected Model summarizeEvaluation() throws Exception {
-        LOGGER.info("summarizeEvaluation Not supported yet.");
-        return null;//To change body of generated methods, choose Tools | Templates.
-    }
+    public Model summarizeEvaluation() throws Exception {
+        LOGGER.info("Summary of Evaluation begins.");
 
+        if (this.experimentUri == null) {
+            Map<String, String> env = System.getenv();
+            this.experimentUri = env.get(Constants.HOBBIT_EXPERIMENT_URI_KEY);
+        }
+
+        double recall = (double) this.truePositives
+                / (double) (this.truePositives + this.falseNegatives);
+        double precision = (double) this.truePositives
+                / (double) (this.truePositives + this.falsePositives);
+        double fmeasure = (double) (2.0 * recall * precision)
+                / (double) (recall + precision);
+
+        //////////////////////////////////////////////////////////////////////////////////////////////
+        Resource experiment = this.finalModel.createResource(experimentUri);
+        this.finalModel.add(experiment, RDF.type, HOBBIT.Experiment);
+
+        Literal timePerformanceLiteral = this.finalModel.createTypedLiteral(this.time_performance, XSDDatatype.XSDlong);
+        this.finalModel.add(experiment, this.EVALUATION_TIME_PERFORMANCE, timePerformanceLiteral);
+
+        Literal recallLiteral = this.finalModel.createTypedLiteral(recall,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_RECALL, recallLiteral);
+
+        Literal precisionLiteral = this.finalModel.createTypedLiteral(precision,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_PRECISION, precisionLiteral);
+
+        Literal fmeasureLiteral = this.finalModel.createTypedLiteral(fmeasure,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_FMEASURE, fmeasureLiteral);
+
+        LOGGER.info("Summary of Evaluation is over.");
+
+        return this.finalModel;
+    }
 
 }

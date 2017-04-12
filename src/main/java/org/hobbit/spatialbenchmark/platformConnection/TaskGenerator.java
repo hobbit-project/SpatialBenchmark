@@ -7,6 +7,8 @@ package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractTaskGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
@@ -39,7 +41,7 @@ public class TaskGenerator extends AbstractTaskGenerator {
 
             // Create an ID for the task
             Task task = (Task) SerializationUtils.deserialize(data);
-            String taskId = task.getTaskId(); //getNextTaskId();
+            String taskId = task.getTaskId(); 
             String taskRelation = task.getRelation();
 
             byte[] target = task.getTarget();
@@ -47,7 +49,6 @@ public class TaskGenerator extends AbstractTaskGenerator {
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
             byte[] targetData = RabbitMQUtils.readByteArray(taskBuffer);
-            
 
             byte[][] taskDataArray = new byte[4][];
             taskDataArray[0] = RabbitMQUtils.writeString(taskRelation);

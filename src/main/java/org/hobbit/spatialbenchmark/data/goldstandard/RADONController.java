@@ -13,7 +13,8 @@ import org.aksw.limes.core.io.serializer.ISerializer;
 import org.aksw.limes.core.io.serializer.SerializerFactory;
 import org.apache.commons.cli.CommandLine;
 import static org.hobbit.spatialbenchmark.data.AbstractWorker.RELATION;
-import org.hobbit.spatialbenchmark.data.Generator;
+import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
+import org.hobbit.spatialbenchmark.platformConnection.BenchmarkController;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.openrdf.rio.RDFFormat;
@@ -26,16 +27,14 @@ import org.slf4j.LoggerFactory;
  */
 public class RADONController extends Controller {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RADONController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
 
     private ResultMappings mappings;
 
     public RADONController(RDFFormat rdfFormat) {
         String[] args = new String[1];
-        args[0] = Generator.configurations.getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
+        args[0] = getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
 
-        //den vlepei to path tou resources 
-//        args[0] = "topologicalConfigs/config" + RELATION + ".xml";
         CommandLine cmd = parseCommandLine(args);
         Configuration config = getConfig(cmd);
         config.getSourceInfo().setEndpoint(config.getSourceInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension());
@@ -43,10 +42,11 @@ public class RADONController extends Controller {
         config.getTargetInfo().setEndpoint(config.getTargetInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension());
         config.getTargetInfo().setType(rdfFormat.getDefaultFileExtension().toUpperCase());
 
-        config.setAcceptanceFile(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "mappings.nt");
-        config.setVerificationFile(Generator.configurations.getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "absolute_mapping_almost.nt");
+        config.setAcceptanceFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "mappings." + rdfFormat.getDefaultFileExtension());
+        config.setVerificationFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "absolute_mapping_almost." + rdfFormat.getDefaultFileExtension());
 
-//        System.out.println("config " + config.toString());
+        LOGGER.info("RADONController SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension() " + rdfFormat.getDefaultFileExtension());
+
         //keep mappings for the oaei format
         mappings = getMapping(config);
         writeResults(mappings, config);
@@ -62,8 +62,6 @@ public class RADONController extends Controller {
         String outputFormat = config.getOutputFormat();
         ISerializer output = SerializerFactory.createSerializer(outputFormat);
         output.setPrefixes(config.getPrefixes());
-//        output.writeToFile(mappings.getVerificationMapping(), config.getVerificationRelation(),
-//                config.getVerificationFile());
         output.writeToFile(mappings.getAcceptanceMapping(), config.getAcceptanceRelation(), config.getAcceptanceFile());
     }
 

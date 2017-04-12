@@ -8,7 +8,6 @@ package org.hobbit.spatialbenchmark.platformConnection.systems;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
@@ -22,6 +21,7 @@ import org.apache.commons.io.FileUtils;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.spatialbenchmark.util.FileUtil;
+import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,15 +115,14 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         config.getSourceInfo().setType(dataFormat);
         config.getTargetInfo().setType(taskFormat);
 
-        resultsFile = "./datasets/LimesSystemAdapterResults/" + relation + "mappings.nt";
+        resultsFile = "./datasets/LimesSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
 
         File dir = new File("./datasets/LimesSystemAdapterResults");
         dir.mkdirs();
-        File file = new File(dir, relation + "mappings.nt");
-//        FileWriter newJsp = new FileWriter(file);
+        File file = new File(dir, relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
         config.setAcceptanceFile(resultsFile);
-        config.setVerificationFile("./datasets/LimesSystemAdapterResults/" + relation + "absolute_mapping_almost.nt");
+        config.setVerificationFile("./datasets/LimesSystemAdapterResults/" + relation + "absolute_mapping_almost." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
         mappings = getMapping(config);
         writeResults(mappings, config);
@@ -148,6 +147,5 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         // Always close the super class after yours!
         super.close();
         LOGGER.info("System Adapter closed successfully.");
-
     }
 }

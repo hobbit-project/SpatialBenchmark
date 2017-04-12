@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
  * @author jsaveta
  */
 public class CreateInstances extends Generator {
-private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
 
     private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
-
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
     private Model sourceTrace;
@@ -49,7 +49,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.cla
             Statement statement = it.next();
             if (statement.getObject().stringValue().endsWith("Trace")) {
                 id = statement.getSubject();
-//                System.out.println("ID " + id);
             }
             if (statement.getPredicate().getLocalName().equals("lat")) {
                 double latitude = Double.parseDouble(statement.getObject().stringValue());
@@ -57,28 +56,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.cla
                 double longitude = Double.parseDouble(statement.getObject().stringValue());
                 p = new TracePoint(longitude, latitude).getTracePoint();
             }
-
             if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
-                call.keepPointCases();
-//                if (!it.hasNext()) {
-//                    point.add(statement);
-//                }
-                if (call.getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
-//                    System.out.println("p "+p);
+                getRelationsCall().keepPointCases();
+                if (getRelationsCall().getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
                     points.add(p);
                 }
             }
         }
-//        System.out.println("id " + id);
-//        System.out.println("points " + points);
-//        System.out.println("points size " + points.size());
         this.sourceTrace = new Trace(id, points).getTraceModel();
-//        System.out.println("this.sourceTrace " + this.sourceTrace);
     }
 
     public Model targetInstance(Model sourceTrace) {
-        //egrapse 7 apo ta 9 traces. ta pire lathos apo ton worker logika! tsekare to 
-        //oxi eixe na kanei me ton arithmo ton triples
         Resource targetURI = null;
         Geometry targetGeometry = null;
         Model targetModel;
@@ -92,17 +80,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.cla
                 } else if (URIMap.containsKey(statement.getSubject())) {
                     targetURI = URIMap.get(statement.getSubject());
                 }
-//                System.out.println("targetURI " + targetURI);
             } else {
-
-                LOGGER.info("transform " + transform);
-                targetGeometry = (Geometry) transform.execute(statement.getObject().stringValue());
-//                System.out.println("targetGeometry " + targetGeometry);
+                targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
             }
-
         }
         targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
-//        System.out.println("targetModel " + targetModel);
         return targetModel;
 
     }

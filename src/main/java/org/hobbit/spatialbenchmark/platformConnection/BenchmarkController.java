@@ -19,15 +19,15 @@ import org.slf4j.LoggerFactory;
 public class BenchmarkController extends AbstractBenchmarkController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
-//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
-//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
-//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
+    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
+    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
+    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
 
-    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
-    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
-    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
+//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
+//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
+//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
 
-    private String[] envVariablesEvaluationModule = null;
+    private String[] envVariablesEvaluationModule;
 
     @Override
     public void init() throws Exception {
@@ -50,13 +50,13 @@ public class BenchmarkController extends AbstractBenchmarkController {
         };
 
         // get KPIs for evaluation module
-        this.envVariablesEvaluationModule = new String[]{
+        envVariablesEvaluationModule = new String[]{
             PlatformConstants.EVALUATION_RECALL + "=" + "http://w3id.org/bench#recall",
             PlatformConstants.EVALUATION_PRECISION + "=" + "http://w3id.org/bench#precision",
             PlatformConstants.EVALUATION_FMEASURE + "=" + "http://w3id.org/bench#fmeasure",
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
-
+       
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -141,14 +141,14 @@ public class BenchmarkController extends AbstractBenchmarkController {
         // create the evaluation module
         LOGGER.info("Will now create the evaluation module.");
 
-        createEvaluationModule(EVALUATION_MODULE_CONTAINER_IMAGE, this.envVariablesEvaluationModule);
+        createEvaluationModule(EVALUATION_MODULE_CONTAINER_IMAGE, envVariablesEvaluationModule);
         LOGGER.info("Evaluation module was created.");
 
         // wait for the evaluation to finish
         LOGGER.info("Waiting for the evaluation to finish.");
         waitForEvalComponentsToFinish();
         LOGGER.info("Evaluation finished.");
-
+        
         // Send the resultModule to the platform controller and terminate
         sendResultModel(this.resultModel);
         LOGGER.info("Evaluated results sent to the platform controller.");

@@ -2,9 +2,7 @@ package org.hobbit.spatialbenchmark.util;
 
 import java.util.Random;
 import java.util.UUID;
-import org.hobbit.spatialbenchmark.data.Generator;
-import static org.hobbit.spatialbenchmark.data.Generator.configurations;
-import org.hobbit.spatialbenchmark.main.Main;
+import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import org.openrdf.model.BNode;
 import org.openrdf.model.URI;
@@ -99,7 +97,7 @@ public class RandomUtil {
 
     public URI randomUniqueURI() {
         StringBuilder sb = new StringBuilder();
-        sb.append(StringUtil.normalizePath(configurations.getString(Configurations.NEW_URI_NAMESPACE)));
+        sb.append(StringUtil.normalizePath(getConfigurations().getString(Configurations.NEW_URI_NAMESPACE)));
         sb.append(UUID.randomUUID().toString());
 
         return ValueFactoryImpl.getInstance().createURI(sb.toString());
