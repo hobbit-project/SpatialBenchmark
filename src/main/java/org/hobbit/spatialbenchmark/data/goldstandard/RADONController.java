@@ -57,7 +57,6 @@ public class RADONController extends Controller {
 
     }
 
-    //prepei na ginei public sto jar?
     private static void writeResults(ResultMappings mappings, Configuration config) {
         String outputFormat = config.getOutputFormat();
         ISerializer output = SerializerFactory.createSerializer(outputFormat);

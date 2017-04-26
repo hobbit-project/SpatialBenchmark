@@ -6,9 +6,12 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +29,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
 //    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
 //    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
 //    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
-
     private String[] envVariablesEvaluationModule;
 
     @Override
@@ -36,7 +38,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
 
         int numberOfDataGenerators = (Integer) getProperty("http://w3id.org/bench#hasNumberOfGenerators", 1);
         int population = (Integer) getProperty("http://w3id.org/bench#hasPopulation", 100);
-        String serializationFormat = (String) getProperty("http://w3id.org/bench#spatialDataFormat", "n-triples");
+        String serializationFormat = (String) getProperty("http://w3id.org/bench#spatialDataFormat", "ntriples");
         String spatialRelation = (String) getProperty("http://w3id.org/bench#spatialRelation", "COVERS");
         double keepPoints = (double) getProperty("http://w3id.org/bench#keepPoints", 0.3);
 
@@ -56,7 +58,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_FMEASURE + "=" + "http://w3id.org/bench#fmeasure",
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
-       
+
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -87,10 +89,18 @@ public class BenchmarkController extends AbstractBenchmarkController {
         NodeIterator iterator = benchmarkParamModel
                 .listObjectsOfProperty(benchmarkParamModel
                         .getProperty(property));
-
+        LOGGER.info("defaultValue " + defaultValue.toString());
         if (iterator.hasNext()) {
             try {
-                if (defaultValue instanceof String) {
+                if (defaultValue.equals("ntriples")) {
+                    //this should change! 
+                    return (T) iterator.next().asResource().getLocalName();
+
+                } else if (defaultValue.equals("COVERS")) {
+                    //this should change! 
+                    return (T) iterator.next().asResource().getLocalName();
+                   
+                } else if (defaultValue instanceof String) {
                     return (T) iterator.next().asLiteral().getString();
                 } else if (defaultValue instanceof Integer) {
                     return (T) ((Integer) iterator.next().asLiteral().getInt());
@@ -137,7 +147,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Waiting for the system to terminate.");
         waitForSystemToFinish();
         LOGGER.info("System terminated.");
-                
+
         // create the evaluation module
         LOGGER.info("Will now create the evaluation module.");
 
@@ -148,7 +158,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Waiting for the evaluation to finish.");
         waitForEvalComponentsToFinish();
         LOGGER.info("Evaluation finished.");
-        
+
         // Send the resultModule to the platform controller and terminate
         sendResultModel(this.resultModel);
         LOGGER.info("Evaluated results sent to the platform controller.");
