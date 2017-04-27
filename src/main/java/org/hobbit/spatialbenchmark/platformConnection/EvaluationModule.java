@@ -94,8 +94,8 @@ public class EvaluationModule extends AbstractEvaluationModule {
     protected void evaluateResponse(byte[] expectedData, byte[] receivedData, long taskSentTimestamp,
             long responseReceivedTimestamp) throws Exception {
 
-        time_performance = (responseReceivedTimestamp - taskSentTimestamp) / 1000l;
-        LOGGER.info("time_performance in seconds! (divided by 1000) " + time_performance);
+        time_performance = (responseReceivedTimestamp - taskSentTimestamp);
+        LOGGER.info("time_performance in ms: " + time_performance);
 
 //        this.sumTaskDelay += delay;
         //expected data come from data generator and received data come from system adapter
@@ -107,8 +107,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
         String path = RabbitMQUtils.readString(buffer);
 
         byte[] expected = RabbitMQUtils.readByteArray(buffer);
-//        LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
-
+        
         //handle empty results! 
         String[] dataAnswers = null;
         if (expected.length > 0) {
@@ -119,14 +118,19 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (dataAnswers != null && dataAnswers.length > 0) {
             for (String answer : dataAnswers) {
                 answer = answer.trim();
-                String source = answer.split(">")[0];
-                String target = answer.split(">")[1];
-                expectedMap.put(source + ">", target + ">");
+                String source_temp = answer.split(">")[0];
+                String source = source_temp.substring(source_temp.indexOf("<")+1);
+                
+                String target_temp = answer.split(">")[1];
+                String target = target_temp.substring(target_temp.indexOf("<")+1);
+                expectedMap.put(source , target);
             }
-            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
+//            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
+//            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
+            LOGGER.info("expected data into the map: " + expectedMap.toString());
         }
 
-//        LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
+        
 
         // read received data
         LOGGER.info("Read received data");
@@ -140,11 +144,16 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (receivedDataAnswers != null && receivedDataAnswers.length > 0) {
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
-                String source = answer.split(">")[0];
-                String target = answer.split(">")[1];
-                receivedMap.put(source + ">", target + ">");
+                String source_temp = answer.split(">")[0];
+                String source = source_temp.substring(source_temp.indexOf("<")+1);
+                
+                String target_temp = answer.split(">")[1];
+                String target = target_temp.substring(target_temp.indexOf("<")+1);
+                receivedMap.put(source , target);
             }
-            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
+//            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
+//            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
+            LOGGER.info("received data into the map: " + receivedMap.toString());
         }
 
         //TODO: check this again
@@ -162,10 +171,6 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     tpFound = true;
                     break;
                 }
-//                else {
-//                    tpFound = false;
-//                    break;
-//                }
             }
             if (tpFound == true) {
                 truePositives++;

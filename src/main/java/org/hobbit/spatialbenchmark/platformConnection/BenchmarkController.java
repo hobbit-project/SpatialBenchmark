@@ -6,12 +6,9 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,14 +86,15 @@ public class BenchmarkController extends AbstractBenchmarkController {
         NodeIterator iterator = benchmarkParamModel
                 .listObjectsOfProperty(benchmarkParamModel
                         .getProperty(property));
-        LOGGER.info("defaultValue " + defaultValue.toString());
         if (iterator.hasNext()) {
             try {
                 if (defaultValue.equals("ntriples")) {
+
                     //this should change! 
                     return (T) iterator.next().asResource().getLocalName();
 
                 } else if (defaultValue.equals("COVERS")) {
+
                     //this should change! 
                     return (T) iterator.next().asResource().getLocalName();
                    
