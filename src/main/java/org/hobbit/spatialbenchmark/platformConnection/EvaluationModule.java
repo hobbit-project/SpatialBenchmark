@@ -1,7 +1,6 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
@@ -115,9 +114,10 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         HashMap<String, String> expectedMap = new HashMap<String, String>();
-        if (dataAnswers != null && dataAnswers.length > 0) {
+//        if (dataAnswers.length > 0) {
             for (String answer : dataAnswers) {
                 answer = answer.trim();
+                if (answer != null && !answer.equals("")) {  
                 String source_temp = answer.split(">")[0];
                 String source = source_temp.substring(source_temp.indexOf("<")+1);
                 
@@ -139,11 +139,12 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (receivedData.length > 0) {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
+        
         HashMap<String, String> receivedMap = new HashMap<String, String>();
-
-        if (receivedDataAnswers != null && receivedDataAnswers.length > 0) {
+//        if (receivedDataAnswers.length > 0) {
             for (String answer : receivedDataAnswers) {
                 answer = answer.trim();
+                if (answer != null && !answer.equals("")) {
                 String source_temp = answer.split(">")[0];
                 String source = source_temp.substring(source_temp.indexOf("<")+1);
                 
@@ -196,12 +197,19 @@ public class EvaluationModule extends AbstractEvaluationModule {
             this.experimentUri = env.get(Constants.HOBBIT_EXPERIMENT_URI_KEY);
         }
 
-        double recall = (double) this.truePositives
-                / (double) (this.truePositives + this.falseNegatives);
-        double precision = (double) this.truePositives
-                / (double) (this.truePositives + this.falsePositives);
-        double fmeasure = (double) (2.0 * recall * precision)
-                / (double) (recall + precision);
+        double recall = 0.0;
+        double precision = 0.0;
+        double fmeasure = 0.0;
+
+        if ((double) (this.truePositives + this.falseNegatives) > 0.0) {
+            recall = (double) this.truePositives / (double) (this.truePositives + this.falseNegatives);
+        }
+        if ((double) (this.truePositives + this.falsePositives) > 0.0) {
+            precision = (double) this.truePositives / (double) (this.truePositives + this.falsePositives);
+        }
+        if ((double) (recall + precision) > 0.0) {
+            fmeasure = (double) (2.0 * recall * precision) / (double) (recall + precision);
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         Resource experiment = this.finalModel.createResource(experimentUri);
