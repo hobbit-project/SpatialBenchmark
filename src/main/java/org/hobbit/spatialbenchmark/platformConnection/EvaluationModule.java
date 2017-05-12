@@ -106,7 +106,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
         String path = RabbitMQUtils.readString(buffer);
 
         byte[] expected = RabbitMQUtils.readByteArray(buffer);
-        
+
         //handle empty results! 
         String[] dataAnswers = null;
         if (expected.length > 0) {
@@ -115,22 +115,20 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
         HashMap<String, String> expectedMap = new HashMap<String, String>();
 //        if (dataAnswers.length > 0) {
-            for (String answer : dataAnswers) {
-                answer = answer.trim();
-                if (answer != null && !answer.equals("")) {  
+        for (String answer : dataAnswers) {
+            answer = answer.trim();
+            if (answer != null && !answer.equals("")) {
                 String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<")+1);
-                
+                String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
                 String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<")+1);
-                expectedMap.put(source , target);
+                String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                expectedMap.put(source, target);
             }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
 //            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
             LOGGER.info("expected data into the map: " + expectedMap.toString());
         }
-
-        
 
         // read received data
         LOGGER.info("Read received data");
@@ -139,18 +137,18 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (receivedData.length > 0) {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
-        
+
         HashMap<String, String> receivedMap = new HashMap<String, String>();
 //        if (receivedDataAnswers.length > 0) {
-            for (String answer : receivedDataAnswers) {
-                answer = answer.trim();
-                if (answer != null && !answer.equals("")) {
+        for (String answer : receivedDataAnswers) {
+            answer = answer.trim();
+            if (answer != null && !answer.equals("")) {
                 String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<")+1);
-                
+                String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
                 String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<")+1);
-                receivedMap.put(source , target);
+                String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                receivedMap.put(source, target);
             }
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 //            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
@@ -158,34 +156,35 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         //TODO: check this again
-        for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
-            String expectedKey = expectedEntry.getKey();
-            String expectedValue = expectedEntry.getValue();
+        if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
+            for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+                String expectedKey = expectedEntry.getKey();
+                String expectedValue = expectedEntry.getValue();
 
-            boolean tpFound = false;
-            for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
-                tpFound = false;
-                String receivedKey = receivedEntry.getKey();
-                String receivedValue = receivedEntry.getValue();
+                boolean tpFound = false;
+                for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
+                    tpFound = false;
+                    String receivedKey = receivedEntry.getKey();
+                    String receivedValue = receivedEntry.getValue();
 
-                if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
-                    tpFound = true;
-                    break;
+                    if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
+                        tpFound = true;
+                        break;
+                    }
+                }
+                if (tpFound == true) {
+                    truePositives++;
+                } else {
+                    falseNegatives++;
                 }
             }
-            if (tpFound == true) {
-                truePositives++;
-            } else {
-                falseNegatives++;
-            }
+            // what is not TP in the received answers, is a FP
+            falsePositives = receivedMap.size() - truePositives;
+
+            LOGGER.info("truePositives " + truePositives);
+            LOGGER.info("falsePositives " + falsePositives);
+            LOGGER.info("falseNegatives " + falseNegatives);
         }
-        // what is not TP in the received answers, is a FP
-        falsePositives = receivedMap.size() - truePositives;
-
-        LOGGER.info("truePositives " + truePositives);
-        LOGGER.info("falsePositives " + falsePositives);
-        LOGGER.info("falseNegatives " + falseNegatives);
-
     }
 
     @Override
