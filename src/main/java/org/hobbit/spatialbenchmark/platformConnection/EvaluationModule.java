@@ -34,7 +34,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
     private int falsePositives = 0;
     private int falseNegatives = 0;
 
-    private double time_perfomance = 0;
+//    private double time_perfomance = 0;
     public long time_performance = 0;
 
     private boolean flag = true;
