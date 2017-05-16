@@ -5,8 +5,10 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.hobbit.core.Commands;
+import org.hobbit.core.Constants;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.slf4j.Logger;
@@ -56,6 +58,10 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
 
+        envVariablesEvaluationModule = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
+                Constants.RABBIT_MQ_HOST_NAME_KEY + "=" + this.rabbitMQHostName);
+        envVariablesEvaluationModule = ArrayUtils.add(envVariablesEvaluationModule, "ACKNOWLEDGEMENT_FLAG=true");
+
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -97,7 +103,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
 
                     //this should change! 
                     return (T) iterator.next().asResource().getLocalName();
-                   
+
                 } else if (defaultValue instanceof String) {
                     return (T) iterator.next().asLiteral().getString();
                 } else if (defaultValue instanceof Integer) {
