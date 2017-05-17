@@ -29,10 +29,13 @@ public class DISJOINT implements SpatialTransformation {
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
+            result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
-                CreateDisjointGeometryObject instance = new CreateDisjointGeometryObject(line, GeometryType.GeometryTypes.LineString);
-                result = instance.generateGeometry();
+                if (line.getCoordinates().length >= 2) {
+                    CreateDisjointGeometryObject instance = new CreateDisjointGeometryObject(line, GeometryType.GeometryTypes.LineString);
+                    result = instance.generateGeometry();
+                }
             }
 
         } catch (ParseException ex) {

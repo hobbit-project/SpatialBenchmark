@@ -155,12 +155,14 @@ public class Worker extends AbstractWorker {
                             Model sourceTrace = create.getSourceTrace();
                             Model targetTrace = create.targetInstance(sourceTrace);
                             //if the relation is within or covered_by, write sources on target file and targets on source file
-                            if (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY")) {
-                                Rio.write(targetTrace, sourceFos, rdfFormat);
-                                Rio.write(sourceTrace, targetFos, rdfFormat);
-                            } else {
-                                Rio.write(sourceTrace, sourceFos, rdfFormat);
-                                Rio.write(targetTrace, targetFos, rdfFormat);
+                            if (sourceTrace != null && targetTrace != null) {
+                                if (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY")) {
+                                    Rio.write(targetTrace, sourceFos, rdfFormat);
+                                    Rio.write(sourceTrace, targetFos, rdfFormat);
+                                } else {
+                                    Rio.write(sourceTrace, sourceFos, rdfFormat);
+                                    Rio.write(targetTrace, targetFos, rdfFormat);
+                                }
                             }
 
                             givenInstanceModel = new LinkedHashModel();

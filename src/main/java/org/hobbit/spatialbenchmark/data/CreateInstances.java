@@ -34,7 +34,7 @@ public class CreateInstances extends Generator {
     private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
-    private Model sourceTrace;
+    private Model sourceTrace = null;
 
     public CreateInstances() {
     }
@@ -63,28 +63,34 @@ public class CreateInstances extends Generator {
                 }
             }
         }
-        this.sourceTrace = new Trace(id, points).getTraceModel();
+        if (points.size() >= 2) {
+            this.sourceTrace = new Trace(id, points).getTraceModel();
+        }
     }
 
     public Model targetInstance(Model sourceTrace) {
         Resource targetURI = null;
         Geometry targetGeometry = null;
-        Model targetModel;
-        Iterator<Statement> it = sourceTrace.iterator();
-        while (it.hasNext()) {
-            Statement statement = it.next();
-            if (statement.getObject().stringValue().endsWith("Trace")) {
-                if (!URIMap.containsKey(statement.getSubject())) {
-                    targetURI = targetSubject(statement);
+        Model targetModel = null;
+        if (sourceTrace != null) {
+            Iterator<Statement> it = sourceTrace.iterator();
+            while (it.hasNext()) {
+                Statement statement = it.next();
+                if (statement.getObject().stringValue().endsWith("Trace")) {
+                    if (!URIMap.containsKey(statement.getSubject())) {
+                        targetURI = targetSubject(statement);
 
-                } else if (URIMap.containsKey(statement.getSubject())) {
-                    targetURI = URIMap.get(statement.getSubject());
+                    } else if (URIMap.containsKey(statement.getSubject())) {
+                        targetURI = URIMap.get(statement.getSubject());
+                    }
+                } else {
+                    targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
                 }
-            } else {
-                targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
+            }
+            if (targetGeometry != null) {
+                targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
             }
         }
-        targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
         return targetModel;
 
     }
