@@ -28,10 +28,8 @@ public class BenchmarkController extends AbstractBenchmarkController {
 //    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
 //    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
 //    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
-    private String[] envVariablesEvaluationModule = null;
-    private String[] evalStorageEnvVariables = null;    
-    private String[] envVariablesDataGenerator = null;
-
+    private String[] envVariablesEvaluationModule;
+    
     
 
     @Override
@@ -46,7 +44,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         double keepPoints = (double) getProperty("http://w3id.org/bench#keepPoints", 0.3);
 
         // data generators environmental values
-        envVariablesDataGenerator = new String[]{
+        String[] envVariablesDataGenerator = new String[]{
             PlatformConstants.NUMBER_OF_DATA_GENERATORS + "=" + numberOfDataGenerators,
             PlatformConstants.GENERATED_POPULATION + "=" + population,
             PlatformConstants.GENERATED_DATA_FORMAT + "=" + serializationFormat,
@@ -62,10 +60,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.EVALUATION_TIME_PERFORMANCE + "=" + "http://w3id.org/bench#timePerformance"
         };
 
-        evalStorageEnvVariables = ArrayUtils.add(DEFAULT_EVAL_STORAGE_PARAMETERS,
-                Constants.RABBIT_MQ_HOST_NAME_KEY + "=" + this.rabbitMQHostName);
-        evalStorageEnvVariables = ArrayUtils.add(evalStorageEnvVariables, "ACKNOWLEDGEMENT_FLAG=true");
-
         // Create data generators
         createDataGenerators(DATA_GENERATOR_CONTAINER_IMAGE, numberOfDataGenerators, envVariablesDataGenerator);
         LOGGER.info("Initilalizing Benchmark Controller...");
@@ -75,7 +69,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
         LOGGER.info("Task Generators created successfully.");
 
         // Create evaluation storage
-        createEvaluationStorage(DEFAULT_EVAL_STORAGE_IMAGE, evalStorageEnvVariables);
+        createEvaluationStorage();
         LOGGER.info("Evaluation Storage created successfully.");
 
         waitForComponentsToInitialize();

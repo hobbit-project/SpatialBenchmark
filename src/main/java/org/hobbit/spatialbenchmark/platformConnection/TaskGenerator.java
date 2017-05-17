@@ -8,7 +8,7 @@ package org.hobbit.spatialbenchmark.platformConnection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.apache.commons.lang3.SerializationUtils;
-import org.hobbit.core.components.AbstractSequencingTaskGenerator;
+import org.hobbit.core.components.AbstractTaskGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +17,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author jsaveta
  */
-public class TaskGenerator extends AbstractSequencingTaskGenerator {
+public class TaskGenerator extends AbstractTaskGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskGenerator.class);
 
+    public TaskGenerator(){
+        super(1);
+    }
     @Override
     public void init() throws Exception {
+        
         LOGGER.info("Initializing Task Generators...");
         super.init();
         LOGGER.info("Task Generators initialized successfully.");
@@ -74,6 +78,7 @@ public class TaskGenerator extends AbstractSequencingTaskGenerator {
     @Override
     public void close() throws IOException {
         LOGGER.info("Closign Task Generator...");
+        
         super.close();
         LOGGER.info("Task Genererator closed successfully.");
     }
