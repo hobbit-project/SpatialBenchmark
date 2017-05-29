@@ -47,6 +47,7 @@ public class OAEIRDFAlignmentFormat extends OutputMappingsFormat {
     protected void setOutput() throws Exception {
 
         writer = new WriteFile(output_file);
+        System.out.println("output_file " +output_file.toString());
 
     }
 
