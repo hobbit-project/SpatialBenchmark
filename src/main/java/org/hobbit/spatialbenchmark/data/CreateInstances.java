@@ -43,28 +43,31 @@ public class CreateInstances extends Generator {
         Resource id = null;
         Coordinate p = null;
         ArrayList<Coordinate> points = new ArrayList<Coordinate>();
-
-        Iterator<Statement> it = givenModel.iterator();
-        while (it.hasNext()) {
-            Statement statement = it.next();
-            if (statement.getObject().stringValue().endsWith("Trace")) {
-                id = statement.getSubject();
-            }
-            if (statement.getPredicate().getLocalName().equals("lat")) {
-                double latitude = Double.parseDouble(statement.getObject().stringValue());
-                statement = it.next();
-                double longitude = Double.parseDouble(statement.getObject().stringValue());
-                p = new TracePoint(longitude, latitude).getTracePoint();
-            }
-            if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
-                getRelationsCall().keepPointCases();
-                if (getRelationsCall().getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
-                    points.add(p);
+        try {
+            Iterator<Statement> it = givenModel.iterator();
+            while (it.hasNext()) {
+                Statement statement = it.next();
+                if (statement.getObject().stringValue().endsWith("Trace")) {
+                    id = statement.getSubject();
+                }
+                if (statement.getPredicate().getLocalName().equals("lat")) {
+                    double latitude = Double.parseDouble(statement.getObject().stringValue());
+                    statement = it.next();
+                    double longitude = Double.parseDouble(statement.getObject().stringValue());
+                    p = new TracePoint(longitude, latitude).getTracePoint();
+                }
+                if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
+                    getRelationsCall().keepPointCases();
+                    if (getRelationsCall().getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
+                        points.add(p);
+                    }
                 }
             }
-        }
-        if (points.size() >= 2) {
-            this.sourceTrace = new Trace(id, points).getTraceModel();
+            if (points.size() >= 2) {
+                this.sourceTrace = new Trace(id, points).getTraceModel();
+            }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         }
     }
 
@@ -72,24 +75,28 @@ public class CreateInstances extends Generator {
         Resource targetURI = null;
         Geometry targetGeometry = null;
         Model targetModel = null;
-        if (sourceTrace != null) {
-            Iterator<Statement> it = sourceTrace.iterator();
-            while (it.hasNext()) {
-                Statement statement = it.next();
-                if (statement.getObject().stringValue().endsWith("Trace")) {
-                    if (!URIMap.containsKey(statement.getSubject())) {
-                        targetURI = targetSubject(statement);
+        try {
+            if (sourceTrace != null) {
+                Iterator<Statement> it = sourceTrace.iterator();
+                while (it.hasNext()) {
+                    Statement statement = it.next();
+                    if (statement.getObject().stringValue().endsWith("Trace")) {
+                        if (!URIMap.containsKey(statement.getSubject())) {
+                            targetURI = targetSubject(statement);
 
-                    } else if (URIMap.containsKey(statement.getSubject())) {
-                        targetURI = URIMap.get(statement.getSubject());
+                        } else if (URIMap.containsKey(statement.getSubject())) {
+                            targetURI = URIMap.get(statement.getSubject());
+                        }
+                    } else {
+                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
                     }
-                } else {
-                    targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
+                }
+                if (targetGeometry != null) {
+                    targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
                 }
             }
-            if (targetGeometry != null) {
-                targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
-            }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         }
         return targetModel;
 
