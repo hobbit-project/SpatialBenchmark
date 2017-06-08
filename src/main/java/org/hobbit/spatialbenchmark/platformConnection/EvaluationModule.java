@@ -114,20 +114,21 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         HashMap<String, String> expectedMap = new HashMap<String, String>();
-//        if (dataAnswers.length > 0) {
-        for (String answer : dataAnswers) {
-            answer = answer.trim();
-            if (answer != null && !answer.equals("")) {
-                String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<") + 1);
+        if (dataAnswers != null) {
+            for (String answer : dataAnswers) {
+                answer = answer.trim();
+                if (answer != null && !answer.equals("")) {
+                    String source_temp = answer.split(">")[0];
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
 
-                String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<") + 1);
-                expectedMap.put(source, target);
-            }
+                    String target_temp = answer.split(">")[1];
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    expectedMap.put(source, target);
+                }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
 //            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
-            LOGGER.info("expected data into the map: " + expectedMap.toString());
+                LOGGER.info("expected data into the map: " + expectedMap.toString());
+            }
         }
 
         // read received data
@@ -139,20 +140,22 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
 
         HashMap<String, String> receivedMap = new HashMap<String, String>();
-//        if (receivedDataAnswers.length > 0) {
-        for (String answer : receivedDataAnswers) {
-            answer = answer.trim();
-            if (answer != null && !answer.equals("")) {
-                String source_temp = answer.split(">")[0];
-                String source = source_temp.substring(source_temp.indexOf("<") + 1);
+        if (receivedDataAnswers != null) {
+            for (String answer : receivedDataAnswers) {
 
-                String target_temp = answer.split(">")[1];
-                String target = target_temp.substring(target_temp.indexOf("<") + 1);
-                receivedMap.put(source, target);
-            }
+                answer = answer.trim();
+                if (answer != null && !answer.equals("")) {
+                    String source_temp = answer.split(">")[0];
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
+                    String target_temp = answer.split(">")[1];
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    receivedMap.put(source, target);
+                }
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 //            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
-            LOGGER.info("received data into the map: " + receivedMap.toString());
+                LOGGER.info("received data into the map: " + receivedMap.toString());
+            }
         }
 
         //TODO: check this again
