@@ -5,11 +5,18 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractTaskGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
+import org.hobbit.core.rabbit.SimpleFileReceiver;
+import org.hobbit.core.rabbit.SimpleFileSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +27,15 @@ import org.slf4j.LoggerFactory;
 public class TaskGenerator extends AbstractTaskGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskGenerator.class);
+    private SimpleFileReceiver targetReceiver;
 
-    public TaskGenerator(){
+    public TaskGenerator() {
         super(1);
     }
+
     @Override
     public void init() throws Exception {
-        
+
         LOGGER.info("Initializing Task Generators...");
         super.init();
         LOGGER.info("Task Generators initialized successfully.");
@@ -40,23 +49,47 @@ public class TaskGenerator extends AbstractTaskGenerator {
             // number of all task generators running in parallel.
 //        int dataGeneratorId = getGeneratorId();
 //        int numberOfGenerators = getNumberOfGenerators();
+            targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
 
+            String[] receivedFiles_target = targetReceiver.receiveData("./datasets/TargetDatasets/");
+
+            for (String f : receivedFiles_target) {
+                // define a queue name, e.g., read it from the environment
+                String queueName = "task_target_file";
+                File file = new File("./datasets/TargetDatasets/" + f);
+                // create the sender
+                SimpleFileSender sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+                // close the sender
+                IOUtils.closeQuietly(sender);
+
+            }
             // Create an ID for the task
             Task task = (Task) SerializationUtils.deserialize(data);
-            String taskId = task.getTaskId(); 
+            String taskId = task.getTaskId();
             String taskRelation = task.getRelation();
 
             byte[] target = task.getTarget();
             ByteBuffer taskBuffer = ByteBuffer.wrap(target);
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
-            byte[] targetData = RabbitMQUtils.readByteArray(taskBuffer);
 
-            byte[][] taskDataArray = new byte[4][];
+            byte[][] taskDataArray = new byte[3][];
             taskDataArray[0] = RabbitMQUtils.writeString(taskRelation);
             taskDataArray[1] = RabbitMQUtils.writeString(format);
             taskDataArray[2] = RabbitMQUtils.writeString(path);
-            taskDataArray[3] = targetData;
+  
             byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
 
             byte[] expectedAnswerData = task.getExpectedAnswers();
@@ -76,9 +109,18 @@ public class TaskGenerator extends AbstractTaskGenerator {
     }
 
     @Override
+    public void receiveCommand(byte command, byte[] data) {
+        if (Commands.DATA_GENERATION_FINISHED == command) {
+            targetReceiver.terminate();
+
+        }
+        super.receiveCommand(command, data);
+    }
+
+    @Override
     public void close() throws IOException {
         LOGGER.info("Closign Task Generator...");
-        
+
         super.close();
         LOGGER.info("Task Genererator closed successfully.");
     }

@@ -5,6 +5,8 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection.systems;
 
+import com.rabbitmq.client.ConsumerCancelledException;
+import com.rabbitmq.client.ShutdownSignalException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -18,8 +20,10 @@ import org.aksw.limes.core.io.serializer.ISerializer;
 import org.aksw.limes.core.io.serializer.SerializerFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
+import org.hobbit.core.rabbit.SimpleFileReceiver;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
@@ -32,6 +36,8 @@ import org.slf4j.LoggerFactory;
 public class LimesSystemAdapter extends AbstractSystemAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LimesSystemAdapter.class);
+    private SimpleFileReceiver sourceReceiver;
+    private SimpleFileReceiver targetReceiver;
     private String receivedGeneratedDataFilePath;
     private String dataFormat;
     private String taskFormat;
@@ -48,20 +54,23 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
 
     @Override
     public void receiveGeneratedData(byte[] data) {
-        LOGGER.info("Starting receiveGeneratedData..");
-
-        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
-        // read the file path
-        dataFormat = RabbitMQUtils.readString(dataBuffer);
-        receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
-        byte[] receivedGeneratedData = RabbitMQUtils.readByteArray(dataBuffer);
         try {
-            FileUtils.writeByteArrayToFile(new File(receivedGeneratedDataFilePath), receivedGeneratedData);
-        } catch (IOException ex) {
+            LOGGER.info("Starting receiveGeneratedData..");
+
+            ByteBuffer dataBuffer = ByteBuffer.wrap(data);
+            // read the file path
+            dataFormat = RabbitMQUtils.readString(dataBuffer);
+            receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
+
+            sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
+            String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
+//LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
+            receivedGeneratedDataFilePath = receivedFiles[0];
+            LOGGER.info("Received data from receiveGeneratedData..");
+
+        } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        LOGGER.info("Received data from receiveGeneratedData..");
 
     }
 
@@ -78,12 +87,19 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
 
             // read the file path
             taskFormat = RabbitMQUtils.readString(taskBuffer);
-            String receivedGeneratedTaskFilePath = RabbitMQUtils.readString(taskBuffer);
-            byte[] receivedGeneratedTask = RabbitMQUtils.readByteArray(taskBuffer);
+            String receivedGeneratedTaskFilePath = null;
+            try {
 
-            FileUtils.writeByteArrayToFile(new File(receivedGeneratedTaskFilePath), receivedGeneratedTask);
+                targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");
+                String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
+//LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
+                receivedGeneratedTaskFilePath = receivedFiles[0];
 
-            LOGGER.info("Received task from receiveGeneratedTask..");
+            } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
+                java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            LOGGER.info("Task " + taskId + " received from task generator");
 
             limesController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
             byte[][] resultsArray = new byte[1][];
@@ -140,7 +156,19 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         output.setPrefixes(config.getPrefixes());
         output.writeToFile(mappings.getAcceptanceMapping(), config.getAcceptanceRelation(), config.getAcceptanceFile());
     }
-    
+
+    @Override
+    public void receiveCommand(byte command, byte[] data) {
+        if (Commands.DATA_GENERATION_FINISHED == command) {
+            LOGGER.info("my receiveCommand for source");
+            sourceReceiver.terminate();
+
+        } else if (Commands.TASK_GENERATION_FINISHED == command) {
+            LOGGER.info("my receiveCommand for target");
+            targetReceiver.terminate();
+        }
+        super.receiveCommand(command, data);
+    }
 
     @Override
     public void close() throws IOException {

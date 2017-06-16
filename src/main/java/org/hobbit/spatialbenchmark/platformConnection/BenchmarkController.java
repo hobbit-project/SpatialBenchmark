@@ -5,10 +5,8 @@
  */
 package org.hobbit.spatialbenchmark.platformConnection;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.hobbit.core.Commands;
-import org.hobbit.core.Constants;
 import org.hobbit.core.components.AbstractBenchmarkController;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.slf4j.Logger;
@@ -21,13 +19,13 @@ import org.slf4j.LoggerFactory;
 public class BenchmarkController extends AbstractBenchmarkController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
-    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
-    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
-    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
+//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
+//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
+//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
 
-//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
-//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
-//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
+    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
+    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
+    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
     private String[] envVariablesEvaluationModule;
     
     

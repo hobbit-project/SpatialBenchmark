@@ -1,7 +1,9 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -9,9 +11,11 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
 import org.hobbit.core.rabbit.RabbitMQUtils;
+import org.hobbit.core.rabbit.SimpleFileSender;
 import org.hobbit.spatialbenchmark.data.Generator;
 import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
 import static org.hobbit.spatialbenchmark.data.Generator.getDefinitions;
@@ -73,6 +77,7 @@ public class DataGenerator extends AbstractDataGenerator {
 //        int dataGeneratorId = getGeneratorId();
 //        int numberOfGenerators = getNumberOfGenerators();
         LOGGER.info("Generate data.. ");
+        SimpleFileSender sender = null;
         try {
 
             Worker worker = new Worker();
@@ -86,21 +91,6 @@ public class DataGenerator extends AbstractDataGenerator {
 
             File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
-
-            // send generated data to system adapter
-            for (File file : sourceFiles) {
-                byte[][] generatedFileArray = new byte[3][];
-                // send the file name and its content
-                generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
-                generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
-                // convert them to byte[]
-                byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
-                // send data to system
-                sendDataToSystemAdapter(generatedFile);
-                LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
-
-            }
 
             for (File file : gsFiles) {
                 byte[][] generatedFileArray = new byte[3][];
@@ -116,23 +106,79 @@ public class DataGenerator extends AbstractDataGenerator {
                 LOGGER.info("Gold Standard successfully added to Task.");
             }
 
-            // send generated tasks along with their expected answers to task generator
-            for (File file : targetFiles) {
-                byte[][] generatedFileArray = new byte[3][];
+            // send generated data to system adapter
+            for (File file : sourceFiles) {
+                byte[][] generatedFileArray = new byte[2][];
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                generatedFileArray[2] = FileUtils.readFileToByteArray(file);
+                // convert them to byte[]
+                byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
+
+                // define a queue name, e.g., read it from the environment
+                String queueName = "source_file";
+
+                // create the sender
+                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+
+                // close the sender
+                IOUtils.closeQuietly(sender);
+                // send data to system
+                sendDataToSystemAdapter(generatedFile);
+                LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
+
+            }
+
+            // send generated tasks along with their expected answers to task generator
+            for (File file : targetFiles) {
+                byte[][] generatedFileArray = new byte[2][];
+                // send the file name and its content
+                generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
+                generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
                 task.setRelation(relation);
-
+                
                 byte[] data = SerializationUtils.serialize(task);
+
+                // define a queue name, e.g., read it from the environment
+                String queueName = "target_file";
+                // create the sender
+                sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
+
+                InputStream is = null;
+                try {
+                    // create input stream, e.g., by opening a file
+                    is = new FileInputStream(file);
+                    // send data
+                    sender.streamData(is, file.getName());
+                } catch (Exception e) {
+                    // handle exception
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+
+                // close the sender
+                IOUtils.closeQuietly(sender);
 
                 sendDataToTaskGenerator(data);
                 LOGGER.info("Target data successfully sent to Task Generator.");
             }
+
+            
 
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
@@ -193,7 +239,6 @@ public class DataGenerator extends AbstractDataGenerator {
         getDefinitions().initializeAllocations(getRandom());
 
         // re-initialize test.properties file that is required for data generation
-
         getConfigurations().setStringProperty(Configurations.INSTANCES, String.valueOf(population));
         getConfigurations().setStringProperty(Configurations.GENERATED_DATA_FORMAT, serializationFormat);
         getConfigurations().setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
