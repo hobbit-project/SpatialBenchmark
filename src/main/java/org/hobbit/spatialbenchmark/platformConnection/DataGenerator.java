@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hobbit.core.components.AbstractDataGenerator;
+import org.hobbit.core.mimic.DockerBasedMimickingAlg;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileSender;
 import org.hobbit.spatialbenchmark.data.Generator;
@@ -39,6 +40,7 @@ public class DataGenerator extends AbstractDataGenerator {
 
     private int numberOfDataGenerators; //TODO: use this
     private int population;
+    private int seed;
     public static String serializationFormat;
     private String relation;
     private double keepPoints;
@@ -63,6 +65,9 @@ public class DataGenerator extends AbstractDataGenerator {
 
         // Given the above input, update configuration files that are necessary for data generation
         reInitializeProperties();
+
+        // call mimicking algorithm
+        runMimicking();
 
         task = new Task(Integer.toString(taskId++), null, null, null);
 
@@ -151,7 +156,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
                 task.setRelation(relation);
-                
+
                 byte[] data = SerializationUtils.serialize(task);
 
                 // define a queue name, e.g., read it from the environment
@@ -178,8 +183,6 @@ public class DataGenerator extends AbstractDataGenerator {
                 LOGGER.info("Target data successfully sent to Task Generator.");
             }
 
-            
-
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
         }
@@ -192,6 +195,7 @@ public class DataGenerator extends AbstractDataGenerator {
         Map<String, String> env = System.getenv();
         serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
         population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
+        seed = (Integer) getFromEnv(env, PlatformConstants.GENERATED_TOMTOM_SEED, 0);
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         relation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
         keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
@@ -269,6 +273,49 @@ public class DataGenerator extends AbstractDataGenerator {
         getConfigurations().loadFromFile(testPropertiesFile);
         getDefinitions().loadFromFile(definitionsPropertiesFile);
         //getDefinitions().loadFromFile(configurations.getString(Configurations.DEFINITIONS_PATH));
+    }
+
+    /**
+     * Initializes and runs a mimicking algorithm.
+     *
+     */
+    public void runMimicking() {
+        LOGGER.info("Running mimicking algorithm ");
+//git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator
+        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+
+        try {
+
+            /*"hobbit.numtraces": number of traces to generate
+            "hobbit.seed": seed for the random generator
+            "hobbit.outputformat": format for the output (supports "kml", "csv" and "rdf")
+             */
+            ///* Seed for the mimicking algorithm */
+//    private String DATA_GENERATOR_SEED = null;
+//vale sta parameter sto ttl kai ston kodika to seed tou mimicking algortihm.. rota ti akrivos einai!?
+            String[] TomTomDataArguments = new String[3];
+            TomTomDataArguments[0] = "hobbit.numtraces=" + population;
+            TomTomDataArguments[1] = "hobbit.seed=" + seed;
+            TomTomDataArguments[2] = "hobbit.outputformat=rdf";
+
+            alg.generateData(givenDatasetsPath, TomTomDataArguments);
+            //print files in folder
+            File[] files = new File(givenDatasetsPath).listFiles();
+//If this pathname does not denote a directory, then listFiles() returns null. 
+            LOGGER.info("files generated from mimicking: " + files.length);
+            for (File file : files) {
+                if (file.isFile()) {
+                    LOGGER.info("file from mimicking: " + file.getName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("TOMTOM_DATA script terminated.");
+            throw new RuntimeException();
+        }
+
+        LOGGER.info("Mimicking data has been received.");
+
     }
 
     @Override
