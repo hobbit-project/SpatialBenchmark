@@ -65,7 +65,7 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
             sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
 //LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
-            receivedGeneratedDataFilePath = receivedFiles[0];
+            receivedGeneratedDataFilePath = "./datasets/SourceDatasets/"+receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
         } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
@@ -93,7 +93,7 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
                 targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
 //LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
-                receivedGeneratedTaskFilePath = receivedFiles[0];
+                receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/"+receivedFiles[0];
 
             } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
                 java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);

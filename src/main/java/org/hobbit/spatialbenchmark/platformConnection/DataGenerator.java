@@ -281,22 +281,13 @@ public class DataGenerator extends AbstractDataGenerator {
      */
     public void runMimicking() {
         LOGGER.info("Running mimicking algorithm ");
-//git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator
         DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
 
         try {
-
-            /*"hobbit.numtraces": number of traces to generate
-            "hobbit.seed": seed for the random generator
-            "hobbit.outputformat": format for the output (supports "kml", "csv" and "rdf")
-             */
-            ///* Seed for the mimicking algorithm */
-//    private String DATA_GENERATOR_SEED = null;
-//vale sta parameter sto ttl kai ston kodika to seed tou mimicking algortihm.. rota ti akrivos einai!?
             String[] TomTomDataArguments = new String[3];
             TomTomDataArguments[0] = "hobbit.numtraces=" + population;
             TomTomDataArguments[1] = "hobbit.seed=" + seed;
-            TomTomDataArguments[2] = "hobbit.outputformat=rdf";
+            TomTomDataArguments[2] = "hobbit.outputformat=rdf"; //what else can be ?
 
             alg.generateData(givenDatasetsPath, TomTomDataArguments);
             //print files in folder
