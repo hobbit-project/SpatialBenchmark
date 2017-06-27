@@ -1,7 +1,9 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -102,13 +104,10 @@ public class DataGenerator extends AbstractDataGenerator {
                 // send the file name and its content
                 generatedFileArray[0] = RabbitMQUtils.writeString(serializationFormat);
                 generatedFileArray[1] = RabbitMQUtils.writeString(file.getAbsolutePath());
-                LOGGER.info("file.getAbsolutePath() gs " + file.getAbsolutePath());
                 generatedFileArray[2] = FileUtils.readFileToByteArray(file);
                 // convert them to byte[]
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
-
                 task.setExpectedAnswers(generatedFile);
-                LOGGER.info("Gold Standard successfully added to Task.");
             }
 
             // send generated data to system adapter
@@ -123,7 +122,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 // define a queue name, e.g., read it from the environment
                 String queueName = "source_file";
 
-                // create the sender
+                // create the senderfile to System Adapter or Task Generator(s).
                 sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
 
                 InputStream is = null;
@@ -285,9 +284,9 @@ public class DataGenerator extends AbstractDataGenerator {
 
         try {
             String[] TomTomDataArguments = new String[3];
-            TomTomDataArguments[0] = "hobbit.numtraces=" + population;
-            TomTomDataArguments[1] = "hobbit.seed=" + seed;
-            TomTomDataArguments[2] = "hobbit.outputformat=rdf"; //what else can be ?
+            TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + population;
+            TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
+            TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
 
             alg.generateData(givenDatasetsPath, TomTomDataArguments);
             //print files in folder
@@ -297,6 +296,9 @@ public class DataGenerator extends AbstractDataGenerator {
             for (File file : files) {
                 if (file.isFile()) {
                     LOGGER.info("file from mimicking: " + file.getName());
+                    double bytes = file.length();
+                    LOGGER.info("file bytes "+bytes);
+                    
                 }
             }
         } catch (Exception e) {
