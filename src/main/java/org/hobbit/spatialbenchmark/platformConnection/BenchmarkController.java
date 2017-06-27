@@ -19,13 +19,13 @@ import org.slf4j.LoggerFactory;
 public class BenchmarkController extends AbstractBenchmarkController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkController.class);
-//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
-//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
-//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
+    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialdatagenerator";
+    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialtaskgenerator";
+    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "git.project-hobbit.eu:4567/jsaveta1/spatialevaluationmodule";
 
-    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
-    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
-    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
+//    private static final String DATA_GENERATOR_CONTAINER_IMAGE = "spatial_data-generator";
+//    private static final String TASK_GENERATOR_CONTAINER_IMAGE = "spatial_task-generator";
+//    private static final String EVALUATION_MODULE_CONTAINER_IMAGE = "spatial_evaluation-module";
     private String[] envVariablesEvaluationModule;
     
     
