@@ -4,4 +4,11 @@ ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.
 
 WORKDIR /SpatialBenchmark
 
+COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
+
+COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
+
+COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/GoldStandards/
+
+
 CMD java -Xms100G -Xmx200G -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.EvaluationModule
