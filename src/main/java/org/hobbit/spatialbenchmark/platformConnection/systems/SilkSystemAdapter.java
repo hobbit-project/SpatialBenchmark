@@ -11,13 +11,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
-import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author jsaveta
  */
 public class SilkSystemAdapter extends AbstractSystemAdapter {
-    //na anevei k system.ttl gia to silk
-    //na exei to diko tou docker image
-    //vale sto build tou docker kai ta 2 sustimata
-    // sto experiment.ttl na valo to sosto sustima gia local kai sto test_cmd
-    //na ftiakso ta configs gia ola ta relations.. 
-    // na valo ta sosta paths edo
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
@@ -116,9 +108,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
     }
 
     public void silkController(String source, String target, String relation) throws IOException {
-//na diavazei to file kai na kanei replace ola ta format kai tin kataliksi tou arxeiou 
-        //na svinei apo to arxeio ta polu megala WKT 
-
+        
         LOGGER.info("Started silkController.. ");
 
         String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
@@ -147,10 +137,10 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
         //awk 'length($0) < 65535' sourceCONTAINS-0001.nt > source-clear-for-silk.nt
         //awk 'length($0) < 65535' targetCONTAINS-0001.nt > target-clear-for-silk.nt
         
-        Runtime.getRuntime().exec("awk 'length($0) < 65535' sourceCONTAINS-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
+        Runtime.getRuntime().exec("awk 'length($0) < 65535' source"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
                 + "source-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
-        Runtime.getRuntime().exec("awk 'length($0) < 65535' targetCONTAINS-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
+        Runtime.getRuntime().exec("awk 'length($0) < 65535' target"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
                 + "target-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
         //run silk 
