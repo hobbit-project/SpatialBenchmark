@@ -1,9 +1,11 @@
 package org.hobbit.spatialbenchmark.data;
 
+import java.io.BufferedReader;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import org.hobbit.spatialbenchmark.data.goldstandard.oaei.OAEIRDFAlignmentFormat
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
 import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
+import org.hobbit.spatialbenchmark.platformConnection.DataGenerator;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 
@@ -43,7 +46,7 @@ public class Worker extends AbstractWorker {
     private String serializationFormat;
     private int numOfInstances;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
 
     public Worker() {
         this.numOfInstances = getConfigurations().getInt(Configurations.INSTANCES);
@@ -63,7 +66,6 @@ public class Worker extends AbstractWorker {
         String targetDestination = destinationPath + "/TargetDatasets";
         String goldStandardDestination = destinationPath + "/GoldStandards";
         String OAEIGoldStandardDestination = destinationPath + "/OAEIGoldStandards";
-
         File theFileS = new File(sourceDestination);
         theFileS.mkdirs();
         FileUtils.cleanDirectory(theFileS); // will create a folder for the transformed data if not exists                     
@@ -85,14 +87,11 @@ public class Worker extends AbstractWorker {
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + "rdf", OAEIGoldStandardDestination, File.separator, currentFilesCount);
 
-        RDFFormat format = RDFFormat.TURTLE; //TODO: change this format based on mimicking algorithm later!
         String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
 
         List<File> collectedFiles = new ArrayList<File>();
         RepositoryConnection con = null;
 
-        //TODO: if each file is not an instance any more on mimicking change this class
-        //each file is an instance
         FileUtil.collectFilesList(path, collectedFiles, "*", true);
 
         if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
@@ -102,8 +101,11 @@ public class Worker extends AbstractWorker {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
-
             for (int i = 0; i < numOfInstances; i++) {
+                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
+
+                RDFFormat format = RDFFormat.forFileName(collectedFiles.get(i).getName());
+
                 Repository repository = new SailRepository(new MemoryStore());
                 con = null;
                 repository.initialize();
@@ -174,14 +176,12 @@ public class Worker extends AbstractWorker {
 
             //oaei gold standard
             OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
-
             //mappings from RADON
             ResultMappings results = new RADONController(rdfFormat).getMappings(); //generate gold standard
             HashMap<String, HashMap<String, Double>> mappings = results.getAcceptanceMapping().getMap();
 
             for (HashMap.Entry<String, HashMap<String, Double>> entry : mappings.entrySet()) {
                 String source = entry.getKey();
-
                 for (HashMap.Entry<String, Double> innerEntry : entry.getValue().entrySet()) {
                     String target = innerEntry.getKey();
                     oaeiRDF.addMapping2Output(source, target, RELATION, 1.0);
