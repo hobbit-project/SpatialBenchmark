@@ -25,7 +25,13 @@ import org.slf4j.LoggerFactory;
  * @author jsaveta
  */
 public class SilkSystemAdapter extends AbstractSystemAdapter {
-    
+    //na anevei k system.ttl gia to silk
+    //na exei to diko tou docker image
+    //vale sto build tou docker kai ta 2 sustimata
+    // sto experiment.ttl na valo to sosto sustima gia local kai sto test_cmd
+    //na ftiakso ta configs gia ola ta relations.. 
+    // na valo ta sosta paths edo
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
@@ -138,17 +144,22 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
         //awk 'length($0) < 65535' targetCONTAINS-0001.nt > target-clear-for-silk.nt
         
         Runtime.getRuntime().exec("awk 'length($0) < 65535' source"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
-                + "source-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
+                + "./datasets/SourceDatasets/source-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
         Runtime.getRuntime().exec("awk 'length($0) < 65535' target"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
-                + "target-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
+                + "./datasets/TargetDatasets/target-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
 
+        //episis edo emfanizontai allios se sxesi me to radon gia to evaluation !!! prepei na
+        //einai sugkrisima
         //run silk 
         // java -DconfigFile=silkConfigCONTAINS.xml -jar ./lib/silk.jar 
         
         //make sure you copy the lib folder in the docker image
         Runtime.getRuntime().exec("java -DconfigFile=silkConfig"+relation+".xml -jar ./lib/silk.jar ");
         LOGGER.info("silkController finished..");
+        
+        
+        //SOS vale to reduce tou stream kai sto gs!  
     }
 
     @Override
