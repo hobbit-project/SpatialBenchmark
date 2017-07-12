@@ -1,0 +1,21 @@
+FROM java
+
+ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.jar
+
+WORKDIR /SpatialBenchmark
+
+COPY datasets/* /SpatialBenchmark/datasets/
+
+COPY lib/* /SpatialBenchmark/lib/
+
+COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
+
+COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
+
+COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
+
+COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/GoldStandards/
+
+CMD java -Xms100G -Xmx200G -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.systems.SilkSystemAdapter
+
+
