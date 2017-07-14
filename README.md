@@ -18,5 +18,5 @@ If you want to run Spatial Benchmark, please follow the guidelines found here: h
 
 * Percentage of points to keep from source trace: one can restrict the number of points to consider due to the possibly very large number of points per Trace
 
-* Output dataset size: Number of instances to retrieve from the input dataset
+* Population of generated data (number on instances)
 
