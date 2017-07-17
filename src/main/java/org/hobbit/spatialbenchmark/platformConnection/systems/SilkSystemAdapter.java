@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
@@ -25,7 +26,8 @@ import org.slf4j.LoggerFactory;
  * @author jsaveta
  */
 public class SilkSystemAdapter extends AbstractSystemAdapter {
-    
+
+    private static final Logger LOGGER_SILK = LoggerFactory.getLogger(org.silkframework.execution.GenerateLinks.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
     protected File folder = new File("");
     private SimpleFileReceiver sourceReceiver;
@@ -128,7 +130,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
 //  TODO             CORRECT FORMAT.. Now only gets nt, find how the have defined it
 //or maybe they only return .nt resutls! I should fix that if so
-
                 content = content.replaceAll("mappings.nt", "../../" + resultsFile);
 
                 File tempFile = new File(newConfig);
@@ -147,6 +148,9 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
             Process p = Runtime.getRuntime().exec("java -DconfigFile=" + newConfig + "  -jar ./lib/silk.jar ");
             p.waitFor();
+
+            LOGGER_SILK.info(IOUtils.toString(p.getInputStream()));
+            LOGGER_SILK.info(IOUtils.toString(p.getErrorStream()));
 
             LOGGER.info("silkController finished..");
 
