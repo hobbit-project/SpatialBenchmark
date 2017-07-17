@@ -25,14 +25,9 @@ import org.slf4j.LoggerFactory;
  * @author jsaveta
  */
 public class SilkSystemAdapter extends AbstractSystemAdapter {
-    //na anevei k system.ttl gia to silk
-    //na exei to diko tou docker image
-    //vale sto build tou docker kai ta 2 sustimata
-    // sto experiment.ttl na valo to sosto sustima gia local kai sto test_cmd
-    //na ftiakso ta configs gia ola ta relations.. 
-    // na valo ta sosta paths edo
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
+    protected File folder = new File("");
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
     private String receivedGeneratedDataFilePath;
@@ -44,7 +39,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
     public void init() throws Exception {
         LOGGER.info("Initializing SILK test system...");
         super.init();
-        LOGGER.info("SILK initialized successfully .");
+        LOGGER.info("SILK initialized successfully.");
 
     }
 
@@ -99,6 +94,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
             silkController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
             byte[][] resultsArray = new byte[1][];
+
             resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
             byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
             try {
@@ -114,52 +110,50 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
     }
 
     public void silkController(String source, String target, String relation) throws IOException {
-        
-        LOGGER.info("Started silkController.. ");
 
-        String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
-        String newConfig = "./configs/topologicalConfigs/silkNewConfig" + relation + ".xml";
-        
         try {
-            //replace format with the correct
-            String content = FileUtils.readFileToString(new File(config), "UTF-8");
-            content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
-            content = content.replaceAll("mappings.nt", "./datasets/SilkSystemAdapterResults/"+relation+"mappings."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-            content = content.replaceAll(".nt", "."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-            
-            File tempFile = new File(newConfig);
-            FileUtils.writeStringToFile(tempFile, content, "UTF-8");
-        } catch (IOException e) {
-            //Simple exception handling, replace with what's necessary for your use case!
-            throw new RuntimeException("Generating file failed", e);
+
+            LOGGER.info("Started silkController.. ");
+            String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
+            String newConfig = "./configs/topologicalConfigs/silkNewConfig" + relation + ".xml";
+
+            try {
+                resultsFile = "./datasets/SilkSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
+
+                String content = FileUtils.readFileToString(new File(config), "UTF-8");
+                content = content.replaceAll("source-clear-for-silk.nt", "../../" + source);
+                content = content.replaceAll("target-clear-for-silk.nt", "../../" + target);
+//                content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
+//                content = content.replaceAll("N-TRIPLES", "N-TRIPLE");
+
+//  TODO             CORRECT FORMAT.. Now only gets nt, find how the have defined it
+//or maybe they only return .nt resutls! I should fix that if so
+
+                content = content.replaceAll("mappings.nt", "../../" + resultsFile);
+
+                File tempFile = new File(newConfig);
+                FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+
+//                LOGGER.info("------------CONFIG");
+//                try (BufferedReader br = new BufferedReader(new FileReader(newConfig))) {
+//                    String line = null;
+//                    while ((line = br.readLine()) != null) {
+//                        LOGGER.info("" + line);
+//                    }
+//                }
+            } catch (IOException e) {
+                throw new RuntimeException("Generating file failed", e);
+            }
+
+            Process p = Runtime.getRuntime().exec("java -DconfigFile=" + newConfig + "  -jar ./lib/silk.jar ");
+            p.waitFor();
+
+            LOGGER.info("silkController finished..");
+
+        } catch (InterruptedException ex) {
+            java.util.logging.Logger.getLogger(SilkSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        //vale auto to path sto config
-        resultsFile = "./datasets/SilkSystemAdapterResults/mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
 
-        
-        //Java streams can't store strings longer than 64 kbyte = 65536 byte so we trim lines
-        //larger than 64KB 
-        //awk 'length($0) < 65535' sourceCONTAINS-0001.nt > source-clear-for-silk.nt
-        //awk 'length($0) < 65535' targetCONTAINS-0001.nt > target-clear-for-silk.nt
-        
-        Runtime.getRuntime().exec("awk 'length($0) < 65535' source"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
-                + "./datasets/SourceDatasets/source-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-
-        Runtime.getRuntime().exec("awk 'length($0) < 65535' target"+relation+"-0001."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension()+" > "
-                + "./datasets/TargetDatasets/target-clear-for-silk."+SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-
-        //episis edo emfanizontai allios se sxesi me to radon gia to evaluation !!! prepei na
-        //einai sugkrisima
-        //run silk 
-        // java -DconfigFile=silkConfigCONTAINS.xml -jar ./lib/silk.jar 
-        
-        //make sure you copy the lib folder in the docker image
-        Runtime.getRuntime().exec("java -DconfigFile=silkConfig"+relation+".xml -jar ./lib/silk.jar ");
-        LOGGER.info("silkController finished..");
-        
-        
-        //SOS vale to reduce tou stream kai sto gs!  
     }
 
     @Override

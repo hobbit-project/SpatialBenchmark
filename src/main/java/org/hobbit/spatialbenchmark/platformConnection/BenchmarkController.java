@@ -32,7 +32,7 @@ public class BenchmarkController extends AbstractBenchmarkController {
 
     @Override
     public void init() throws Exception {
-        LOGGER.info("Initilalizing Benchmark Controller...");
+        LOGGER.info("Initializing Benchmark Controller...");
         super.init();
 
         int numberOfDataGenerators = (Integer) getProperty("http://w3id.org/bench#hasNumberOfGenerators", 1);

@@ -12,12 +12,13 @@ public class Main {
     private static Generator generateData;
 
     public static void main(String[] args) throws IOException {
+
         generateData = new Generator();
         getConfigurations().loadFromFile("test.properties");
         getDefinitions().loadFromFile(getConfigurations().getString(Configurations.DEFINITIONS_PATH));
         getDefinitions().initializeAllocations(getRandom());
 
         generateData.exec();
-    }
 
+    }
 }

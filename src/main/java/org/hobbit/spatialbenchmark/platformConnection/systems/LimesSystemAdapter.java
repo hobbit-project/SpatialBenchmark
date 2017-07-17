@@ -48,7 +48,7 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
     public void init() throws Exception {
         LOGGER.info("Initializing Limes test system...");
         super.init();
-        LOGGER.info("Limes initialized successfully .");
+        LOGGER.info("Limes initialized successfully.");
 
     }
 
@@ -126,6 +126,7 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
 
         CommandLine cmd = parseCommandLine(args);
         Configuration config = getConfig(cmd);
+        
         config.getSourceInfo().setEndpoint(source);
         config.getTargetInfo().setEndpoint(target);
         config.getSourceInfo().setType(dataFormat);

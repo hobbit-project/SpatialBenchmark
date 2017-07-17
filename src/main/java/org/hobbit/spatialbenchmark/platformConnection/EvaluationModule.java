@@ -147,6 +147,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
             for (String answer : receivedDataAnswers) {
 
                 answer = answer.trim();
+                answer = answer.replaceAll("<http://www.w3.org/2002/07/owl#sameAs>", "");
                 if (answer != null && !answer.equals("")) {
                     String source_temp = answer.split(">")[0];
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
