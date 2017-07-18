@@ -24,6 +24,7 @@ import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
+import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
@@ -39,7 +40,6 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
     private String receivedGeneratedDataFilePath;
-    private String receivedGeneratedTaskFilePath;
     private String dataFormat;
     private String taskFormat;
     private String resultsFile;
@@ -53,7 +53,6 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Super class initialized. It took {}ms.", System.currentTimeMillis() - time);
         time = System.currentTimeMillis();
         sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
-        targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "task_target_file");
         LOGGER.info("Receivers initialized. It took {}ms.", System.currentTimeMillis() - time);
     }
 
@@ -76,7 +75,6 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
         } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
             LOGGER.error("Got an exception while receiving generated data.", ex);
         }
-
     }
 
     @Override
@@ -94,27 +92,14 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
         time = System.currentTimeMillis();
 
-        // Start a parallel thread that receives the data
-        Thread receiverThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
-                    receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
-                } catch (Exception ex) {
-                    LOGGER.error("Exception while receiving data of task.", ex);
-                }
-            }
-        });
-        // start the thread and directly terminate the receiver since it should
-        // already find all the data in its queue
-        receiverThread.start();
-        targetReceiver.terminate();
-        // wait for the receiver thread to finish its work
+        SingleFileReceiver targetReceiver;
         try {
-            receiverThread.join();
-        } catch (InterruptedException e1) {
-            LOGGER.warn("Interrupted while waiting for receiving task data.");
+            targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
+                    "task_target_file");
+            String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
+            String receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
+        } catch (Exception e) {
+            LOGGER.error("Exception while trying to receive data. Aborting.", e);
         }
         LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
         time = System.currentTimeMillis();
