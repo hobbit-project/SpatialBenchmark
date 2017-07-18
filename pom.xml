@@ -29,11 +29,12 @@
      
     </repositories>
     
+
     <dependencies>
         <dependency>
             <groupId>org.hobbit</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.5-SNAPSHOT</version>
+            <version>1.0.6-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -183,9 +184,15 @@
             <artifactId>jtsExtension</artifactId>   
             <version>0.1</version> 
         </dependency>
+        <dependency>
+            <groupId>com.vividsolutions.jts</groupId>
+            <artifactId>silk</artifactId>
+            <version>0.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <build>
- 
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -224,6 +231,7 @@
                     </execution>
                 </executions>
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
@@ -242,15 +250,31 @@
                             <packaging>jar</packaging>
                   
                         </configuration>
-                        
+                    
                         
                             
                         <goals>
                             <goal>install-file</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        
+                        <configuration>                            
+                            <file>${basedir}/lib/silk.jar</file>
+                            <repositoryLayout>default</repositoryLayout>
+                            <artifactId>silk</artifactId>   
+                            <version>0.1</version> 
+                            <packaging>jar</packaging>
+                  
+                        </configuration>                  
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>              
+             
+           
         </plugins>
     </build>
     <name>SpatialBenchmark</name>
