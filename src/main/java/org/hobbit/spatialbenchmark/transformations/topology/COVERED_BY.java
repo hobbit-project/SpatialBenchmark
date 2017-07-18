@@ -25,15 +25,17 @@ public class COVERED_BY implements SpatialTransformation {
     GeometryFactory geometryFactory = new GeometryFactory();
     WKTReader reader = new WKTReader(geometryFactory);
 
-    @Override
     public Object execute(Object arg) {
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
+            result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
-                CreateCoversGeometryObject instance = new CreateCoversGeometryObject(line, GeometryType.GeometryTypes.LineString);
-                result = instance.generateGeometry();
+                if (line.getCoordinates().length >= 4) {
+                    CreateCoversGeometryObject instance = new CreateCoversGeometryObject(line, GeometryType.GeometryTypes.LineString);
+                    result = instance.generateGeometry();
+                }
             }
 
         } catch (ParseException ex) {
@@ -41,7 +43,6 @@ public class COVERED_BY implements SpatialTransformation {
         }
         return result;
     }
-
 
     @Override
     public String print() {

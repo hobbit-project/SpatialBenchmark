@@ -1,5 +1,6 @@
 package org.hobbit.spatialbenchmark.util;
 
+import com.google.common.primitives.Doubles;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,7 +14,7 @@ public class AllocationsUtil {
     // Don't need to store allocations, but might be useful for debugging
 
     private final double[] limits;
-    private final ArrayList<Double> allocation;
+    private ArrayList<Double> allocation;
     private Random random;
 
     /**
@@ -29,6 +30,17 @@ public class AllocationsUtil {
         this.allocation = new ArrayList<Double>();
         this.random = random;
         calculateLimitsFromAllocations(allocations);
+    }
+
+    public AllocationsUtil(ArrayList<Double> allocations, Random random) {
+        this.limits = new double[allocations.size()];
+        this.allocation = allocations;
+        this.random = random;
+        calculateLimitsFromAllocations(Doubles.toArray(allocations));
+    }
+    
+    public AllocationsUtil() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private void calculateLimitsFromAllocations(double[] allocations) {
@@ -69,5 +81,10 @@ public class AllocationsUtil {
 
     public ArrayList<Double> getAllocationsArray() {
         return this.allocation;
+    }
+    
+    public void setAllocationsArray(ArrayList<Double> a) {
+//        this.allocation = new ArrayList<Double>();
+        this.allocation = a;
     }
 }

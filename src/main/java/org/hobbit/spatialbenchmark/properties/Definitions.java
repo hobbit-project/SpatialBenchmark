@@ -24,7 +24,7 @@ public class Definitions {
     //Determines percentage of points we want to keep for each trace
     public static AllocationsUtil keepPointsAllocation;
 
-    private static final Properties definitionsProperties = new Properties();
+    private static Properties definitionsProperties = new Properties();
 
     private boolean verbose = false;
 
@@ -145,5 +145,13 @@ public class Definitions {
         if (verbose) {
             System.out.println(String.format("\t%-33s : {%s}", allocationPropertyName, allocations));
         }
+    }
+
+    public void setIntProperty(String key, int value) {
+        definitionsProperties.setProperty(key, Integer.toString(value));
+    }
+
+    public void setStringProperty(String key, String value) {
+        definitionsProperties.setProperty(key, value);
     }
 }

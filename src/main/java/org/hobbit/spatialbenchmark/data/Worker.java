@@ -1,22 +1,18 @@
 package org.hobbit.spatialbenchmark.data;
 
+import java.io.BufferedReader;
+import org.aksw.limes.core.controller.ResultMappings;
+import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-import org.aksw.limes.core.controller.ResultMappings;
-import org.apache.commons.io.FileUtils;
-import org.hobbit.spatialbenchmark.data.goldstandard.RADONController;
-import org.hobbit.spatialbenchmark.data.goldstandard.oaei.OAEIRDFAlignmentFormat;
-import org.hobbit.spatialbenchmark.main.Main;
-import org.hobbit.spatialbenchmark.properties.Configurations;
-import org.hobbit.spatialbenchmark.util.FileUtil;
-import org.hobbit.spatialbenchmark.util.SesameUtils;
+import static org.hobbit.spatialbenchmark.data.Generator.getAtomicLong;
 import org.openrdf.model.Model;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.LinkedHashModel;
@@ -33,19 +29,29 @@ import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.Rio;
 import org.openrdf.sail.memory.MemoryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.hobbit.spatialbenchmark.data.goldstandard.RADONController;
+import org.hobbit.spatialbenchmark.data.goldstandard.oaei.OAEIRDFAlignmentFormat;
+import org.hobbit.spatialbenchmark.properties.Configurations;
+import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
+import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
+import org.hobbit.spatialbenchmark.platformConnection.DataGenerator;
+import org.hobbit.spatialbenchmark.util.FileUtil;
+import org.hobbit.spatialbenchmark.util.SesameUtils;
 
 public class Worker extends AbstractWorker {
 
-    protected long targetTriples;
-    protected long totalTriplesForWorker;
-    protected String destinationPath;
-    protected String serializationFormat;
-    protected AtomicLong filesCount;
+    private String destinationPath;
+    private String serializationFormat;
+    private int numOfInstances;
 
-    public Worker(AtomicLong filesCount, String destinationPath, String serializationFormat) {
-        this.filesCount = filesCount;
-        this.destinationPath = destinationPath;
-        this.serializationFormat = serializationFormat;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
+
+    public Worker() {
+        this.numOfInstances = getConfigurations().getInt(Configurations.INSTANCES);
+        this.destinationPath = getConfigurations().getString(Configurations.DATASETS_PATH);
+        this.serializationFormat = getConfigurations().getString(Configurations.GENERATED_DATA_FORMAT);
     }
 
     @Override
@@ -60,7 +66,6 @@ public class Worker extends AbstractWorker {
         String targetDestination = destinationPath + "/TargetDatasets";
         String goldStandardDestination = destinationPath + "/GoldStandards";
         String OAEIGoldStandardDestination = destinationPath + "/OAEIGoldStandards";
-
         File theFileS = new File(sourceDestination);
         theFileS.mkdirs();
         FileUtils.cleanDirectory(theFileS); // will create a folder for the transformed data if not exists                     
@@ -77,31 +82,30 @@ public class Worker extends AbstractWorker {
         theFileOAEIGS.mkdirs();
         FileUtils.cleanDirectory(theFileOAEIGS);
 
-        long currentFilesCount = filesCount.incrementAndGet();
+        long currentFilesCount = getAtomicLong().incrementAndGet();
         String sourceFileName = String.format(SOURCE_FILENAME + rdfFormat.getDefaultFileExtension(), sourceDestination, File.separator, currentFilesCount);
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
-        String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + rdfFormat.getDefaultFileExtension(), OAEIGoldStandardDestination, File.separator, currentFilesCount);
+        String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + "rdf", OAEIGoldStandardDestination, File.separator, currentFilesCount);
 
-        RDFFormat format = RDFFormat.TURTLE; //fix format
-        String path = Main.getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
+        String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
+
         List<File> collectedFiles = new ArrayList<File>();
-
         RepositoryConnection con = null;
 
-        //each file is an instance
         FileUtil.collectFilesList(path, collectedFiles, "*", true);
 
-        int numOfInstances = Main.getConfigurations().getInt(Configurations.INSTANCES);
-
-        if ((Main.getConfigurations().getInt(Configurations.INSTANCES) > collectedFiles.size()) || (Main.getConfigurations().getInt(Configurations.INSTANCES) == 0)) {
+        if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
             numOfInstances = collectedFiles.size();
         }
         try {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
-
             for (int i = 0; i < numOfInstances; i++) {
+                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
+
+                RDFFormat format = RDFFormat.forFileName(collectedFiles.get(i).getName());
+
                 Repository repository = new SailRepository(new MemoryStore());
                 con = null;
                 repository.initialize();
@@ -134,7 +138,6 @@ public class Worker extends AbstractWorker {
 
                 GraphQueryResult graphResult = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString).evaluate();
                 Model resultsModel = QueryResults.asModel(graphResult);
-                targetTriples -= resultsModel.size();
                 CreateInstances create = new CreateInstances();
 
                 Model givenInstanceModel = new LinkedHashModel();
@@ -147,7 +150,6 @@ public class Worker extends AbstractWorker {
                     if (statement.getObject().stringValue().endsWith("Trace") || !it.hasNext()) {
                         if (!givenInstanceModel.isEmpty()) {
                             //source instance - Trace
-
                             if (!it.hasNext()) {
                                 givenInstanceModel.add(statement);
                             }
@@ -155,12 +157,14 @@ public class Worker extends AbstractWorker {
                             Model sourceTrace = create.getSourceTrace();
                             Model targetTrace = create.targetInstance(sourceTrace);
                             //if the relation is within or covered_by, write sources on target file and targets on source file
-                            if (transform.getClass().getSimpleName().equals("WITHIN") || transform.getClass().getSimpleName().equals("COVERED_BY")) {
-                                Rio.write(targetTrace, sourceFos, rdfFormat);
-                                Rio.write(sourceTrace, targetFos, rdfFormat);
-                            } else {
-                                Rio.write(sourceTrace, sourceFos, rdfFormat);
-                                Rio.write(targetTrace, targetFos, rdfFormat);
+                            if (sourceTrace != null && targetTrace != null) {
+                                if (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY")) {
+                                    Rio.write(targetTrace, sourceFos, rdfFormat);
+                                    Rio.write(sourceTrace, targetFos, rdfFormat);
+                                } else {
+                                    Rio.write(sourceTrace, sourceFos, rdfFormat);
+                                    Rio.write(targetTrace, targetFos, rdfFormat);
+                                }
                             }
 
                             givenInstanceModel = new LinkedHashModel();
@@ -172,7 +176,6 @@ public class Worker extends AbstractWorker {
 
             //oaei gold standard
             OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
-
             //mappings from RADON
             ResultMappings results = new RADONController(rdfFormat).getMappings(); //generate gold standard
             HashMap<String, HashMap<String, Double>> mappings = results.getAcceptanceMapping().getMap();
@@ -184,7 +187,6 @@ public class Worker extends AbstractWorker {
                     oaeiRDF.addMapping2Output(source, target, RELATION, 1.0);
                 }
             }
-
             try {
                 oaeiRDF.saveOutputFile();
             } catch (Exception e) {

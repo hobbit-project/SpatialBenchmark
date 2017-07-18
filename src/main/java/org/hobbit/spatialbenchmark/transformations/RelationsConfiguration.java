@@ -21,6 +21,8 @@ import org.hobbit.spatialbenchmark.transformations.topology.WITHIN;
  * @author jsaveta
  */
 public class RelationsConfiguration {
+//SPATIAL RELATIONS
+//EQUALS, DISJOINT, TOUCHES, CONTAINS, COVERS, INTERSECTS, WITHIN, COVERED_BY, CROSSES, OVERLAPS
 
     public static EQUALS equals() {
         return new EQUALS();

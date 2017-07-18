@@ -20,6 +20,8 @@ import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
 import org.openrdf.model.Value;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,11 +29,12 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class CreateInstances extends Generator {
 
-    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
 
+    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
-    private Model sourceTrace;
+    private Model sourceTrace = null;
 
     public CreateInstances() {
     }
@@ -40,50 +43,61 @@ public class CreateInstances extends Generator {
         Resource id = null;
         Coordinate p = null;
         ArrayList<Coordinate> points = new ArrayList<Coordinate>();
-
-        Iterator<Statement> it = givenModel.iterator();
-        while (it.hasNext()) {
-            Statement statement = it.next();
-            if (statement.getObject().stringValue().endsWith("Trace")) {
-                id = statement.getSubject();
-            }
-            if (statement.getPredicate().getLocalName().equals("lat")) {
-                double latitude = Double.parseDouble(statement.getObject().stringValue());
-                statement = it.next();
-                double longitude = Double.parseDouble(statement.getObject().stringValue());
-                p = new TracePoint(longitude, latitude).getTracePoint();
-            }
-
-            if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
-                call.keepPointCases();
-                if (call.getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
-                    points.add(p);
+        try {
+            Iterator<Statement> it = givenModel.iterator();
+            while (it.hasNext()) {
+                Statement statement = it.next();
+                if (statement.getObject().stringValue().endsWith("Trace")) {
+                    id = statement.getSubject();
+                }
+                if (statement.getPredicate().getLocalName().equals("lat")) {
+                    double latitude = Double.parseDouble(statement.getObject().stringValue());
+                    statement = it.next();
+                    double longitude = Double.parseDouble(statement.getObject().stringValue());
+                    p = new TracePoint(longitude, latitude).getTracePoint();
+                }
+                if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
+                    getRelationsCall().keepPointCases();
+                    if (getRelationsCall().getKeepPoint() && p != null) { //check alloccation of config file for the percentage of points to keep
+                        points.add(p);
+                    }
                 }
             }
+            if (points.size() >= 2) {
+                this.sourceTrace = new Trace(id, points).getTraceModel();
+            }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         }
-        this.sourceTrace = new Trace(id, points).getTraceModel();
     }
 
     public Model targetInstance(Model sourceTrace) {
         Resource targetURI = null;
         Geometry targetGeometry = null;
-        Model targetModel;
-        Iterator<Statement> it = sourceTrace.iterator();
-        while (it.hasNext()) {
-            Statement statement = it.next();
-            if (statement.getObject().stringValue().endsWith("Trace")) {
-                if (!URIMap.containsKey(statement.getSubject())) {
-                    targetURI = targetSubject(statement);
+        Model targetModel = null;
+        try {
+            if (sourceTrace != null) {
+                Iterator<Statement> it = sourceTrace.iterator();
+                while (it.hasNext()) {
+                    Statement statement = it.next();
+                    if (statement.getObject().stringValue().endsWith("Trace")) {
+                        if (!URIMap.containsKey(statement.getSubject())) {
+                            targetURI = targetSubject(statement);
 
-                } else if (URIMap.containsKey(statement.getSubject())) {
-                    targetURI = URIMap.get(statement.getSubject());
+                        } else if (URIMap.containsKey(statement.getSubject())) {
+                            targetURI = URIMap.get(statement.getSubject());
+                        }
+                    } else {
+                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
+                    }
                 }
-            } else {
-
-                targetGeometry = (Geometry) transform.execute(statement.getObject().stringValue());
+                if (targetGeometry != null) {
+                    targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
+                }
             }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         }
-        targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
         return targetModel;
 
     }

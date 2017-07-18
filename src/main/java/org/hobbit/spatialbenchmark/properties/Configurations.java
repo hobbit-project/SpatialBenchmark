@@ -24,24 +24,26 @@ public class Configurations {
     public static final String INSTANCES = "instances";
     public static final String ENDPOINT_URL = "endpointURL";
     public static final String DATASETS_PATH = "datasetsPath";
+    public static final String CONFIGS_PATH = "configsPath";
     public static final String GIVEN_DATASETS_PATH = "givenDatasetsPath";
     public static final String DEFINITIONS_PATH = "definitionsPath";
     public static final String GENERATED_DATA_FORMAT = "generatedDataFormat";
     public static final String NEW_URI_NAMESPACE = "newURInamespace";
     public static final String LOAD_ONTOLOGIES = "loadOntologies";
     public static final String CLEAR_DATABASE = "clearDatabase";
-    private final Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
     /**
      * Initialise and set default values for parameters that make sense.
      */
     public Configurations() {
-        properties.setProperty(INSTANCES, "10");
+        properties.setProperty(INSTANCES, "111");
         properties.setProperty(ENDPOINT_URL, "");
         properties.setProperty(DATASETS_PATH, "./datasets");
+        properties.setProperty(CONFIGS_PATH, "./configs");
         properties.setProperty(GIVEN_DATASETS_PATH, "./datasets/givenDatasets");
         properties.setProperty(DEFINITIONS_PATH, "./definitions.properties");
-        properties.setProperty(GENERATED_DATA_FORMAT, "turtle");
+        properties.setProperty(GENERATED_DATA_FORMAT, "n3");
         properties.setProperty(NEW_URI_NAMESPACE, "http://www.hobbit.eu/");
         properties.setProperty(LOAD_ONTOLOGIES, "true");
         properties.setProperty(CLEAR_DATABASE, "false");
@@ -181,6 +183,14 @@ public class Configurations {
 
     public Properties getProperties() {
         return this.properties;
+    }
+
+    public void setIntProperty(String key, int value) {
+        properties.setProperty(key, Integer.toString(value));
+    }
+
+    public void setStringProperty(String key, String value) {
+        properties.setProperty(key, value);
     }
 
 }

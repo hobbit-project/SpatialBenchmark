@@ -5,7 +5,7 @@ import org.openrdf.rio.RDFFormat;
 public class SesameUtils {
 
     public static RDFFormat parseRdfFormat(String serializationFormat) {
-        RDFFormat rdfFormat = RDFFormat.NQUADS;
+        RDFFormat rdfFormat = RDFFormat.TURTLE;
 
         if (serializationFormat.equalsIgnoreCase("BinaryRDF")) {
             rdfFormat = RDFFormat.BINARY;
@@ -13,20 +13,22 @@ public class SesameUtils {
             rdfFormat = RDFFormat.TRIG;
         } else if (serializationFormat.equalsIgnoreCase("TriX")) {
             rdfFormat = RDFFormat.TRIX;
+        } else if (serializationFormat.equalsIgnoreCase("NTriples")) {
+            rdfFormat = RDFFormat.NTRIPLES;
         } else if (serializationFormat.equalsIgnoreCase("N-Triples")) {
             rdfFormat = RDFFormat.NTRIPLES;
-        } else if (serializationFormat.equalsIgnoreCase("N-Quads")) {
+        } else if (serializationFormat.equalsIgnoreCase("NQuads")) {
             rdfFormat = RDFFormat.NQUADS;
         } else if (serializationFormat.equalsIgnoreCase("N3")) {
             rdfFormat = RDFFormat.N3;
-        } else if (serializationFormat.equalsIgnoreCase("RDF/XML")) {
+        } else if (serializationFormat.equalsIgnoreCase("RDFXML")) {
             rdfFormat = RDFFormat.RDFXML;
-        } else if (serializationFormat.equalsIgnoreCase("RDF/JSON")) {
+        } else if (serializationFormat.equalsIgnoreCase("RDFJSON")) {
             rdfFormat = RDFFormat.RDFJSON;
         } else if (serializationFormat.equalsIgnoreCase("Turtle")) {
             rdfFormat = RDFFormat.TURTLE;
         } else {
-            throw new IllegalArgumentException("Warning : unknown serialization format : " + serializationFormat + ", defaulting to N-Quads");
+            throw new IllegalArgumentException("Warning : unknown serialization format : " + serializationFormat + ", defaulting to Turtle");
         }
 
         return rdfFormat;

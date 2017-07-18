@@ -3,6 +3,7 @@ package org.hobbit.spatialbenchmark.platformConnection;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -10,102 +11,50 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
+import org.hobbit.core.Constants;
 import org.hobbit.core.components.AbstractEvaluationModule;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.vocab.HOBBIT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EvaluationModule extends AbstractEvaluationModule {
 
-    /* Experiment key */
-    private String EVALUATION_PARAMETER_KEY; // NUMBER OF BATCHES
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvaluationModule.class);
 
     private Property EVALUATION_RECALL = null;
     private Property EVALUATION_PRECISION = null;
     private Property EVALUATION_FMEASURE = null;
+    private Property EVALUATION_TIME_PERFORMANCE = null;
 
     private Model finalModel = ModelFactory.createDefaultModel();
 
-    private int totalTruePositives = 0;
-    private int totalFalsePositives = 0;
-    private int totalFalseNegatives = 0;
+    private int truePositives = 0;
+    private int falsePositives = 0;
+    private int falseNegatives = 0;
 
-    private double sumTaskDelay = 0;
-
-    private int taskCounter = 0;
+//    private double time_perfomance = 0;
+    public long time_performance = 0;
 
     private boolean flag = true;
 
-    /* Setters and Getters */
-    public String getEVALUATION_PARAMETER_KEY() {
-        return EVALUATION_PARAMETER_KEY;
-    }
-
-    public void setEVALUATION_PARAMETER_KEY(String eVALUATION_PARAMETER_KEY) {
-        EVALUATION_PARAMETER_KEY = eVALUATION_PARAMETER_KEY;
-    }
-
-    private Property EVALUATION_AVERAGE_TASK_DELAY = null;
-
-    public Property getEVALUATION_AVERAGE_TASK_DELAY() {
-        return EVALUATION_AVERAGE_TASK_DELAY;
-    }
-
-    public void setEVALUATION_AVERAGE_TASK_DELAY(Property eVALUATION_AVERAGE_TASK_DELAY) {
-        EVALUATION_AVERAGE_TASK_DELAY = eVALUATION_AVERAGE_TASK_DELAY;
-    }
-
-    public Property getEVALUATION_RECALL() {
-        return EVALUATION_RECALL;
-    }
-
-    public void setEVALUATION_RECALL(Property eVALUATION_RECALL) {
-        EVALUATION_RECALL = eVALUATION_RECALL;
-    }
-
-    public Property getEVALUATION_PRECISION() {
-        return EVALUATION_PRECISION;
-    }
-
-    public void setEVALUATION_PRECISION(Property eVALUATION_PRECISION) {
-        EVALUATION_PRECISION = eVALUATION_PRECISION;
-    }
-
-    public Property getEVALUATION_FMEASURE() {
-        return EVALUATION_FMEASURE;
-    }
-
-    public void setEVALUATION_FMEASURE(Property eVALUATION_FMEASURE) {
-        EVALUATION_FMEASURE = eVALUATION_FMEASURE;
-    }
-
-    public boolean isFlag() {
-        return flag;
-    }
-
-    public void setFlag(boolean flag) {
-        this.flag = flag;
-    }
-
     @Override
     public void init() throws Exception {
+        LOGGER.info("Initializing Evaluation Module started...");
         super.init();
 
         Map<String, String> env = System.getenv();
-        if (!env.containsKey(PlatformConstants.EVALUATION_PARAMETER_KEY)) {
-            throw new IllegalArgumentException("Couldn't get \"" + PlatformConstants.EVALUATION_PARAMETER_KEY
+
+        /* time performance */
+        if (!env.containsKey(PlatformConstants.EVALUATION_TIME_PERFORMANCE)) {
+            throw new IllegalArgumentException("Couldn't get \"" + PlatformConstants.EVALUATION_TIME_PERFORMANCE
                     + "\" from the environment. Aborting.");
         }
-        EVALUATION_PARAMETER_KEY = env.get(PlatformConstants.EVALUATION_PARAMETER_KEY);
+        EVALUATION_TIME_PERFORMANCE = this.finalModel
+                .createProperty(env.get(PlatformConstants.EVALUATION_TIME_PERFORMANCE));
 
-        /* average task delay */
-        if (!env.containsKey(PlatformConstants.EVALUATION_AVERAGE_TASK_DELAY)) {
-            throw new IllegalArgumentException("Couldn't get \"" + PlatformConstants.EVALUATION_AVERAGE_TASK_DELAY
-                    + "\" from the environment. Aborting.");
-        }
-        EVALUATION_AVERAGE_TASK_DELAY = this.finalModel
-                .createProperty(env.get(PlatformConstants.EVALUATION_AVERAGE_TASK_DELAY));
-
+        LOGGER.info("EVALUATION_TIME_PERFORMANCE setted");
         /* recall */
         if (!env.containsKey(PlatformConstants.EVALUATION_RECALL)) {
             throw new IllegalArgumentException("Couldn't get \"" + PlatformConstants.EVALUATION_RECALL
@@ -113,6 +62,8 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
         EVALUATION_RECALL = this.finalModel
                 .createProperty(env.get(PlatformConstants.EVALUATION_RECALL));
+
+        LOGGER.info("EVALUATION_RECALL setted");
 
         /* precision */
         if (!env.containsKey(PlatformConstants.EVALUATION_PRECISION)) {
@@ -122,6 +73,8 @@ public class EvaluationModule extends AbstractEvaluationModule {
         EVALUATION_PRECISION = this.finalModel
                 .createProperty(env.get(PlatformConstants.EVALUATION_PRECISION));
 
+        LOGGER.info("EVALUATION_PRECISION setted");
+
         /* fmeasure */
         if (!env.containsKey(PlatformConstants.EVALUATION_FMEASURE)) {
             throw new IllegalArgumentException("Couldn't get \"" + PlatformConstants.EVALUATION_FMEASURE
@@ -129,107 +82,161 @@ public class EvaluationModule extends AbstractEvaluationModule {
         }
         EVALUATION_FMEASURE = this.finalModel
                 .createProperty(env.get(PlatformConstants.EVALUATION_FMEASURE));
-    }
 
-    @Override
-    public void receiveCommand(byte command, byte[] data) {
-        System.out.println("EvaluationModule receiveCommand");
-        this.receiveCommand(command, data);
+        LOGGER.info("EVALUATION_FMEASURE setted");
+
+        LOGGER.info("Initializing Evaluation Module ended...");
+
     }
 
     @Override
     protected void evaluateResponse(byte[] expectedData, byte[] receivedData, long taskSentTimestamp,
             long responseReceivedTimestamp) throws Exception {
-        System.out.println("EvaluationModule evaluateResponse");
 
-        taskCounter++;
+        time_performance = responseReceivedTimestamp - taskSentTimestamp;
+        if (time_performance < 0) {
+            time_performance = 0;
+        }
+        LOGGER.info("time_performance in ms: " + time_performance);
 
-        long delay = responseReceivedTimestamp - taskSentTimestamp;
-        this.sumTaskDelay += delay;
+//        this.sumTaskDelay += delay;
+        //expected data come from data generator and received data come from system adapter
+        //make sure you know that the results coming from the system adapter have the same format
         // read expected data
-        ByteBuffer expectedBuffer = ByteBuffer.wrap(expectedData);
-        HashMap<String, String> expected = new HashMap<String, String>();
-        while (expectedBuffer.remaining() > 0) {
-            String answer = RabbitMQUtils.readString(expectedBuffer);
-            String source = answer.split(" ")[0];
-            String relation = answer.split(" ")[1];
-            String target = answer.split(" ")[2];
-            expected.put(source, target);
+        LOGGER.info("Read expected data");
+        ByteBuffer buffer = ByteBuffer.wrap(expectedData);
+        String format = RabbitMQUtils.readString(buffer);
+        String path = RabbitMQUtils.readString(buffer);
+
+        byte[] expected = RabbitMQUtils.readByteArray(buffer);
+
+        //handle empty results! 
+        String[] dataAnswers = null;
+        if (expected.length > 0) {
+            dataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
+        }
+
+        HashMap<String, String> expectedMap = new HashMap<String, String>();
+        if (dataAnswers != null) {
+            for (String answer : dataAnswers) {
+                answer = answer.trim();
+                if (answer != null && !answer.equals("")) {
+                    String source_temp = answer.split(">")[0];
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
+                    String target_temp = answer.split(">")[1];
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    expectedMap.put(source, target);
+                }
+//            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
+//            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
+//                LOGGER.info("expected data into the map: " + expectedMap.toString());
+            }
         }
 
         // read received data
-        ByteBuffer receivedBuffer = ByteBuffer.wrap(expectedData);
-        HashMap<String, String> received = new HashMap<String, String>();
-        while (receivedBuffer.remaining() > 0) {
-            String answer = RabbitMQUtils.readString(receivedBuffer);
-            String source = answer.split(" ")[0];
-            String relation = answer.split(" ")[1];
-            String target = answer.split(" ")[2];
-            received.put(source, target); 
+        LOGGER.info("Read received data");
+        //handle empty results! 
+        String[] receivedDataAnswers = null;
+        if (receivedData.length > 0) {
+            receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
 
-        int truePositives = 0;
-        int falsePositives = 0;
-        int falseNegatives = 0;
+        HashMap<String, String> receivedMap = new HashMap<String, String>();
+        if (receivedDataAnswers != null) {
+            for (String answer : receivedDataAnswers) {
 
-        boolean found = false;
-        boolean isPositive = true;
-        for (Map.Entry<String, String> entry : received.entrySet()) {
-            String variable = entry.getKey();
-            String receivedAnswer = entry.getValue();
-            if (!receivedAnswer.equals(expected.get(variable))) {
-                isPositive = false;
-                break;
+                answer = answer.trim();
+                answer = answer.replaceAll("<http://www.w3.org/2002/07/owl#sameAs>", "");
+                if (answer != null && !answer.equals("")) {
+                    String source_temp = answer.split(">")[0];
+                    String source = source_temp.substring(source_temp.indexOf("<") + 1);
+
+                    String target_temp = answer.split(">")[1];
+                    String target = target_temp.substring(target_temp.indexOf("<") + 1);
+                    receivedMap.put(source, target);
+                }
+//            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
+//            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
+//                LOGGER.info("received data into the map: " + receivedMap.toString());
             }
         }
-        if (isPositive == true) {
-            truePositives++;
-            found = true;
-        } else if (isPositive == false) {
-            falsePositives++;
-        }
-        if (found == false) {
-            falseNegatives++;
-        }
-        System.out.println("this.totalFalseNegatives " + this.totalFalseNegatives);
-        System.out.println("this.totalFalsePositives " + this.totalFalsePositives);
-        System.out.println("this.totalTruePositives " + this.totalTruePositives);
-        this.totalFalseNegatives += falseNegatives;
-        this.totalFalsePositives += falsePositives;
-        this.totalTruePositives += truePositives;
 
+        //TODO: check this again
+        if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
+            for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+                String expectedKey = expectedEntry.getKey();
+                String expectedValue = expectedEntry.getValue();
+
+                boolean tpFound = false;
+                for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
+                    tpFound = false;
+                    String receivedKey = receivedEntry.getKey();
+                    String receivedValue = receivedEntry.getValue();
+
+                    if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
+                        tpFound = true;
+                        break;
+                    }
+                }
+                if (tpFound == true) {
+                    truePositives++;
+                } else {
+                    falseNegatives++;
+                }
+            }
+            // what is not TP in the received answers, is a FP
+            falsePositives = receivedMap.size() - truePositives;
+
+            LOGGER.info("truePositives " + truePositives);
+            LOGGER.info("falsePositives " + falsePositives);
+            LOGGER.info("falseNegatives " + falseNegatives);
+        }
     }
 
     @Override
-    protected Model summarizeEvaluation() throws Exception {
-        System.out.println("EvaluationModule summarizeEvaluation");
+    public Model summarizeEvaluation() throws Exception {
+        LOGGER.info("Summary of Evaluation begins.");
 
-        float averageTaskDelay = (float) this.sumTaskDelay / this.taskCounter;
+        if (this.experimentUri == null) {
+            Map<String, String> env = System.getenv();
+            this.experimentUri = env.get(Constants.HOBBIT_EXPERIMENT_URI_KEY);
+        }
 
-        // compute macro and micro averages KPIs
-        float microAverageRecall = (float) this.totalTruePositives
-                / (float) (this.totalTruePositives + this.totalFalseNegatives);
-        float microAveragePrecision = (float) this.totalTruePositives
-                / (float) (this.totalTruePositives + this.totalFalsePositives);
-        float microAverageFmeasure = (float) (2.0 * microAverageRecall * microAveragePrecision)
-                / (float) (microAverageRecall + microAveragePrecision);
+        double recall = 0.0;
+        double precision = 0.0;
+        double fmeasure = 0.0;
+
+        if ((double) (this.truePositives + this.falseNegatives) > 0.0) {
+            recall = (double) this.truePositives / (double) (this.truePositives + this.falseNegatives);
+        }
+        if ((double) (this.truePositives + this.falsePositives) > 0.0) {
+            precision = (double) this.truePositives / (double) (this.truePositives + this.falsePositives);
+        }
+        if ((double) (recall + precision) > 0.0) {
+            fmeasure = (double) (2.0 * recall * precision) / (double) (recall + precision);
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////////
-        Resource experiment = this.finalModel
-                .createResource("http://w3id.org/hobbit/experiments#" + EVALUATION_PARAMETER_KEY);
+        Resource experiment = this.finalModel.createResource(experimentUri);
         this.finalModel.add(experiment, RDF.type, HOBBIT.Experiment);
 
-        Literal averageTaskDelayLiteral = this.finalModel.createTypedLiteral(new Float(averageTaskDelay));
-        this.finalModel.add(experiment, this.EVALUATION_AVERAGE_TASK_DELAY, averageTaskDelayLiteral);
+        Literal timePerformanceLiteral = this.finalModel.createTypedLiteral(this.time_performance, XSDDatatype.XSDlong);
+        this.finalModel.add(experiment, this.EVALUATION_TIME_PERFORMANCE, timePerformanceLiteral);
 
-        Literal microAverageRecallLiteral = this.finalModel.createTypedLiteral(new Float(microAverageRecall));
-        this.finalModel.add(experiment, this.EVALUATION_RECALL, microAverageRecallLiteral);
+        Literal recallLiteral = this.finalModel.createTypedLiteral(recall,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_RECALL, recallLiteral);
 
-        Literal microAveragePrecisionLiteral = this.finalModel.createTypedLiteral(new Float(microAveragePrecision));
-        this.finalModel.add(experiment, this.EVALUATION_PRECISION, microAveragePrecisionLiteral);
+        Literal precisionLiteral = this.finalModel.createTypedLiteral(precision,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_PRECISION, precisionLiteral);
 
-        Literal microAverageFmeasureLiteral = this.finalModel.createTypedLiteral(new Float(microAverageFmeasure));
-        this.finalModel.add(experiment, this.EVALUATION_FMEASURE, microAverageFmeasureLiteral);
+        Literal fmeasureLiteral = this.finalModel.createTypedLiteral(fmeasure,
+                XSDDatatype.XSDdouble);
+        this.finalModel.add(experiment, this.EVALUATION_FMEASURE, fmeasureLiteral);
+
+        LOGGER.info("Summary of Evaluation is over.");
 
         return this.finalModel;
     }

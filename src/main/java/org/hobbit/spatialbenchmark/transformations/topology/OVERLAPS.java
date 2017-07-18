@@ -25,15 +25,17 @@ public class OVERLAPS implements SpatialTransformation {
     GeometryFactory geometryFactory = new GeometryFactory();
     WKTReader reader = new WKTReader(geometryFactory);
 
-    @Override
     public Object execute(Object arg) {
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
+            result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
-                CreateOverlapsGeometryObject instance = new CreateOverlapsGeometryObject(line, GeometryType.GeometryTypes.LineString);
-                result = instance.generateGeometry();
+                if (line.getCoordinates().length >= 2) {
+                    CreateOverlapsGeometryObject instance = new CreateOverlapsGeometryObject(line, GeometryType.GeometryTypes.LineString);
+                    result = instance.generateGeometry();
+                }
             }
 
         } catch (ParseException ex) {

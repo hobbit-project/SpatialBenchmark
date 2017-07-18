@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Silk>
+
+<Prefixes>
+	<Prefix namespace="http://www.w3.org/1999/02/22-rdf-syntax-ns#" id="rdf"></Prefix>
+	<Prefix namespace="http://www.w3.org/2002/07/owl#" id="owl"></Prefix>
+	<Prefix namespace="http://www.tomtom.com/ontologies/traces#" id="tomtom"></Prefix>
+	<Prefix namespace="http://strdf.di.uoa.gr/ontology#" id="strdf"></Prefix>
+</Prefixes>
+
+<DataSources>
+	<DataSource id="source" type="file">
+		<Param name="file" value="source-clear-for-silk.nt"/>
+		<Param name="format" value="N-TRIPLE"/>
+	</DataSource>
+
+	<DataSource id="target" type="file">
+		<Param name="file" value="target-clear-for-silk.nt"/>
+		<Param name="format" value="N-TRIPLE"/>
+	</DataSource>
+</DataSources>	
+<Blocking />
+<Interlinks>
+	<Interlink id="source_target_contains">
+		<LinkType>
+			strdf:crosses
+		</LinkType>
+
+		<SourceDataset dataSource="source" var="s">
+			<RestrictTo>
+				?a ?p ?v .
+        		</RestrictTo>
+		</SourceDataset>
+
+		<TargetDataset dataSource="target" var="t">
+			 <RestrictTo>
+          			?b ?p ?v .
+        		 </RestrictTo>
+		</TargetDataset>
+<!--SELECT * WHERE { ?t "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" "http://www.tomtom.com/ontologies/traces#Trace" .}-->
+		<LinkageRule>
+			<Compare required="true" weight="1" metric="CrossesMetric" indexing="true">
+				<Input id="unnamed_1" path="?a/strdf:hasGeometry"/>
+            			<Input id="unnamed_2" path="?b/strdf:hasGeometry"/>					
+			</Compare>
+		</LinkageRule>
+		<Filter />
+
+	</Interlink>		
+</Interlinks>
+
+		<Outputs>
+		    <Dataset id="unnamed_3" type="file">
+		      <Param name="file" value="mappings.nt"/>
+		      <Param name="format" value="N-TRIPLE"/>
+		    </Dataset>
+		  </Outputs>
+</Silk>
+
+
+
