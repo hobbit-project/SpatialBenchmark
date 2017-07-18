@@ -17,6 +17,7 @@ import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
+import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,6 +152,10 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
             LOGGER_SILK.info(IOUtils.toString(p.getInputStream()));
             LOGGER_SILK.info(IOUtils.toString(p.getErrorStream()));
+
+            //delete cache folder 
+            File folder = new File("./cache/");
+            FileUtil.removeDirectory(folder);
 
             LOGGER.info("silkController finished..");
 

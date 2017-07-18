@@ -130,7 +130,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
 //            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
-                LOGGER.info("expected data into the map: " + expectedMap.toString());
+//                LOGGER.info("expected data into the map: " + expectedMap.toString());
             }
         }
 
@@ -158,7 +158,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
                 }
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 //            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
-                LOGGER.info("received data into the map: " + receivedMap.toString());
+//                LOGGER.info("received data into the map: " + receivedMap.toString());
             }
         }
 

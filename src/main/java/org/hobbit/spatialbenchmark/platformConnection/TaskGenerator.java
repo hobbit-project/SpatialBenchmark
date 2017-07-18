@@ -95,11 +95,12 @@ public class TaskGenerator extends AbstractTaskGenerator {
             byte[] expectedAnswerData = task.getExpectedAnswers();
 
             // Send the task to the system (and store the timestamp)
-            long timestamp = System.currentTimeMillis();
+            
             sendTaskToSystemAdapter(taskId, taskData);
             LOGGER.info("Task " + taskId + " sent to System Adapter.");
 
             // Send the expected answer to the evaluation store
+            long timestamp = System.currentTimeMillis();
             sendTaskToEvalStorage(taskId, timestamp, expectedAnswerData);
             LOGGER.info("Expected answers of task " + taskId + " sent to Evaluation Storage.");
 
