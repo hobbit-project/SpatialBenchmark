@@ -39,6 +39,7 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
     private String receivedGeneratedDataFilePath;
+    private String receivedGeneratedTaskFilePath;
     private String dataFormat;
     private String taskFormat;
     private String resultsFile;
@@ -83,41 +84,49 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Starting receiveGeneratedTask..");
         LOGGER.info("Task " + taskId + " received from task generator");
         long time = System.currentTimeMillis();
+        ByteBuffer taskBuffer = ByteBuffer.wrap(data);
+        // read the relation
+        String taskRelation = RabbitMQUtils.readString(taskBuffer);
+        LOGGER.info("taskRelation " + taskRelation);
+
+        // read the file path
+        taskFormat = RabbitMQUtils.readString(taskBuffer);
+        LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
+        time = System.currentTimeMillis();
+
+        // Start a parallel thread that receives the data
+        Thread receiverThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
+                    receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
+                } catch (Exception ex) {
+                    LOGGER.error("Exception while receiving data of task.", ex);
+                }
+            }
+        });
+        // start the thread and directly terminate the receiver since it should
+        // already find all the data in its queue
+        receiverThread.start();
+        targetReceiver.terminate();
+        // wait for the receiver thread to finish its work
         try {
+            receiverThread.join();
+        } catch (InterruptedException e1) {
+            LOGGER.warn("Interrupted while waiting for receiving task data.");
+        }
+        LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
+        time = System.currentTimeMillis();
 
-            ByteBuffer taskBuffer = ByteBuffer.wrap(data);
-            // read the relation
-            String taskRelation = RabbitMQUtils.readString(taskBuffer);
-            LOGGER.info("taskRelation " + taskRelation);
-
-            // read the file path
-            taskFormat = RabbitMQUtils.readString(taskBuffer);
-            String receivedGeneratedTaskFilePath = null;
-            LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
-            time = System.currentTimeMillis();
-            try {
-
-                String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
-                receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
-
-            } catch (ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
-                java.util.logging.Logger.getLogger(TimeMeasuringSystemAdapter.class.getName()).log(Level.SEVERE, null,
-                        ex);
-            }
-            LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
-            time = System.currentTimeMillis();
-
-            byte[][] resultsArray = new byte[1][];
-            resultsArray[0] = new byte[0];
-            byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
-            try {
-                sendResultToEvalStorage(taskId, results);
-                LOGGER.info("Results sent to evaluation storage. It took {}ms.", System.currentTimeMillis() - time);
-            } catch (IOException e) {
-                LOGGER.error("Exception while sending storage space cost to evaluation storage.", e);
-            }
-        } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(TimeMeasuringSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        byte[][] resultsArray = new byte[1][];
+        resultsArray[0] = new byte[0];
+        byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
+        try {
+            sendResultToEvalStorage(taskId, results);
+            LOGGER.info("Results sent to evaluation storage. It took {}ms.", System.currentTimeMillis() - time);
+        } catch (IOException e) {
+            LOGGER.error("Exception while sending storage space cost to evaluation storage.", e);
         }
     }
 
@@ -126,10 +135,9 @@ public class TimeMeasuringSystemAdapter extends AbstractSystemAdapter {
         if (Commands.DATA_GENERATION_FINISHED == command) {
             LOGGER.info("my receiveCommand for source");
             sourceReceiver.terminate();
-
-        } else if (Commands.TASK_GENERATION_FINISHED == command) {
-            LOGGER.info("my receiveCommand for target");
-            targetReceiver.terminate();
+            // } else if (Commands.TASK_GENERATION_FINISHED == command) {
+            // LOGGER.info("my receiveCommand for target");
+            // targetReceiver.terminate();
         }
         super.receiveCommand(command, data);
     }
