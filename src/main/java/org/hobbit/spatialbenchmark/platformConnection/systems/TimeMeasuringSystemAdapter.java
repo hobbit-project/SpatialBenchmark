@@ -7,26 +7,14 @@ package org.hobbit.spatialbenchmark.platformConnection.systems;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.ShutdownSignalException;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.logging.Level;
-import static org.aksw.limes.core.controller.Controller.getConfig;
-import static org.aksw.limes.core.controller.Controller.getMapping;
-import static org.aksw.limes.core.controller.Controller.parseCommandLine;
 import org.aksw.limes.core.controller.ResultMappings;
-import org.aksw.limes.core.io.config.Configuration;
-import org.aksw.limes.core.io.serializer.ISerializer;
-import org.aksw.limes.core.io.serializer.SerializerFactory;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.io.FileUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
 import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
-import org.hobbit.spatialbenchmark.util.FileUtil;
-import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
