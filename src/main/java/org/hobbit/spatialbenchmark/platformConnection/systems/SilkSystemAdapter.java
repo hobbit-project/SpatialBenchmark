@@ -133,15 +133,15 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("Started silkController.. ");
             String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
             String newConfig = "./configs/topologicalConfigs/silkNewConfig" + relation + ".xml";
-
+//Supported formats are: 'RDF/XML', 'N-Triples', 'N-Quads', 'Turtle'
             try {
-                resultsFile = "./datasets/SilkSystemAdapterResults/" + relation + "mappings." +"nt";//+ SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
+                resultsFile = "./datasets/SilkSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
 
                 String content = FileUtils.readFileToString(new File(config), "UTF-8");
                 content = content.replaceAll("source-clear-for-silk.nt", "../../" + source);
                 content = content.replaceAll("target-clear-for-silk.nt", "../../" + target);
-                content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
-                content = content.replaceAll("N-TRIPLES", "N-TRIPLE");
+//                content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
+//                content = content.replaceAll("N-TRIPLES", "N-TRIPLE");
 
 //  TODO             CORRECT FORMAT.. Now only gets nt, find how the have defined it
 //or maybe they only return .nt resutls! I should fix that if so
