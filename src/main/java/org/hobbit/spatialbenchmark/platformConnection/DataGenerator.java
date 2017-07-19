@@ -313,12 +313,12 @@ public class DataGenerator extends AbstractDataGenerator {
                 i = 0;
                 for (File file : files) {
                     double bytes = file.length();
-                    LOGGER.info("file from mimicking: " + file.getName());
-                    LOGGER.info("file bytes " + bytes);
+//                    LOGGER.info("file from mimicking: " + file.getName());
+//                    LOGGER.info("file bytes " + bytes);
 //                if (file.isFile()) {
                     if (bytes < 65536) {
                         i++;
-                        LOGGER.info("bytes < 65536 " + i);
+//                        LOGGER.info("bytes < 65536 " + i);
                     } else {
                         file.delete();
                     }
