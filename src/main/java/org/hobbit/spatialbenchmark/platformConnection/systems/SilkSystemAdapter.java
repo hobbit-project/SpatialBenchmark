@@ -69,7 +69,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("Received data from receiveGeneratedData..");
 
         } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
-            java.util.logging.Logger.getLogger(LimesSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(SilkSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
