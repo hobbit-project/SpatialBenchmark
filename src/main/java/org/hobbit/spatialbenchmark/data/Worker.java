@@ -97,12 +97,13 @@ public class Worker extends AbstractWorker {
         if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
             numOfInstances = collectedFiles.size();
         }
+        LOGGER.info("numOfInstances from Worker" +numOfInstances);
         try {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
             for (int i = 0; i < numOfInstances; i++) {
-                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
+//                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
 
                 RDFFormat format = RDFFormat.forFileName(collectedFiles.get(i).getName());
 
@@ -111,7 +112,7 @@ public class Worker extends AbstractWorker {
                 repository.initialize();
                 con = repository.getConnection();
                 con.add(collectedFiles.get(i), "", format);
-                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
+//                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"

@@ -1,7 +1,9 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 
@@ -116,22 +118,36 @@ public class EvaluationModule extends AbstractEvaluationModule {
             dataAnswers = RabbitMQUtils.readString(expected).split(System.getProperty("line.separator"));
         }
 
-        HashMap<String, String> expectedMap = new HashMap<String, String>();
+        HashMap<String, List<String>> expectedMap = new HashMap<String, List<String>>();
         if (dataAnswers != null) {
+
+            List values = null;
             for (String answer : dataAnswers) {
                 answer = answer.trim();
+                LOGGER.info("expected answer " + answer);
                 if (answer != null && !answer.equals("")) {
                     String source_temp = answer.split(">")[0];
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
 
                     String target_temp = answer.split(">")[1];
                     String target = target_temp.substring(target_temp.indexOf("<") + 1);
-                    expectedMap.put(source, target);
+
+                    if (!expectedMap.containsKey(source)) {
+                        values = new ArrayList<String>();
+                        values.add(target);
+
+                    } else {
+                        values.add(target);
+                    }
+
+                    //todo i want n-n mapping
+                    expectedMap.put(source, values);
                 }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
-            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
-//                LOGGER.info("expected data into the map: " + expectedMap.toString());
             }
+
+//            LOGGER.info("expected data into the map: " + expectedMap.toString());
+            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
         }
 
         // read received data
@@ -142,8 +158,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
 
-        HashMap<String, String> receivedMap = new HashMap<String, String>();
+        HashMap<String, List<String>> receivedMap = new HashMap<String, List<String>>();
         if (receivedDataAnswers != null) {
+            List values = null;
             for (String answer : receivedDataAnswers) {
 
                 answer = answer.trim();
@@ -154,36 +171,65 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
                     String target_temp = answer.split(">")[1];
                     String target = target_temp.substring(target_temp.indexOf("<") + 1);
-                    receivedMap.put(source, target);
+
+                    if (!receivedMap.containsKey(source)) {
+                        values = new ArrayList<String>();
+                        values.add(target);
+
+                    } else {
+                        values.add(target);
+                    }
+
+                    //todo i want n-n mapping
+                    receivedMap.put(source, values);
+
                 }
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
-            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
-//                LOGGER.info("received data into the map: " + receivedMap.toString());
+
             }
+
+//            LOGGER.info("received data into the map: " + receivedMap.toString());
+            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
         }
 
         //TODO: check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
-            for (Map.Entry<String, String> expectedEntry : expectedMap.entrySet()) {
+            for (Map.Entry<String, List<String>> expectedEntry : expectedMap.entrySet()) {
                 String expectedKey = expectedEntry.getKey();
-                String expectedValue = expectedEntry.getValue();
+                List<String> expectedValue = expectedEntry.getValue();
 
                 boolean tpFound = false;
-                for (Map.Entry<String, String> receivedEntry : receivedMap.entrySet()) {
-                    tpFound = false;
-                    String receivedKey = receivedEntry.getKey();
-                    String receivedValue = receivedEntry.getValue();
+                for (Map.Entry<String, List<String>> receivedEntry : receivedMap.entrySet()) {
 
-                    if (expectedKey.equals(receivedKey) && expectedValue.equals(receivedValue)) {
-                        tpFound = true;
-                        break;
+                    String receivedKey = receivedEntry.getKey();
+                    List<String> receivedValue = receivedEntry.getValue();
+
+                    if (expectedKey.equals(receivedKey)) {
+                        LOGGER.info("expectedKey.equals(receivedKey)");
+                        for (String answer : expectedValue) {
+                            tpFound = false;
+                            LOGGER.info("answer " + answer + " receivedValue " + receivedValue.toString());
+                            if (receivedValue.contains(answer)) {
+                                tpFound = true;
+                                break;
+                            }
+
+                        }
+                        if (tpFound == true) {
+                            truePositives++;
+                        } else {
+                            falseNegatives++;
+                        }
+
+//                        tpFound = true;
+//                        break;
                     }
                 }
-                if (tpFound == true) {
-                    truePositives++;
-                } else {
-                    falseNegatives++;
-                }
+//                if (tpFound == true) {
+//                    truePositives++;
+//                } else {
+//                    falseNegatives++;
+//                }
             }
             // what is not TP in the received answers, is a FP
             falsePositives = receivedMap.size() - truePositives;

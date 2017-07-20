@@ -38,17 +38,6 @@ public class RADONController extends Controller {
 
         CommandLine cmd = parseCommandLine(args);
         Configuration config = getConfig(cmd);
-//        String sourceFileTmp = config.getSourceInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
-//        String targetFileTmp = config.getTargetInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
-//        
-//        String sourceFile = config.getSourceInfo().getEndpoint() + "TMP." + rdfFormat.getDefaultFileExtension();
-//        String targetFile = config.getTargetInfo().getEndpoint() + "TMP." + rdfFormat.getDefaultFileExtension();
-//             
-//        LOGGER.info("Triming instances longer than 64 kbyte..");
-//        Runtime.getRuntime().exec("awk 'length($0) < 65535'"+sourceFileTmp+" > " + sourceFile);
-//
-//        Runtime.getRuntime().exec("awk 'length($0) < 65535'"+targetFileTmp+" > " + targetFile);
-
         String sourceFile = config.getSourceInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
         String targetFile = config.getTargetInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
       
