@@ -39,7 +39,7 @@
 		</TargetDataset>
 <!--SELECT * WHERE { ?t "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" "http://www.tomtom.com/ontologies/traces#Trace" .}-->
 		<LinkageRule>
-			<Compare required="true" weight="1" metric="TouchesMetric" indexing="true">
+			<Compare required="true" weight="10.0" metric="TouchesMetric" indexing="true">
 				<Input id="unnamed_1" path="?a/strdf:hasGeometry"/>
             			<Input id="unnamed_2" path="?b/strdf:hasGeometry"/>					
 			</Compare>
