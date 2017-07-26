@@ -124,7 +124,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
             List values = null;
             for (String answer : dataAnswers) {
                 answer = answer.trim();
-                LOGGER.info("expected answer " + answer);
+//                LOGGER.info("expected answer " + answer);
                 if (answer != null && !answer.equals("")) {
                     String source_temp = answer.split(">")[0];
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
@@ -205,10 +205,10 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     List<String> receivedValue = receivedEntry.getValue();
 
                     if (expectedKey.equals(receivedKey)) {
-                        LOGGER.info("expectedKey.equals(receivedKey)");
+//                        LOGGER.info("expectedKey.equals(receivedKey)");
                         for (String answer : expectedValue) {
                             tpFound = false;
-                            LOGGER.info("answer " + answer + " receivedValue " + receivedValue.toString());
+//                            LOGGER.info("answer " + answer + " receivedValue " + receivedValue.toString());
                             if (receivedValue.contains(answer)) {
                                 tpFound = true;
                                 break;
@@ -220,16 +220,8 @@ public class EvaluationModule extends AbstractEvaluationModule {
                         } else {
                             falseNegatives++;
                         }
-
-//                        tpFound = true;
-//                        break;
                     }
                 }
-//                if (tpFound == true) {
-//                    truePositives++;
-//                } else {
-//                    falseNegatives++;
-//                }
             }
             // what is not TP in the received answers, is a FP
             falsePositives = receivedMap.size() - truePositives;

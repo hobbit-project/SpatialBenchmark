@@ -344,7 +344,8 @@ public class DataGenerator extends AbstractDataGenerator {
 
 //    public void runMimicking() {
 //        LOGGER.info("Running mimicking algorithm ");
-//        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+////        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+//        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator/64kb-traces");
 //
 //        try {
 //            String[] TomTomDataArguments = new String[3];
@@ -374,11 +375,11 @@ public class DataGenerator extends AbstractDataGenerator {
 //        LOGGER.info("Mimicking data has been received.");
 //
 //    }
-    @Override
-    public void close() throws IOException {
-        LOGGER.info("Closing Data Generator...");
-        super.close();
-        LOGGER.info("Data Generator closed successfully.");
-    }
+//    @Override
+//    public void close() throws IOException {
+//        LOGGER.info("Closing Data Generator...");
+//        super.close();
+//        LOGGER.info("Data Generator closed successfully.");
+//    }
 
 }
