@@ -17,7 +17,7 @@ COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
 
 COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
 
-COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/GoldStandards/
+COPY datasets/GoldStandards/ /SpatialBenchmark/datasets/GoldStandards/
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
