@@ -38,6 +38,7 @@ public class TaskGenerator extends AbstractTaskGenerator {
 
         LOGGER.info("Initializing Task Generators...");
         super.init();
+        targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
         LOGGER.info("Task Generators initialized successfully.");
     }
 
@@ -49,7 +50,7 @@ public class TaskGenerator extends AbstractTaskGenerator {
             // number of all task generators running in parallel.
 //        int dataGeneratorId = getGeneratorId();
 //        int numberOfGenerators = getNumberOfGenerators();
-            targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
+//            targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
 
             String[] receivedFiles_target = targetReceiver.receiveData("./datasets/TargetDatasets/");
 

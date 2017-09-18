@@ -1,11 +1,9 @@
 package org.hobbit.spatialbenchmark.data;
 
-import java.io.BufferedReader;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
