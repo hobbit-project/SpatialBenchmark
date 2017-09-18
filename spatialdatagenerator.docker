@@ -4,6 +4,8 @@ ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.
 
 WORKDIR /SpatialBenchmark
 
+COPY lib/* /SpatialBenchmark/lib/
+
 COPY test.properties /SpatialBenchmark/
 
 COPY definitions.properties /SpatialBenchmark/
@@ -16,7 +18,7 @@ COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
 
 COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
 
-COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/GoldStandards/
+COPY datasets/GoldStandards/ /SpatialBenchmark/datasets/GoldStandards/
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
