@@ -6,7 +6,7 @@ WORKDIR /SpatialBenchmark
 
 COPY datasets/* /SpatialBenchmark/datasets/
 
-COPY lib/* /SpatialBenchmark/lib/
+COPY repository/com/vividsolutions/jts/silk/0.1/silk-0.1.jar /SpatialBenchmark/lib/silk.jar
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 

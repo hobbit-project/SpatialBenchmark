@@ -67,7 +67,7 @@ public class DataGenerator extends AbstractDataGenerator {
         reInitializeProperties();
 
         // call mimicking algorithm
-//        runMimicking();
+        runMimicking();
 
         task = new Task(Integer.toString(taskId++), null, null, null);
 
@@ -344,8 +344,8 @@ public class DataGenerator extends AbstractDataGenerator {
 
     public void runMimicking() {
         LOGGER.info("Running mimicking algorithm ");
-//        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
-        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator/64kb-traces");
+        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
+//        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator/64kb-traces");
 
         try {
             String[] TomTomDataArguments = new String[3];

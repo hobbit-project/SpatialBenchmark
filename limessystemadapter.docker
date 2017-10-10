@@ -4,8 +4,6 @@ ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.
 
 WORKDIR /SpatialBenchmark
 
-COPY lib/* /SpatialBenchmark/lib/
-
 COPY datasets/* /SpatialBenchmark/datasets/
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
