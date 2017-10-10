@@ -231,50 +231,6 @@
                     </execution>
                 </executions>
             </plugin>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
-                <executions>
-                    <execution>
-                        <id>install-external</id>
-                        <phase>clean</phase>
-                        
-                        <configuration>                            
-                            <file>${basedir}/lib/jtsExtension.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
-                            <groupId>com.vividsolutions.jts</groupId>
-                            <artifactId>jtsExtension</artifactId>   
-                            <version>0.1</version> 
-                            <packaging>jar</packaging>
-                  
-                        </configuration>
-                    
-                        
-                            
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        
-                        <configuration>                            
-                            <file>${basedir}/lib/silk.jar</file>
-                            <repositoryLayout>default</repositoryLayout>
-                            <artifactId>silk</artifactId>   
-                            <version>0.1</version> 
-                            <packaging>jar</packaging>
-                  
-                        </configuration>                  
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>              
-             
-           
         </plugins>
     </build>
     <name>SpatialBenchmark</name>
