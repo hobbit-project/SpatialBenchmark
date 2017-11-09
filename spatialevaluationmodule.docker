@@ -11,4 +11,4 @@ COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
 COPY datasets/GoldStandards/ /SpatialBenchmark/datasets/GoldStandards/
 
 
-CMD java -Xms100G -Xmx200G -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.EvaluationModule
+CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.EvaluationModule

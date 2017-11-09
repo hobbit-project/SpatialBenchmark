@@ -21,6 +21,6 @@ COPY datasets/GoldStandards/ /SpatialBenchmark/datasets/GoldStandards/
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
-CMD java -Xms100G -Xmx200G -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
+CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
 
 
