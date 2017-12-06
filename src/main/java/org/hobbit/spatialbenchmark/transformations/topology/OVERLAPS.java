@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.create.CreateOverlapsGeometryObject;
-import com.vividsolutions.jts.geom.create.GeometryType;
+import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import java.util.logging.Level;
@@ -26,36 +26,25 @@ public class OVERLAPS implements SpatialTransformation {
 
     GeometryFactory geometryFactory = new GeometryFactory();
     WKTReader reader = new WKTReader(geometryFactory);
-     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
 
-    public Object execute(Object arg) {
+    public Object execute(Object arg, GeometryTypes type) {
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
-            
-//            LOGGER.info("geo.getCoordinates().length: "+geo.getCoordinates().length);
-//            result = null;
+
             result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
                 if (line.getCoordinates().length >= 4) {
-                    CreateOverlapsGeometryObject instance = new CreateOverlapsGeometryObject(line, GeometryType.GeometryTypes.LineString);
+                    CreateOverlapsGeometryObject instance = new CreateOverlapsGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
-//                LOGGER.info("result.equals(geo): "+result.equalsTopo(geo));
             }
-
+//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
-            Logger.getLogger(EQUALS.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(OVERLAPS.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        LOGGER.info("is result null? " + result.isEmpty());
-//        LOGGER.info("result.getCoordinates().length: "+result.getCoordinates().length);
-        
         return result;
     }
 
-    @Override
-    public String print() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

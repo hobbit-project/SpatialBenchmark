@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.create.CreateIntersectsGeometryObject;
-import com.vividsolutions.jts.geom.create.GeometryType;
+import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import java.util.logging.Level;
@@ -25,29 +25,24 @@ public class INTERSECTS implements SpatialTransformation {
     GeometryFactory geometryFactory = new GeometryFactory();
     WKTReader reader = new WKTReader(geometryFactory);
 
-    public Object execute(Object arg) {
+    public Object execute(Object arg, GeometryTypes type) {
         Geometry result = null;
         try {
-        Geometry geo = reader.read(arg.toString());            
-        result = (LineString) geo;
-        
+            Geometry geo = reader.read(arg.toString());
+            result = (LineString) geo;
+
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
                 if (line.getCoordinates().length >= 2) {
-                    CreateIntersectsGeometryObject instance = new CreateIntersectsGeometryObject(line, GeometryType.GeometryTypes.LineString);
+                    CreateIntersectsGeometryObject instance = new CreateIntersectsGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
             }
-
+//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
-            Logger.getLogger(EQUALS.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(INTERSECTS.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
-    }
-
-    @Override
-    public String print() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
