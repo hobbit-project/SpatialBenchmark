@@ -5,6 +5,8 @@
  */
 package org.hobbit.spatialbenchmark.transformations;
 
+import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
+
 
 /**
  *
@@ -12,8 +14,6 @@ package org.hobbit.spatialbenchmark.transformations;
  */
 public interface SpatialTransformation {
 
-    public abstract Object execute(Object arg);
-
-    public String print();
+    public abstract Object execute(Object arg, GeometryTypes type);
 
 }

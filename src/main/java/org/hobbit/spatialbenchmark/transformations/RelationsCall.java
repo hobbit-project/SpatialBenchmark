@@ -5,6 +5,8 @@
  */
 package org.hobbit.spatialbenchmark.transformations;
 
+import com.vividsolutions.jts.geom.create.GeometryType;
+import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
 import org.hobbit.spatialbenchmark.properties.Definitions;
 
 /**
@@ -15,7 +17,9 @@ public class RelationsCall {
 
     private spatialRelation spatialRelationsPerc = spatialRelation.CONTAINS;
     private SpatialTransformation spatialRelationTransformation;
-    private KeepPoints keepPointsPerc = KeepPoints.KEEP;
+    private GeometryTypes geomType;
+    private keepPoints keepPointsPerc = keepPoints.KEEP;
+    private targetGeometry targetGeometryPerc = targetGeometry.LINESTRING;
     private boolean keepPoint;
 
     public RelationsCall() {
@@ -25,11 +29,13 @@ public class RelationsCall {
         EQUALS, DISJOINT, TOUCHES, CONTAINS, COVERS, INTERSECTS, WITHIN, COVERED_BY, CROSSES, OVERLAPS
     }
 
-    private static enum KeepPoints {
+    private static enum keepPoints {
         KEEP, REMOVE
     }
 
-
+    public static enum targetGeometry {
+        LINESTRING, POLYGON
+    }
 
     private void initializeSpatialRelationsEntity() {
         try {
@@ -74,10 +80,26 @@ public class RelationsCall {
         try {
             switch (Definitions.keepPointsAllocation.getAllocation()) {
                 case 0:
-                    this.keepPointsPerc = KeepPoints.KEEP;
+                    this.keepPointsPerc = keepPoints.KEEP;
                     break;
                 case 1:
-                    this.keepPointsPerc = KeepPoints.REMOVE;
+                    this.keepPointsPerc = keepPoints.REMOVE;
+                    break;
+
+            }
+        } catch (IllegalArgumentException iae) {
+            System.err.println("Check transformation percentages");
+        }
+    }
+
+    private void initializeTargetGeometryEntity() {
+        try {
+            switch (Definitions.targetGeometryAllocation.getAllocation()) {
+                case 0:
+                    this.targetGeometryPerc = targetGeometry.LINESTRING;
+                    break;
+                case 1:
+                    this.targetGeometryPerc = targetGeometry.POLYGON;
                     break;
 
             }
@@ -137,6 +159,18 @@ public class RelationsCall {
         }
     }
 
+    public void targetGeometryCases() {
+        initializeTargetGeometryEntity();
+        switch (targetGeometryPerc) {
+            case LINESTRING:
+                geomType = GeometryType.GeometryTypes.LineString;
+                break;
+            case POLYGON:
+                geomType = GeometryType.GeometryTypes.Polygon;
+                break;
+        }
+    }
+
     public SpatialTransformation getSpatialRelationsConfiguration() {
         return spatialRelationTransformation;
     }
@@ -144,4 +178,9 @@ public class RelationsCall {
     public boolean getKeepPoint() {
         return keepPoint;
     }
+    
+    public GeometryTypes getTargetGeometryType() {
+        return geomType;
+    }
+    
 }
