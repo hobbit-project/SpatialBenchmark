@@ -147,8 +147,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
             }
 
 //            LOGGER.info("expected data into the map: " + expectedMap.toString());
-            LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
         }
+
+        LOGGER.info("expected data into the map, Map size: " + expectedMap.size());
 
         // read received data
         LOGGER.info("Read received data");
@@ -189,8 +190,9 @@ public class EvaluationModule extends AbstractEvaluationModule {
             }
 
 //            LOGGER.info("received data into the map: " + receivedMap.toString());
-            LOGGER.info("received data into the map, Map size: " + receivedMap.size());
         }
+
+        LOGGER.info("received data into the map, Map size: " + receivedMap.size());
 
         //TODO: check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {

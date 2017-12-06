@@ -7,9 +7,11 @@ package org.hobbit.spatialbenchmark.platformConnection.systems;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.ShutdownSignalException;
+import com.vividsolutions.jts.geom.create.GeometryType;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
@@ -24,6 +26,8 @@ import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
+import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
+import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
 import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
@@ -142,6 +146,25 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         config.getTargetInfo().setEndpoint(target);
         config.getSourceInfo().setType(dataFormat);
         config.getTargetInfo().setType(taskFormat);
+        ArrayList<String> sourceRestrictions = new ArrayList<String>();
+        ArrayList<String> targetRestrictions = new ArrayList<String>();
+
+        if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.LineString) && (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY"))) {
+            sourceRestrictions.add("?y a regions:Region");
+            targetRestrictions.add("?y a tomtom:Trace");
+        } //check this ! 
+        else if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
+            sourceRestrictions.add("?y a regions:Region");
+            targetRestrictions.add("?y a tomtom:Trace");
+
+        } else {
+            sourceRestrictions.add("?y a regions:Trace");
+            targetRestrictions.add("?y a tomtom:Region");
+        }
+        
+        config.getSourceInfo().setRestrictions(sourceRestrictions);
+        config.getTargetInfo().setRestrictions(targetRestrictions);
+        
 
         resultsFile = "./datasets/LimesSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
 

@@ -14,6 +14,7 @@ public final class PlatformConstants {
     public static final String GENERATED_DATA_FORMAT = "generator_data_format";
     public static final String SPATIAL_RELATION = "spatial_relation";
     public static final String KEEP_POINTS = "keep_points";
+    public static final String TARGET_GEOMETRY = "target_geometry";
 
     // =============== EVALUATION MODULE CONSTANTS ===============
 

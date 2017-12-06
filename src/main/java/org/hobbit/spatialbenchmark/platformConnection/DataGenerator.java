@@ -23,12 +23,14 @@ import static org.hobbit.spatialbenchmark.data.Generator.getDefinitions;
 import static org.hobbit.spatialbenchmark.data.Generator.getRandom;
 import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
 import static org.hobbit.spatialbenchmark.data.Generator.setSpatialTransformation;
+import static org.hobbit.spatialbenchmark.data.Generator.setTargetGeometryType;
 import org.hobbit.spatialbenchmark.data.Worker;
 import org.hobbit.spatialbenchmark.platformConnection.util.PlatformConstants;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import org.hobbit.spatialbenchmark.properties.Definitions;
 import org.hobbit.spatialbenchmark.util.AllocationsUtil;
 import org.hobbit.spatialbenchmark.transformations.RelationsCall.spatialRelation;
+import org.hobbit.spatialbenchmark.transformations.RelationsCall.targetGeometry;
 
 /**
  *
@@ -44,6 +46,7 @@ public class DataGenerator extends AbstractDataGenerator {
     public static String serializationFormat;
     private String relation;
     private double keepPoints;
+    private double targetGeom;
     private int taskId = 0;
 
     public static Generator dataGeneration = new Generator();
@@ -196,6 +199,7 @@ public class DataGenerator extends AbstractDataGenerator {
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         relation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
         keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
+        targetGeom = (double) getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, 0.0);
     }
 
     /**
@@ -251,6 +255,21 @@ public class DataGenerator extends AbstractDataGenerator {
         points.add(1.0 - keepPoints);
         Random random = new Random();
         Definitions.keepPointsAllocation = new AllocationsUtil(points, random);
+        
+        //target geometry
+        ArrayList<Double> targetGeometryArrayList = new ArrayList<Double>();
+        for (int i = 0; i < 2; i++) {
+            targetGeometryArrayList.add(0.0);
+        }
+
+        int ind = targetGeometry.valueOf(relation).ordinal();
+        targetGeometryArrayList.add(ind, 1.0);
+        Definitions.targetGeometryAllocation = new AllocationsUtil(targetGeometryArrayList, random);
+
+        getRelationsCall().targetGeometryCases();
+        setTargetGeometryType(getRelationsCall().getTargetGeometryType());
+        
+        
 
         ArrayList<Double> relationArrayList = new ArrayList<Double>();
         for (int i = 0; i < 10; i++) {
