@@ -10,6 +10,10 @@
         <NAMESPACE>http://www.tomtom.com/ontologies/traces#</NAMESPACE>
         <LABEL>tomtom</LABEL>
 	</PREFIX>
+ <PREFIX>
+        <NAMESPACE>http://www.tomtom.com/ontologies/regions#</NAMESPACE>
+        <LABEL>regions</LABEL>
+</PREFIX>
 	<PREFIX>
 		<NAMESPACE>http://strdf.di.uoa.gr/ontology#</NAMESPACE>
         <LABEL>strdf</LABEL>
@@ -20,7 +24,7 @@
         <ENDPOINT>./datasets/SourceDatasets/sourceCONTAINS-0001</ENDPOINT>
         <VAR>?x</VAR>
         <PAGESIZE>-1</PAGESIZE>
-        <RESTRICTION>?x a tomtom:Trace</RESTRICTION>
+         <RESTRICTION>?x a tomtom:Trace</RESTRICTION> 
 		<PROPERTY>strdf:hasGeometry RENAME geometry</PROPERTY> 
 		<!--<TYPE>NT</TYPE> -->
     </SOURCE>
@@ -30,7 +34,7 @@
         <ENDPOINT>./datasets/TargetDatasets/targetCONTAINS-0001</ENDPOINT>
         <VAR>?y</VAR>
         <PAGESIZE>-1</PAGESIZE>
-        <RESTRICTION>?y a tomtom:Trace</RESTRICTION>
+        <RESTRICTION>?y a tomtom:Trace</RESTRICTION> 
 		<PROPERTY>strdf:hasGeometry RENAME geometry</PROPERTY> 
 		<!--<TYPE>NT</TYPE> -->
     </TARGET>

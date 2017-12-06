@@ -10,6 +10,10 @@
         <NAMESPACE>http://www.tomtom.com/ontologies/traces#</NAMESPACE>
         <LABEL>tomtom</LABEL>
 	</PREFIX>
+ <PREFIX>
+        <NAMESPACE>http://www.tomtom.com/ontologies/regions#</NAMESPACE>
+        <LABEL>regions</LABEL>
+</PREFIX>
 	<PREFIX>
 		<NAMESPACE>http://strdf.di.uoa.gr/ontology#</NAMESPACE>
         <LABEL>strdf</LABEL>
