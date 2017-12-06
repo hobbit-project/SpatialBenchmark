@@ -1,5 +1,6 @@
 package org.hobbit.spatialbenchmark.data;
 
+import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
@@ -33,8 +34,8 @@ import org.hobbit.spatialbenchmark.data.goldstandard.RADONController;
 import org.hobbit.spatialbenchmark.data.goldstandard.oaei.OAEIRDFAlignmentFormat;
 import org.hobbit.spatialbenchmark.properties.Configurations;
 import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
+import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
 import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
-import org.hobbit.spatialbenchmark.platformConnection.DataGenerator;
 import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.hobbit.spatialbenchmark.util.SesameUtils;
 
@@ -44,7 +45,7 @@ public class Worker extends AbstractWorker {
     private String serializationFormat;
     private int numOfInstances;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
 
     public Worker() {
         this.numOfInstances = getConfigurations().getInt(Configurations.INSTANCES);
@@ -95,7 +96,7 @@ public class Worker extends AbstractWorker {
         if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
             numOfInstances = collectedFiles.size();
         }
-        LOGGER.info("numOfInstances from Worker" +numOfInstances);
+        LOGGER.info("numOfInstances from Worker" + numOfInstances);
         try {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
@@ -146,7 +147,7 @@ public class Worker extends AbstractWorker {
                 while (it.hasNext()) {
                     Statement statement = it.next();
 
-                    if (statement.getObject().stringValue().endsWith("Trace") || !it.hasNext()) {
+                    if (statement.getObject().stringValue().endsWith("Trace") || !it.hasNext()) { //or region
                         if (!givenInstanceModel.isEmpty()) {
                             //source instance - Trace
                             if (!it.hasNext()) {
@@ -157,7 +158,13 @@ public class Worker extends AbstractWorker {
                             Model targetTrace = create.targetInstance(sourceTrace);
                             //if the relation is within or covered_by, write sources on target file and targets on source file
                             if (sourceTrace != null && targetTrace != null) {
-                                if (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY")) {
+                                //coveredby, covers, within, contains
+                                if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString) && (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY"))) {
+                                    Rio.write(targetTrace, sourceFos, rdfFormat);
+                                    Rio.write(sourceTrace, targetFos, rdfFormat);
+                                }
+                                //check this ! 
+                                if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
                                     Rio.write(targetTrace, sourceFos, rdfFormat);
                                     Rio.write(sourceTrace, targetFos, rdfFormat);
                                 } else {

@@ -5,22 +5,27 @@
  */
 package org.hobbit.spatialbenchmark.data.goldstandard;
 
+import com.vividsolutions.jts.geom.create.GeometryType;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import org.aksw.limes.core.controller.Controller;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.aksw.limes.core.io.config.Configuration;
 import org.aksw.limes.core.io.serializer.ISerializer;
 import org.aksw.limes.core.io.serializer.SerializerFactory;
 import org.apache.commons.cli.CommandLine;
-import static org.hobbit.spatialbenchmark.data.AbstractWorker.RELATION;
-import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
-import org.hobbit.spatialbenchmark.platformConnection.BenchmarkController;
-import org.hobbit.spatialbenchmark.properties.Configurations;
-import org.hobbit.spatialbenchmark.util.FileUtil;
 import org.openrdf.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.hobbit.spatialbenchmark.platformConnection.BenchmarkController;
+import org.hobbit.spatialbenchmark.properties.Configurations;
+import org.hobbit.spatialbenchmark.util.FileUtil;
+import static org.hobbit.spatialbenchmark.data.AbstractWorker.RELATION;
+import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
+import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
+import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
+import org.openrdf.rio.Rio;
 
 /**
  *
@@ -40,12 +45,34 @@ public class RADONController extends Controller {
         Configuration config = getConfig(cmd);
         String sourceFile = config.getSourceInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
         String targetFile = config.getTargetInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
-      
+
         config.getSourceInfo().setEndpoint(sourceFile);
         config.getSourceInfo().setType(rdfFormat.getDefaultFileExtension().toUpperCase());
+ 
+        ArrayList<String> sourceRestrictions = new ArrayList<String>();
+        ArrayList<String> targetRestrictions = new ArrayList<String>();
+
+        if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.LineString) && (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY"))) {
+            sourceRestrictions.add("?y a regions:Region");
+            targetRestrictions.add("?y a tomtom:Trace");
+        } //check this ! 
+        else if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
+            sourceRestrictions.add("?y a regions:Region");
+            targetRestrictions.add("?y a tomtom:Trace");
+
+        } else {
+            sourceRestrictions.add("?y a tomtom:Trace");
+            targetRestrictions.add("?y a regions:Region");
+        }
+        
+        config.getSourceInfo().setRestrictions(sourceRestrictions);
+        config.getTargetInfo().setRestrictions(targetRestrictions);
+        
+        
         config.getTargetInfo().setEndpoint(targetFile);
         config.getTargetInfo().setType(rdfFormat.getDefaultFileExtension().toUpperCase());
-        
+
+       
         config.setAcceptanceFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "mappings." + rdfFormat.getDefaultFileExtension());
         config.setVerificationFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "absolute_mapping_almost." + rdfFormat.getDefaultFileExtension());
 
@@ -53,7 +80,6 @@ public class RADONController extends Controller {
 //        for (String line; (line = br.readLine()) != null;) {
 //            System.out.print("line---------------------------->" + line);
 //        }
-
         LOGGER.info("RADONController SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension() " + rdfFormat.getDefaultFileExtension());
 
         //keep mappings for the oaei format

@@ -11,13 +11,13 @@ public abstract class AbstractWorker {
     public static final String GOLDSTANDARD_FILENAME = "%s%sgoldStandard" + getSpatialTransformation().getClass().getSimpleName() + "-%04d.";
     public static final String OAEI_GOLDSTANDARD_FILENAME = "%s%soaeiGoldStandard" + getSpatialTransformation().getClass().getSimpleName() + "-%04d.";
 
-    public void run() {
-        try {
-            execute();
-        } catch (Exception e) {
-            System.out.println("Exception caught by : " + Thread.currentThread().getName() + " : " + e.getMessage());
-        }
-    }
+//    public void run() {
+//        try {
+//            execute();
+//        } catch (Exception e) {
+//            System.out.println("Exception caught by : " + Thread.currentThread().getName() + " : " + e.getMessage());
+//        }
+//    }
 
     public abstract void execute() throws Exception;
 

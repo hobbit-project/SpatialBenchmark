@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.hobbit.spatialbenchmark.Trace;
-import org.hobbit.spatialbenchmark.TracePoint;
+import org.hobbit.spatialbenchmark.Area;
+import org.hobbit.spatialbenchmark.AreaPoint;
 import org.hobbit.spatialbenchmark.util.RandomUtil;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Model;
@@ -29,9 +29,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CreateInstances extends Generator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
-
-    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
+//    private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
+//    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
     private Model sourceTrace = null;
@@ -54,7 +53,7 @@ public class CreateInstances extends Generator {
                     double latitude = Double.parseDouble(statement.getObject().stringValue());
                     statement = it.next();
                     double longitude = Double.parseDouble(statement.getObject().stringValue());
-                    p = new TracePoint(longitude, latitude).getTracePoint();
+                    p = new AreaPoint(longitude, latitude).getTracePoint();
                 }
                 if (statement.getPredicate().getLocalName().equals("hasPoint") || !it.hasNext()) {
                     getRelationsCall().keepPointCases();
@@ -64,7 +63,7 @@ public class CreateInstances extends Generator {
                 }
             }
             if (points.size() >= 2) {
-                this.sourceTrace = new Trace(id, points).getTraceModel();
+                this.sourceTrace = new Area(id, points).getSourceModel();
             }
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
@@ -75,12 +74,15 @@ public class CreateInstances extends Generator {
         Resource targetURI = null;
         Geometry targetGeometry = null;
         Model targetModel = null;
+        
+        //linestring or polygon
+        getRelationsCall().targetGeometryCases();
         try {
             if (sourceTrace != null) {
                 Iterator<Statement> it = sourceTrace.iterator();
                 while (it.hasNext()) {
                     Statement statement = it.next();
-                    if (statement.getObject().stringValue().endsWith("Trace")) {
+                    if (statement.getObject().stringValue().endsWith("Trace")) {  
                         if (!URIMap.containsKey(statement.getSubject())) {
                             targetURI = targetSubject(statement);
 
@@ -88,16 +90,20 @@ public class CreateInstances extends Generator {
                             targetURI = URIMap.get(statement.getSubject());
                         }
                     } else {
-                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue());
+                        System.out.println("getRelationsCall().getTargetGeometryType() " + getRelationsCall().getTargetGeometryType());
+                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue(), getRelationsCall().getTargetGeometryType());
                     }
                 }
+                
+                //auto edo prepei na ginei get trace model h' polugon model... Na allakso tin klasi
+                // trace h' na kano alli mia polygon!
                 if (targetGeometry != null) {
-                    targetModel = new Trace(targetURI, targetGeometry.getCoordinates()).getTraceModel();
+                    //new trace if target geometry is  linestring
+                    //new something if is a polygon
+                    targetModel = new Area(targetURI, targetGeometry).getTargetModel();
                 }
             }
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-        }
+        } catch (OutOfMemoryError e) {}
         return targetModel;
 
     }
