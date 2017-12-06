@@ -17,6 +17,7 @@ public class Definitions {
 
     public static final String SPATIAL_RELATIONS_ALLOCATION = "spatialRelationsAllocation";
     public static final String KEEP_POINTS_ALLOCATION = "keepPointsAllocation";
+    public static final String TARGET_GEOMETRY_ALLOCATION = "targetGeometryAllocation";
 
     //Determines spatial allocation amount of relations 
     public static AllocationsUtil spatialRelationsAllocation;
@@ -24,6 +25,9 @@ public class Definitions {
     //Determines percentage of points we want to keep for each trace
     public static AllocationsUtil keepPointsAllocation;
 
+    //Determines percentage of LineString to be transformed to LineString or Polygons
+    public static AllocationsUtil targetGeometryAllocation;
+    
     private static Properties definitionsProperties = new Properties();
 
     private boolean verbose = false;
@@ -118,11 +122,13 @@ public class Definitions {
 
         initializeAllocation(SPATIAL_RELATIONS_ALLOCATION, random);
         initializeAllocation(KEEP_POINTS_ALLOCATION, random);
+        initializeAllocation(TARGET_GEOMETRY_ALLOCATION, random);
     }
 
     public static void reconfigureAllocations(Random random) {
         spatialRelationsAllocation.setRandom(random);
         keepPointsAllocation.setRandom(random);
+        targetGeometryAllocation.setRandom(random);
     }
 
     /**
@@ -141,6 +147,8 @@ public class Definitions {
             spatialRelationsAllocation = new AllocationsUtil(allocationsAsDoubles, random);
         } else if (allocationPropertyName.equals(KEEP_POINTS_ALLOCATION)) {
             keepPointsAllocation = new AllocationsUtil(allocationsAsDoubles, random);
+        }else if (allocationPropertyName.equals(TARGET_GEOMETRY_ALLOCATION)) {
+            targetGeometryAllocation = new AllocationsUtil(allocationsAsDoubles, random);
         }
         if (verbose) {
             System.out.println(String.format("\t%-33s : {%s}", allocationPropertyName, allocations));
