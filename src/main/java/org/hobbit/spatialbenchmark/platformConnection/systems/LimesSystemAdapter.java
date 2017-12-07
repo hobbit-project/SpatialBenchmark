@@ -149,17 +149,17 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
         ArrayList<String> sourceRestrictions = new ArrayList<String>();
         ArrayList<String> targetRestrictions = new ArrayList<String>();
 
-        if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.LineString) && (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY"))) {
-            sourceRestrictions.add("?y a regions:Region");
-            targetRestrictions.add("?y a tomtom:Trace");
-        } //check this ! 
-        else if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
+        if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
             sourceRestrictions.add("?y a regions:Region");
             targetRestrictions.add("?y a tomtom:Trace");
 
-        } else {
-            sourceRestrictions.add("?y a regions:Trace");
-            targetRestrictions.add("?y a tomtom:Region");
+        } else if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon)) {
+            sourceRestrictions.add("?y a tomtom:Trace");
+            targetRestrictions.add("?y a regions:Region");
+
+        } else { //LineString
+            sourceRestrictions.add("?y a tomtom:Trace");
+            targetRestrictions.add("?y a tomtom:Trace");
         }
         
         config.getSourceInfo().setRestrictions(sourceRestrictions);
