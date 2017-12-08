@@ -46,7 +46,7 @@ public class DataGenerator extends AbstractDataGenerator {
     public static String serializationFormat;
     private String relation;
     private double keepPoints;
-    private double targetGeom;
+    private String targetGeom;
     private int taskId = 0;
 
     public static Generator dataGeneration = new Generator();
@@ -72,7 +72,7 @@ public class DataGenerator extends AbstractDataGenerator {
         // call mimicking algorithm
 //      runMimicking();
 
-        task = new Task(Integer.toString(taskId++), null, null, null);
+        task = new Task(Integer.toString(taskId++), null, null, null, null);
 
     }
 
@@ -156,6 +156,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 byte[] generatedFile = RabbitMQUtils.writeByteArrays(generatedFileArray);
                 task.setTarget(generatedFile);
                 task.setRelation(relation);
+                task.setTargetGeom(targetGeom);
 
                 byte[] data = SerializationUtils.serialize(task);
 
@@ -199,7 +200,7 @@ public class DataGenerator extends AbstractDataGenerator {
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         relation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
         keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
-        targetGeom = (double) getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, 0.0);
+        targetGeom =  getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, "");
     }
 
     /**
@@ -262,7 +263,7 @@ public class DataGenerator extends AbstractDataGenerator {
             targetGeometryArrayList.add(0.0);
         }
 
-        int ind = targetGeometry.valueOf(relation).ordinal();
+        int ind = targetGeometry.valueOf(targetGeom).ordinal();
         targetGeometryArrayList.add(ind, 1.0);
         Definitions.targetGeometryAllocation = new AllocationsUtil(targetGeometryArrayList, random);
 

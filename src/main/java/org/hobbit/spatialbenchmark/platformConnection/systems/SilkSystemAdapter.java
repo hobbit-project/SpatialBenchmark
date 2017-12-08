@@ -62,7 +62,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             dataFormat = RabbitMQUtils.readString(dataBuffer);
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
-            
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
 //LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = "./datasets/SourceDatasets/" + receivedFiles[0];
@@ -85,27 +84,28 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             // read the relation
             String taskRelation = RabbitMQUtils.readString(taskBuffer);
             LOGGER.info("taskRelation " + taskRelation);
-
+            // read the target geometry
+            String targetGeom = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("targetGeom " + targetGeom);
             // read the file path
             taskFormat = RabbitMQUtils.readString(taskBuffer);
             LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
             time = System.currentTimeMillis();
-            
+
             String receivedGeneratedTaskFilePath = null;
             try {
 
                 targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
-                    "task_target_file");
+                        "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
 //LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
                 receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
 
             } catch (Exception e) {
-                 LOGGER.error("Exception while trying to receive data. Aborting.", e);
+                LOGGER.error("Exception while trying to receive data. Aborting.", e);
             }
             LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
             time = System.currentTimeMillis();
-
 
             LOGGER.info("Task " + taskId + " received from task generator");
 

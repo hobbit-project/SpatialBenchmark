@@ -80,16 +80,17 @@ public class TaskGenerator extends AbstractTaskGenerator {
             Task task = (Task) SerializationUtils.deserialize(data);
             String taskId = task.getTaskId();
             String taskRelation = task.getRelation();
-
+            String targetGeom = task.getTargetGeom();
             byte[] target = task.getTarget();
             ByteBuffer taskBuffer = ByteBuffer.wrap(target);
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
 
-            byte[][] taskDataArray = new byte[3][];
+            byte[][] taskDataArray = new byte[4][];
             taskDataArray[0] = RabbitMQUtils.writeString(taskRelation);
-            taskDataArray[1] = RabbitMQUtils.writeString(format);
-            taskDataArray[2] = RabbitMQUtils.writeString(path);
+            taskDataArray[1] = RabbitMQUtils.writeString(targetGeom);
+            taskDataArray[2] = RabbitMQUtils.writeString(format);
+            taskDataArray[3] = RabbitMQUtils.writeString(path);
   
             byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
 

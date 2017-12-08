@@ -11,10 +11,11 @@ public class Task implements Serializable {
 	
 	private String taskId;
         private String relation;
+        private String targetGeom;
 	private byte[] target;
 	private byte[] expectedAnswers;
 	
-	public Task(String id, String relation, byte[] target, byte[] expectedAnswers) {
+	public Task(String id, String relation, String targetGeom, byte[] target, byte[] expectedAnswers) {
 		this.taskId = id;
                 this.relation = relation;
 		this.target = target;
@@ -35,6 +36,14 @@ public class Task implements Serializable {
 	
 	public String getRelation() {
 		return this.relation;
+	}
+        
+        public void setTargetGeom(String targetGeom) {
+		this.targetGeom = targetGeom;
+	}
+	
+	public String getTargetGeom() {
+		return this.targetGeom;
 	}
 	
         public void setTarget(byte[] res) {
