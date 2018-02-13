@@ -18,10 +18,6 @@ import org.openrdf.model.BNode;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,13 +25,13 @@ import org.slf4j.LoggerFactory;
  */
 public class CreateInstances extends Generator {
 
-//    private static final Logger LOGGER = LoggerFactory.getLogger(CreateInstances.class);
-//    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
     private static Map<Resource, Resource> URIMap = new HashMap<Resource, Resource>(); //sourceURI, targetURI, this contains also th bnodes
     private RandomUtil ru = new RandomUtil();
     private Model sourceTrace = null;
+    private String generator = "";
 
-    public CreateInstances() {
+    public CreateInstances(String generator) {
+        this.generator = generator;
     }
 
     public void sourceInstance(Model givenModel) {
@@ -63,7 +59,7 @@ public class CreateInstances extends Generator {
                 }
             }
             if (points.size() >= 2) {
-                this.sourceTrace = new Area(id, points).getSourceModel();
+                this.sourceTrace = new Area(id, points, generator).getSourceModel();
             }
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
@@ -74,7 +70,7 @@ public class CreateInstances extends Generator {
         Resource targetURI = null;
         Geometry targetGeometry = null;
         Model targetModel = null;
-        
+
         //linestring or polygon
         getRelationsCall().targetGeometryCases();
         try {
@@ -82,7 +78,7 @@ public class CreateInstances extends Generator {
                 Iterator<Statement> it = sourceTrace.iterator();
                 while (it.hasNext()) {
                     Statement statement = it.next();
-                    if (statement.getObject().stringValue().endsWith("Trace")) {  
+                    if (statement.getObject().stringValue().endsWith("Trace")) {
                         if (!URIMap.containsKey(statement.getSubject())) {
                             targetURI = targetSubject(statement);
 
@@ -90,20 +86,16 @@ public class CreateInstances extends Generator {
                             targetURI = URIMap.get(statement.getSubject());
                         }
                     } else {
-                        System.out.println("getRelationsCall().getTargetGeometryType() " + getRelationsCall().getTargetGeometryType());
-                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue(), getRelationsCall().getTargetGeometryType());
+                      targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue(), getRelationsCall().getTargetGeometryType());
                     }
                 }
-                
-                //auto edo prepei na ginei get trace model h' polugon model... Na allakso tin klasi
-                // trace h' na kano alli mia polygon!
+
                 if (targetGeometry != null) {
-                    //new trace if target geometry is  linestring
-                    //new something if is a polygon
-                    targetModel = new Area(targetURI, targetGeometry).getTargetModel();
+                    targetModel = new Area(targetURI, targetGeometry, generator).getTargetModel();
                 }
             }
-        } catch (OutOfMemoryError e) {}
+        } catch (OutOfMemoryError e) {
+        }
         return targetModel;
 
     }

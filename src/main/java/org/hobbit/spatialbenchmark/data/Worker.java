@@ -86,8 +86,14 @@ public class Worker extends AbstractWorker {
         String targetFileName = String.format(TARGET_FILENAME + rdfFormat.getDefaultFileExtension(), targetDestination, File.separator, currentFilesCount);
         String oaeiGSFileName = String.format(OAEI_GOLDSTANDARD_FILENAME + "rdf", OAEIGoldStandardDestination, File.separator, currentFilesCount);
 
+        String generator = "tomtom";
         String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
-
+        if (getConfigurations().getString(Configurations.DATA_GENERATOR).equals("tomtom")) {
+            path = path + "/tomtom";
+        } else if (getConfigurations().getString(Configurations.DATA_GENERATOR).equals("spaten")) {
+            path = path + "/spaten";
+            generator = "spaten";
+        }
         List<File> collectedFiles = new ArrayList<File>();
         RepositoryConnection con = null;
 
@@ -102,7 +108,7 @@ public class Worker extends AbstractWorker {
             targetFos = new FileOutputStream(targetFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
             for (int i = 0; i < numOfInstances; i++) {
-//                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
+                LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
 
                 RDFFormat format = RDFFormat.forFileName(collectedFiles.get(i).getName());
 
@@ -115,7 +121,7 @@ public class Worker extends AbstractWorker {
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
-                        + "?s  a  <http://www.tomtom.com/ontologies/traces#Trace> . }";
+                        + "?s  a  <http://www." + generator + ".com/ontologies/traces#Trace> . }";
 
                 TupleQuery query = con.prepareTupleQuery(QueryLanguage.SPARQL, queryNumInstances);
                 TupleQueryResult result = query.evaluate();
@@ -126,19 +132,19 @@ public class Worker extends AbstractWorker {
                 //retrieve long, lat from given datasets
                 String queryString
                         = "CONSTRUCT{"
-                        + "<" + traceID + ">  a  <http://www.tomtom.com/ontologies/traces#Trace> ."
-                        + "<" + traceID + "> <http://www.tomtom.com/ontologies/traces#hasPoint> ?o1 . " //Point
-                        + "?o1 <http://www.tomtom.com/ontologies/traces#lat> ?o2 . "
-                        + "?o1 <http://www.tomtom.com/ontologies/traces#long> ?o3 . }"
+                        + "<" + traceID + ">  a  <http://www." + generator + ".com/ontologies/traces#Trace> ."
+                        + "<" + traceID + "> <http://www." + generator + ".com/ontologies/traces#hasPoint> ?o1 . " //Point
+                        + "?o1 <http://www." + generator + ".com/ontologies/traces#lat> ?o2 . "
+                        + "?o1 <http://www." + generator + ".com/ontologies/traces#long> ?o3 . }"
                         + "WHERE {"
-                        + "<" + traceID + ">  a  <http://www.tomtom.com/ontologies/traces#Trace> ."
-                        + "<" + traceID + "> <http://www.tomtom.com/ontologies/traces#hasPoint> ?o1 . " //Point
-                        + "?o1 <http://www.tomtom.com/ontologies/traces#lat> ?o2 . "
-                        + "?o1 <http://www.tomtom.com/ontologies/traces#long> ?o3 . }";
+                        + "<" + traceID + ">  a  <http://www." + generator + ".com/ontologies/traces#Trace> ."
+                        + "<" + traceID + "> <http://www." + generator + ".com/ontologies/traces#hasPoint> ?o1 . " //Point
+                        + "?o1 <http://www." + generator + ".com/ontologies/traces#lat> ?o2 . "
+                        + "?o1 <http://www." + generator + ".com/ontologies/traces#long> ?o3 . }";
 
                 GraphQueryResult graphResult = con.prepareGraphQuery(QueryLanguage.SPARQL, queryString).evaluate();
                 Model resultsModel = QueryResults.asModel(graphResult);
-                CreateInstances create = new CreateInstances();
+                CreateInstances create = new CreateInstances(generator);
 
                 Model givenInstanceModel = new LinkedHashModel();
                 Iterator<Statement> it = resultsModel.iterator();
@@ -163,7 +169,7 @@ public class Worker extends AbstractWorker {
                                     Rio.write(targetTrace, sourceFos, rdfFormat);
                                     Rio.write(sourceTrace, targetFos, rdfFormat);
                                 }
-                                //check this ! 
+
                                 if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
                                     Rio.write(targetTrace, sourceFos, rdfFormat);
                                     Rio.write(sourceTrace, targetFos, rdfFormat);
@@ -183,7 +189,7 @@ public class Worker extends AbstractWorker {
             //oaei gold standard
             OAEIRDFAlignmentFormat oaeiRDF = new OAEIRDFAlignmentFormat(oaeiGSFileName, sourceFileName, targetFileName);
             //mappings from RADON
-            ResultMappings results = new RADONController(rdfFormat).getMappings(); //generate gold standard
+            ResultMappings results = new RADONController(rdfFormat, generator).getMappings(); //generate gold standard
             HashMap<String, HashMap<String, Double>> mappings = results.getAcceptanceMapping().getMap();
 
             for (HashMap.Entry<String, HashMap<String, Double>> entry : mappings.entrySet()) {
@@ -222,13 +228,4 @@ public class Worker extends AbstractWorker {
         }
     }
 
-    @Override
-    public Model createSourceModel(Model model) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Model createTargetModel(Model model) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

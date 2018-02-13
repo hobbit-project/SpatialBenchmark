@@ -1,7 +1,6 @@
 package org.hobbit.spatialbenchmark.data;
 
 import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
-import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
@@ -74,14 +73,10 @@ public class Generator {
     public static void setSpatialTransformation(SpatialTransformation tr) {
         transform = tr;
     }
+
     public static void setTargetGeometryType(GeometryTypes gt) {
         geometryType = gt;
     }
-    
-
-//    public static void loadPropertiesFile(String file) throws IOException {
-//        configurations.loadFromFile(file);
-//    }
 
     public void exec() {
         try {

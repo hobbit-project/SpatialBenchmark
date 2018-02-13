@@ -31,6 +31,7 @@ public class Configurations {
     public static final String NEW_URI_NAMESPACE = "newURInamespace";
     public static final String LOAD_ONTOLOGIES = "loadOntologies";
     public static final String CLEAR_DATABASE = "clearDatabase";
+    public static final String DATA_GENERATOR = "dataGenerator";
     private static final Properties properties = new Properties();
 
     /**
@@ -47,6 +48,7 @@ public class Configurations {
         properties.setProperty(NEW_URI_NAMESPACE, "http://www.hobbit.eu/");
         properties.setProperty(LOAD_ONTOLOGIES, "true");
         properties.setProperty(CLEAR_DATABASE, "false");
+        properties.setProperty(DATA_GENERATOR, "tomtom");
 
     }
 

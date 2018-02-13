@@ -25,7 +25,6 @@ import static org.hobbit.spatialbenchmark.data.AbstractWorker.RELATION;
 import static org.hobbit.spatialbenchmark.data.Generator.getConfigurations;
 import static org.hobbit.spatialbenchmark.data.Generator.getRelationsCall;
 import static org.hobbit.spatialbenchmark.data.Generator.getSpatialTransformation;
-import org.openrdf.rio.Rio;
 
 /**
  *
@@ -37,7 +36,7 @@ public class RADONController extends Controller {
 
     private ResultMappings mappings;
 
-    public RADONController(RDFFormat rdfFormat) throws IOException {
+    public RADONController(RDFFormat rdfFormat, String generator) throws IOException {
         String[] args = new String[1];
         args[0] = getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
 
@@ -52,27 +51,19 @@ public class RADONController extends Controller {
         ArrayList<String> sourceRestrictions = new ArrayList<String>();
         ArrayList<String> targetRestrictions = new ArrayList<String>();
 
-//        if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("WITHIN") || getSpatialTransformation().getClass().getSimpleName().equals("COVERED_BY"))) {
-//            sourceRestrictions.add("?y a regions:Region");
-//            targetRestrictions.add("?y a tomtom:Trace");
-//        } //check this ! 
-//        else 
+        System.out.println("generator " + generator);
         if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
-            sourceRestrictions.add("?y a regions:Region");
-            targetRestrictions.add("?y a tomtom:Trace");
+            sourceRestrictions.add("?y a " + generator + "regions:Region");
+            targetRestrictions.add("?y a " + generator + ":Trace");
 
         } else if (getRelationsCall().getTargetGeometryType().equals(GeometryType.GeometryTypes.Polygon)) {
-            sourceRestrictions.add("?y a tomtom:Trace");
-            targetRestrictions.add("?y a regions:Region");
+            sourceRestrictions.add("?y a " + generator + ":Trace");
+            targetRestrictions.add("?y a " + generator + "regions:Region");
 
         } else { //LineString
-            sourceRestrictions.add("?y a tomtom:Trace");
-            targetRestrictions.add("?y a tomtom:Trace");
+            sourceRestrictions.add("?y a " + generator + ":Trace");
+            targetRestrictions.add("?y a " + generator + ":Trace");
         }
-        
-        
-//        LOGGER.info("sourceRestrictions " + sourceRestrictions.toString());
-//        LOGGER.info("targetRestrictions " + targetRestrictions.toString());
 
         config.getSourceInfo().setRestrictions(sourceRestrictions);
         config.getTargetInfo().setRestrictions(targetRestrictions);
@@ -83,10 +74,6 @@ public class RADONController extends Controller {
         config.setAcceptanceFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "mappings." + rdfFormat.getDefaultFileExtension());
         config.setVerificationFile(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards" + File.separator + RELATION + "absolute_mapping_almost." + rdfFormat.getDefaultFileExtension());
 
-//        BufferedReader br = new BufferedReader(new FileReader(config.getSourceInfo().getEndpoint()));
-//        for (String line; (line = br.readLine()) != null;) {
-//            System.out.print("line---------------------------->" + line);
-//        }
         LOGGER.info("RADONController SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension() " + rdfFormat.getDefaultFileExtension());
 
         //keep mappings for the oaei format
