@@ -16,7 +16,10 @@ If you want to run Spatial Benchmark, please follow the guidelines found here: h
 
 * Mimicking Algorithm Seed: The seed value for a mimicking algorithm. 
 
-* Percentage of points to keep from source trace: one can restrict the number of points to consider due to the possibly very large number of points per Trace
-
 * Population of generated data (number on instances)
 
+* Percentage of points to keep from source trace: one can restrict the number of points to consider due to the possibly very large number of points per Trace
+
+* Data Generator (TomTom or Spaten)
+
+* Type of geometry to be generated as target dataset (LineString or Polygon)
