@@ -36,9 +36,6 @@ public class TOUCHES implements SpatialTransformation {
                     CreateTouchesGeometryObject instance = new CreateTouchesGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
-                System.out.println("TOUCHES VALID !!!! " + geo.isValid() );
-                System.out.println("TOUCHES ASSERT !!!! " + geo.touches(result) );
-        
             }
 
         } catch (ParseException ex) {

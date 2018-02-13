@@ -36,7 +36,6 @@ public class WITHIN implements SpatialTransformation {
                     CreateContainsGeometryObject instance = new CreateContainsGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
-//                System.out.println("VALID !!!! " + geo.isValid());
             }
 
         } catch (ParseException ex) {

@@ -40,7 +40,6 @@ public class OVERLAPS implements SpatialTransformation {
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(OVERLAPS.class.getName()).log(Level.SEVERE, null, ex);
         }

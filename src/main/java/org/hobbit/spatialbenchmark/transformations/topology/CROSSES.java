@@ -9,7 +9,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.create.CreateCrossesGeometryObject;
-import com.vividsolutions.jts.geom.create.GeometryType;
 import com.vividsolutions.jts.geom.create.GeometryType.GeometryTypes;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
@@ -27,6 +26,7 @@ public class CROSSES implements SpatialTransformation {
     WKTReader reader = new WKTReader(geometryFactory);
 
     public Object execute(Object arg, GeometryTypes type) {
+        System.out.println("CROSSES");
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
@@ -38,7 +38,6 @@ public class CROSSES implements SpatialTransformation {
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(CROSSES.class.getName()).log(Level.SEVERE, null, ex);
         }

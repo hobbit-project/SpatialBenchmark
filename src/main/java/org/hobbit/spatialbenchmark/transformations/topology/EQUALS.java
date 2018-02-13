@@ -35,12 +35,10 @@ public class EQUALS implements SpatialTransformation {
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
                 if (line.getCoordinates().length >= 2) {
-//                    System.out.println("EQUALS type " + type);
                     CreateEqualGeometryObject instance = new CreateEqualGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(EQUALS.class.getName()).log(Level.SEVERE, null, ex);
         }

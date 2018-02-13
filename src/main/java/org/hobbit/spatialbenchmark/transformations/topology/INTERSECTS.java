@@ -38,7 +38,6 @@ public class INTERSECTS implements SpatialTransformation {
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(INTERSECTS.class.getName()).log(Level.SEVERE, null, ex);
         }

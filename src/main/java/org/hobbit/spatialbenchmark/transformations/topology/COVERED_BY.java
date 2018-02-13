@@ -37,7 +37,6 @@ public class COVERED_BY implements SpatialTransformation {
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(COVERED_BY.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -29,7 +29,6 @@ public class DISJOINT implements SpatialTransformation {
         Geometry result = null;
         try {
             Geometry geo = reader.read(arg.toString());
-            System.out.println("geo " + geo.getCoordinates().length);
             result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
@@ -38,7 +37,6 @@ public class DISJOINT implements SpatialTransformation {
                     result = instance.generateGeometry();
                 }
             }
-//            System.out.println("VALID !!!! " + geo.isValid());
         } catch (ParseException ex) {
             Logger.getLogger(DISJOINT.class.getName()).log(Level.SEVERE, null, ex);
         }
