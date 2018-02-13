@@ -15,6 +15,7 @@ public final class PlatformConstants {
     public static final String SPATIAL_RELATION = "spatial_relation";
     public static final String KEEP_POINTS = "keep_points";
     public static final String TARGET_GEOMETRY = "target_geometry";
+    public static final String DATA_GENERATOR = "data_generator";
 
     // =============== EVALUATION MODULE CONSTANTS ===============
 

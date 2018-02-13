@@ -63,7 +63,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
-//LOGGER.info("receivedFiles 1 " + Arrays.toString(receivedFiles));
+//LOGGER.info("receivedFiles DATA " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = "./datasets/SourceDatasets/" + receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
@@ -98,7 +98,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
                 targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
                         "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
-//LOGGER.info("receivedFiles 2 " + Arrays.toString(receivedFiles));
+//LOGGER.info("receivedFiles TASK " + Arrays.toString(receivedFiles));
                 receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
 
             } catch (Exception e) {

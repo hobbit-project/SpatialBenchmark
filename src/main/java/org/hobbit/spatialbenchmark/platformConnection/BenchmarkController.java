@@ -39,8 +39,8 @@ public class BenchmarkController extends AbstractBenchmarkController {
         String serializationFormat = (String) getProperty("http://w3id.org/bench#spatialDataFormat", "ntriples");
         String spatialRelation = (String) getProperty("http://w3id.org/bench#spatialRelation", "COVERS");
         double keepPoints = (double) getProperty("http://w3id.org/bench#keepPoints", 0.3);
-
         String targetGeometry = (String) getProperty("http://w3id.org/bench#targetGeometry", "LINESTRING");
+        String dataGenerator = (String) getProperty("http://w3id.org/bench#dataGenerator", "TOMTOM");
 
         // data generators environmental values
         String[] envVariablesDataGenerator = new String[]{
@@ -50,7 +50,8 @@ public class BenchmarkController extends AbstractBenchmarkController {
             PlatformConstants.GENERATED_DATA_FORMAT + "=" + serializationFormat,
             PlatformConstants.SPATIAL_RELATION + "=" + spatialRelation,
             PlatformConstants.KEEP_POINTS + "=" + keepPoints,
-            PlatformConstants.TARGET_GEOMETRY + "=" + targetGeometry
+            PlatformConstants.TARGET_GEOMETRY + "=" + targetGeometry,
+            PlatformConstants.DATA_GENERATOR + "=" + dataGenerator
         };
 
         // get KPIs for evaluation module
@@ -93,22 +94,6 @@ public class BenchmarkController extends AbstractBenchmarkController {
                         .getProperty(property));
         if (iterator.hasNext()) {
             try {
-//                if (defaultValue.equals("ntriples")) {
-//
-//                    //this should change! 
-//                    return (T) iterator.next().asResource().getLocalName();
-//
-//                } else if (defaultValue.equals("COVERS")) {
-//
-//                    //this should change! 
-//                    return (T) iterator.next().asResource().getLocalName();
-//
-//                } else if (defaultValue.equals("LINESTRING")) {
-//
-//                    //this should change! 
-//                    return (T) iterator.next().asResource().getLocalName();
-//
-//                }
                 if (defaultValue.equals("ntriples") || defaultValue.equals("COVERS") || defaultValue.equals("LINESTRING")) {
                     return (T) iterator.next().asResource().getLocalName();
                 } else if (defaultValue instanceof String) {

@@ -47,6 +47,7 @@ public class DataGenerator extends AbstractDataGenerator {
     private String relation;
     private double keepPoints;
     private String targetGeom;
+    private String dataGen;
     private int taskId = 0;
 
     public static Generator dataGeneration = new Generator();
@@ -157,6 +158,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 task.setTarget(generatedFile);
                 task.setRelation(relation);
                 task.setTargetGeom(targetGeom);
+                task.setNamespace(dataGen);
 
                 byte[] data = SerializationUtils.serialize(task);
 
@@ -201,6 +203,7 @@ public class DataGenerator extends AbstractDataGenerator {
         relation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
         keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
         targetGeom =  getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, "");
+        dataGen = (String) getFromEnv(env, PlatformConstants.DATA_GENERATOR, "");
     }
 
     /**
@@ -249,6 +252,7 @@ public class DataGenerator extends AbstractDataGenerator {
         getConfigurations().setStringProperty(Configurations.GENERATED_DATA_FORMAT, serializationFormat);
         getConfigurations().setStringProperty(Configurations.DATASETS_PATH, datasetsPath);
         getConfigurations().setStringProperty(Configurations.GIVEN_DATASETS_PATH, givenDatasetsPath);
+        getConfigurations().setStringProperty(Configurations.DATA_GENERATOR, String.valueOf(dataGen));
 
         //TODO : check if keep points < 1.0
         ArrayList<Double> points = new ArrayList<Double>();

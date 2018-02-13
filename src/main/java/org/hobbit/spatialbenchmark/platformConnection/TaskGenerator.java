@@ -48,10 +48,11 @@ public class TaskGenerator extends AbstractTaskGenerator {
             // Create tasks based on the incoming data inside this method.
             // You might want to use the id of this task generator and the
             // number of all task generators running in parallel.
-//        int dataGeneratorId = getGeneratorId();
-//        int numberOfGenerators = getNumberOfGenerators();
-//            targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
 
+//          int dataGeneratorId = getGeneratorId();
+//          int numberOfGenerators = getNumberOfGenerators();
+//          targetReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "target_file");
+            
             String[] receivedFiles_target = targetReceiver.receiveData("./datasets/TargetDatasets/");
 
             for (String f : receivedFiles_target) {
@@ -81,23 +82,25 @@ public class TaskGenerator extends AbstractTaskGenerator {
             String taskId = task.getTaskId();
             String taskRelation = task.getRelation();
             String targetGeom = task.getTargetGeom();
+            String namespace = task.getNamespace();
+//            LOGGER.info("Namespace: " + namespace);
             byte[] target = task.getTarget();
             ByteBuffer taskBuffer = ByteBuffer.wrap(target);
             String format = RabbitMQUtils.readString(taskBuffer);
             String path = RabbitMQUtils.readString(taskBuffer);
 
-            byte[][] taskDataArray = new byte[4][];
+            byte[][] taskDataArray = new byte[5][];
             taskDataArray[0] = RabbitMQUtils.writeString(taskRelation);
             taskDataArray[1] = RabbitMQUtils.writeString(targetGeom);
-            taskDataArray[2] = RabbitMQUtils.writeString(format);
-            taskDataArray[3] = RabbitMQUtils.writeString(path);
-  
+            taskDataArray[2] = RabbitMQUtils.writeString(namespace);
+            taskDataArray[3] = RabbitMQUtils.writeString(format);
+            taskDataArray[4] = RabbitMQUtils.writeString(path);
+
             byte[] taskData = RabbitMQUtils.writeByteArrays(taskDataArray);
 
             byte[] expectedAnswerData = task.getExpectedAnswers();
 
             // Send the task to the system (and store the timestamp)
-            
             sendTaskToSystemAdapter(taskId, taskData);
             LOGGER.info("Task " + taskId + " sent to System Adapter.");
 

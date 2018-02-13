@@ -1,8 +1,5 @@
 package org.hobbit.spatialbenchmark.platformConnection;
 
-/**
- * 
- */
 
 import java.io.Serializable;
 
@@ -12,6 +9,7 @@ public class Task implements Serializable {
 	private String taskId;
         private String relation;
         private String targetGeom;
+        private String namespace;
 	private byte[] target;
 	private byte[] expectedAnswers;
 	
@@ -44,6 +42,14 @@ public class Task implements Serializable {
 	
 	public String getTargetGeom() {
 		return this.targetGeom;
+	}
+        
+        public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
+	
+	public String getNamespace() {
+		return this.namespace;
 	}
 	
         public void setTarget(byte[] res) {

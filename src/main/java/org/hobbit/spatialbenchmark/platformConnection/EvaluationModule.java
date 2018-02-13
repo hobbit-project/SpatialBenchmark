@@ -140,7 +140,6 @@ public class EvaluationModule extends AbstractEvaluationModule {
                         values.add(target);
                     }
 
-                    //todo i want n-n mapping
                     expectedMap.put(source, values);
                 }
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
@@ -158,12 +157,13 @@ public class EvaluationModule extends AbstractEvaluationModule {
         if (receivedData.length > 0) {
             receivedDataAnswers = RabbitMQUtils.readString(receivedData).split(System.getProperty("line.separator"));
         }
-
+//        LOGGER.info("###### " +Arrays.toString(receivedData));
+        
         HashMap<String, List<String>> receivedMap = new HashMap<String, List<String>>();
         if (receivedDataAnswers != null) {
             List values = null;
             for (String answer : receivedDataAnswers) {
-
+//      LOGGER.info("received answer " + answer);
                 answer = answer.trim();
                 answer = answer.replaceAll("<http://www.w3.org/2002/07/owl#sameAs>", "");
                 if (answer != null && !answer.equals("")) {
@@ -180,8 +180,6 @@ public class EvaluationModule extends AbstractEvaluationModule {
                     } else {
                         values.add(target);
                     }
-
-                    //todo i want n-n mapping
                     receivedMap.put(source, values);
 
                 }
@@ -194,7 +192,6 @@ public class EvaluationModule extends AbstractEvaluationModule {
 
         LOGGER.info("received data into the map, Map size: " + receivedMap.size());
 
-        //TODO: check this again
         if (!expectedMap.isEmpty() && !receivedMap.isEmpty()) {
             for (Map.Entry<String, List<String>> expectedEntry : expectedMap.entrySet()) {
                 String expectedKey = expectedEntry.getKey();
