@@ -12,10 +12,10 @@
     </properties>
     <repositories>
         <!-- Let's use a local repository for the local libraries of this project -->
-        <repository>
+        <!-- <repository>
             <id>local repository</id>
             <url>file://${project.basedir}/repository</url>
-        </repository>
+        </repository> -->
         <repository>
             <id>maven.aksw.internal</id>
             <name>University Leipzig, AKSW Maven2 Repository</name>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.hobbit</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.6</version>
+            <version>1.0.9</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -190,8 +190,9 @@
             <artifactId>jtsExtension</artifactId>   
             <version>0.1</version> 
         </dependency>
+        <!--silk-->
         <dependency>
-            <groupId>com.vividsolutions.jts</groupId>
+            <groupId>default</groupId>
             <artifactId>silk</artifactId>
             <version>0.1</version>
             <type>jar</type>
@@ -238,7 +239,7 @@
                 </executions>
             </plugin>
             
-            <plugin>		
+         <plugin>		
                 <groupId>org.apache.maven.plugins</groupId>		
                 <artifactId>maven-install-plugin</artifactId>		
                 <version>2.5.2</version>		
@@ -279,7 +280,7 @@
                     </execution>		
                 </executions>		
             </plugin>             
-            
+   
             
         </plugins>
     </build>
