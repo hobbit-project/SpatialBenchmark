@@ -29,32 +29,44 @@ public class Area {
     private Resource id;
     private ArrayList<Coordinate> pointsOfArea;
     private Geometry geometry;
+    private String generator;
+
     private static final URI rdfType = ValueFactoryImpl.getInstance().createURI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-    private static final Value Trace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
-    private static final Value Region = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/regions#Region");
+    private static final Value tomtomTrace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
+    private static final Value tomtomRegion = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/regions#Region");
+    private static final Value spatenTrace = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/traces#Trace");
+    private static final Value spatenRegion = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/regions#Region");
     private static final String stRDF = "http://strdf.di.uoa.gr/ontology#";
     private static final URI WKT = ValueFactoryImpl.getInstance().createURI(stRDF + "WKT");
+    
 
-    public Area(Resource id, ArrayList<Coordinate> pointsOfArea) {
+    public Area(Resource id, ArrayList<Coordinate> pointsOfArea, String generator) {
         this.id = id;
         this.pointsOfArea = pointsOfArea;
+        this.generator = generator;
     }
 
-    public Area(Resource id, Coordinate[] pointsOfArea) {
+    public Area(Resource id, Coordinate[] pointsOfArea, String generator) {
         this.id = id;
         this.pointsOfArea = new ArrayList<Coordinate>(Arrays.asList(pointsOfArea));
+        this.generator = generator;
     }
 
-    public Area(Resource id, Geometry geometry) {
+    public Area(Resource id, Geometry geometry, String generator) {
         this.id = id;
         this.geometry = geometry;
+        this.generator = generator;
     }
 
     public Model getSourceModel() {
+       
         GeometryFactory geometryFactory = new GeometryFactory();
         Model trace = new LinkedHashModel();
-
-        trace.add(id, rdfType, Trace);
+        if (generator.equals("tomtom")) {
+            trace.add(id, rdfType, tomtomTrace);
+        } else {
+            trace.add(id, rdfType, spatenTrace);
+        }
 
         LineString line = geometryFactory.createLineString(pointsOfArea.toArray(new Coordinate[]{}));
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(line.toText(), WKT);
@@ -66,16 +78,20 @@ public class Area {
 
     public Model getTargetModel() {
         Model trace = new LinkedHashModel();
-
-        //if line trace
-        //if polygon region
-        //change radon adapter based on that and all sys adapters until now
-        //change also class name 
-        if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString)) {
-            trace.add(id, rdfType, Trace);
-        } else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon)) {
-            trace.add(id, rdfType, Region);
-        }
+        if (generator.equals("tomtom")) {
+            if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString)) {
+                trace.add(id, rdfType, tomtomTrace);
+            } else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon)) {
+                trace.add(id, rdfType, tomtomRegion);
+            }
+        } 
+        else{
+            if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString)) {
+                trace.add(id, rdfType, spatenTrace);
+            } else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon)) {
+                trace.add(id, rdfType, spatenRegion);
+            }
+        } 
 
         Geometry target = this.geometry;
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(target.toText(), WKT);
@@ -84,18 +100,5 @@ public class Area {
 
         return trace;
     }
-
-    //getter
-//    public ArrayList<Coordinate> getPointsOfArea() {
-//        return this.pointsOfArea;
-//    }
-//
-//    public Resource getAreaId() {
-//        return this.id;
-//    }
-//
-//    public void addPointToArea(Coordinate p) {
-//        this.pointsOfArea.add(p);
-//    }
 
 }
