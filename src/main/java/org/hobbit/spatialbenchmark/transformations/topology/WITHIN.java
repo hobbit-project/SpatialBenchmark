@@ -32,7 +32,7 @@ public class WITHIN implements SpatialTransformation {
             result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
-                if (line.getCoordinates().length >= 2) {
+                if (line.getCoordinates().length >= 4) {
                     CreateContainsGeometryObject instance = new CreateContainsGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }

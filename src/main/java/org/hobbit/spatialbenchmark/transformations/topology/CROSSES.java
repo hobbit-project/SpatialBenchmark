@@ -33,7 +33,7 @@ public class CROSSES implements SpatialTransformation {
             result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
-                if (line.getCoordinates().length >= 2) {
+                if (line.getCoordinates().length >= 4) {
                     CreateCrossesGeometryObject instance = new CreateCrossesGeometryObject(line, type);
                     result = instance.generateGeometry();
                 }
