@@ -9,13 +9,14 @@ public class Task implements Serializable {
 	private String taskId;
         private String relation;
         private String targetGeom;
-        private String namespace;
+        private String dataGen;
 	private byte[] target;
 	private byte[] expectedAnswers;
 	
-	public Task(String id, String relation, String targetGeom, byte[] target, byte[] expectedAnswers) {
+	public Task(String id, String relation, String targetGeom, String dataGen ,byte[] target, byte[] expectedAnswers) {
 		this.taskId = id;
                 this.relation = relation;
+                this.dataGen = dataGen;
 		this.target = target;
 		this.expectedAnswers = expectedAnswers;
 	}
@@ -44,12 +45,12 @@ public class Task implements Serializable {
 		return this.targetGeom;
 	}
         
-        public void setNamespace(String namespace) {
-		this.namespace = namespace;
+        public void setDataGen(String dataGen) {
+		this.dataGen = dataGen;
 	}
 	
-	public String getNamespace() {
-		return this.namespace;
+	public String getDataGen() {
+		return this.dataGen;
 	}
 	
         public void setTarget(byte[] res) {

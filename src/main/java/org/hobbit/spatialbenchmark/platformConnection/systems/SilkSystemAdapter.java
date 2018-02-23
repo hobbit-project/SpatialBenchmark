@@ -87,6 +87,9 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             // read the target geometry
             String targetGeom = RabbitMQUtils.readString(taskBuffer);
             LOGGER.info("targetGeom " + targetGeom);
+            // read namespace
+            String namespace = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("namespace " + namespace);
             // read the file path
             taskFormat = RabbitMQUtils.readString(taskBuffer);
             LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);

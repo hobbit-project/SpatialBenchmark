@@ -73,7 +73,7 @@ public class DataGenerator extends AbstractDataGenerator {
         // call mimicking algorithm
 //      runMimicking();
 
-        task = new Task(Integer.toString(taskId++), null, null, null, null);
+        task = new Task(Integer.toString(taskId++), null, null, null, null, null);
 
     }
 
@@ -158,7 +158,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 task.setTarget(generatedFile);
                 task.setRelation(relation);
                 task.setTargetGeom(targetGeom);
-                task.setNamespace(dataGen);
+                task.setDataGen(dataGen);
 
                 byte[] data = SerializationUtils.serialize(task);
 

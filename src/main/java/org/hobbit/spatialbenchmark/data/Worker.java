@@ -88,21 +88,22 @@ public class Worker extends AbstractWorker {
 
         String generator = "tomtom";
         String path = getConfigurations().getString(Configurations.GIVEN_DATASETS_PATH);
-        if (getConfigurations().getString(Configurations.DATA_GENERATOR).equals("tomtom")) {
+        if (getConfigurations().getString(Configurations.DATA_GENERATOR).toLowerCase().equals("tomtom")) {
             path = path + "/tomtom";
-        } else if (getConfigurations().getString(Configurations.DATA_GENERATOR).equals("spaten")) {
+        } else if (getConfigurations().getString(Configurations.DATA_GENERATOR).toLowerCase().equals("spaten")) {
             path = path + "/spaten";
             generator = "spaten";
         }
+
         List<File> collectedFiles = new ArrayList<File>();
         RepositoryConnection con = null;
-
         FileUtil.collectFilesList(path, collectedFiles, "*", true);
+
 
         if ((numOfInstances > collectedFiles.size()) || (numOfInstances == 0)) {
             numOfInstances = collectedFiles.size();
         }
-        LOGGER.info("numOfInstances from Worker" + numOfInstances);
+        LOGGER.info("numOfInstances from Worker " + numOfInstances);
         try {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
