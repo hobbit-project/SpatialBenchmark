@@ -118,7 +118,7 @@ public class Worker extends AbstractWorker {
                 repository.initialize();
                 con = repository.getConnection();
                 con.add(collectedFiles.get(i), "", format);
-//                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
+                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"
@@ -171,7 +171,7 @@ public class Worker extends AbstractWorker {
                                     Rio.write(sourceTrace, targetFos, rdfFormat);
                                 }
 
-                                if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
+                                else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon) && (getSpatialTransformation().getClass().getSimpleName().equals("CONTAINS") || getSpatialTransformation().getClass().getSimpleName().equals("COVERS"))) {
                                     Rio.write(targetTrace, sourceFos, rdfFormat);
                                     Rio.write(sourceTrace, targetFos, rdfFormat);
                                 } else {
