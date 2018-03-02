@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -108,6 +109,7 @@ public class Worker extends AbstractWorker {
             sourceFos = new FileOutputStream(sourceFileName);
             targetFos = new FileOutputStream(targetFileName);
             oaeiGSFos = new FileOutputStream(oaeiGSFileName);
+            Collections.sort(collectedFiles); //to retrieve same order of files every time
             for (int i = 0; i < numOfInstances; i++) {
                 LOGGER.info("i " + i + " " + collectedFiles.get(i).getName() + " -> " + collectedFiles.get(i).length());
 
