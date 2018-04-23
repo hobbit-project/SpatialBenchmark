@@ -7,30 +7,33 @@ package org.hobbit.spatialbenchmark.platformConnection.systems;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.ShutdownSignalException;
+import eu.earthobservatory.runtime.postgis.Strabon;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
 import org.hobbit.core.rabbit.SimpleFileReceiver;
 import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
-import org.hobbit.spatialbenchmark.util.FileUtil;
-import org.hobbit.spatialbenchmark.util.SesameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import eu.earthobservatory.runtime.postgis.Strabon;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  *
  * @author jsaveta
  */
-public class SilkSystemAdapter extends AbstractSystemAdapter {
+public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
-    private static final Logger LOGGER_SILK = LoggerFactory.getLogger(org.silkframework.execution.GenerateLinks.class);
-    private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StrabonSystemAdapter.class);
     protected File folder = new File("");
     private SimpleFileReceiver sourceReceiver;
     private SimpleFileReceiver targetReceiver;
@@ -38,17 +41,24 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
     private String dataFormat;
     private String taskFormat;
     private String resultsFile;
+    private Strabon strabon = null; // An instance of Strabon
+    String db = null; // Spatially enabled PostGIS database where data is stored 
+    String user = null; // Username to connect to database
+    String passwd = null; // Password to connect to database
+    Integer port = null; // Database host to connect to
+    String host = null; // Port to connect to on the database host
+    String url = null;
 
     @Override
     public void init() throws Exception {
-        LOGGER.info("Initializing Silk test system...");
+        LOGGER.info("Initializing Strabon test system...");
         long time = System.currentTimeMillis();
         super.init();
         LOGGER.info("Super class initialized. It took {}ms.", System.currentTimeMillis() - time);
         time = System.currentTimeMillis();
         sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
         LOGGER.info("Receivers initialized. It took {}ms.", System.currentTimeMillis() - time);
-        LOGGER.info("Silk initialized successfully.");
+        LOGGER.info("Strabon initialized successfully.");
 
     }
 
@@ -58,19 +68,17 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("Starting receiveGeneratedData..");
 
             ByteBuffer dataBuffer = ByteBuffer.wrap(data);
-            dataFormat = RabbitMQUtils.readString(dataBuffer);
             // read the file path
+            dataFormat = RabbitMQUtils.readString(dataBuffer);
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
-//LOGGER.info("receivedFiles DATA " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = "./datasets/SourceDatasets/" + receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
         } catch (IOException | ShutdownSignalException | ConsumerCancelledException | InterruptedException ex) {
             java.util.logging.Logger.getLogger(SilkSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     @Override
@@ -112,7 +120,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
             LOGGER.info("Task " + taskId + " received from task generator");
 
-            silkController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
+            strabonController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
             byte[][] resultsArray = new byte[1][];
 
             resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
@@ -129,57 +137,59 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
         }
     }
 
-    public void silkController(String source, String target, String relation) throws IOException {
+    public void strabonController(String source, String target, String relation) {
 
         try {
 
-            LOGGER.info("Started silkController.. ");
-            String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
-            String newConfig = "./configs/topologicalConfigs/silkNewConfig" + relation + ".xml";
-//Supported formats are: 'RDF/XML', 'N-Triples', 'N-Quads', 'Turtle'
-            try {
-                resultsFile = "./datasets/SilkSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
+            LOGGER.info("Started strabonController.. ");
+            // docker file creates
+            // user: postgres
+            // with password: postgres
+            // db: template_postgis
+            // wiht port: 9999
+            // url: jdbc:postgresql://localhost:9999/template_postgis  ?????
 
-                String content = FileUtils.readFileToString(new File(config), "UTF-8");
-                content = content.replaceAll("source-clear-for-silk.nt", "../../" + source);
-                content = content.replaceAll("target-clear-for-silk.nt", "../../" + target);
-//                content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
-//                content = content.replaceAll("N-TRIPLES", "N-TRIPLE");
+            //http://hg.strabon.di.uoa.gr/Strabon/file/9ee6935c722a/runtime/src/main/java/eu/earthobservatory/runtime/postgis
+            
+            String db = "template_postgis";
+            String user = "postgres";
+            String passwd = "postgres";
+            Integer port = 9999;
+            String host = "localhost";
+            //String url = "jdbc:postgresql://localhost:9999/template_postgis";
 
-//  TODO             CORRECT FORMAT.. Now only gets nt, find how the have defined it
-//or maybe they only return .nt resutls! I should fix that if so
-                content = content.replaceAll("mappings.nt", "../../" + resultsFile);
+            //initialize strabon - kanei kai connect auto?
+            strabon = new Strabon(db, user, passwd, port, host, true);
+            
+            LOGGER.info("Strabon is initialized");
+            //connect to strabon
+           
+            //http://hg.strabon.di.uoa.gr/Strabon/file/9ee6935c722a/runtime/src/main/java/eu/earthobservatory/runtime/postgis/StoreOp.java
+            
+            //store source dataset            
+            Boolean inference = false;
+            String graph = "sourceGraph";            
+            strabon.storeInRepo(source, null, graph, dataFormat, inference);
+            
+            LOGGER.info("Source dataset is stored in graph named sourceGraph");
+            
+            //store target dataset
+            graph = "targetGraph";            
+            strabon.storeInRepo(target, null, graph, dataFormat, inference);
+            LOGGER.info("Target dataset is stored in graph named targetGraph");
+            
 
-                File tempFile = new File(newConfig);
-                FileUtils.writeStringToFile(tempFile, content, "UTF-8");
+            //run query 
 
-//                LOGGER.info("------------CONFIG");
-//                try (BufferedReader br = new BufferedReader(new FileReader(newConfig))) {
-//                    String line = null;
-//                    while ((line = br.readLine()) != null) {
-//                        LOGGER.info("" + line);
-//                    }
-//                }
-            } catch (IOException e) {
-                throw new RuntimeException("Generating file failed", e);
-            }
-
-            Process p = Runtime.getRuntime().exec("java -DconfigFile=" + newConfig + "  -jar ./lib/silk.jar ");
-            p.waitFor();
-
-            LOGGER_SILK.info(IOUtils.toString(p.getInputStream()));
-            LOGGER_SILK.info(IOUtils.toString(p.getErrorStream()));
-
-            //delete cache folder 
-            File folder = new File("./cache/");
-            FileUtil.removeDirectory(folder);
-
-            LOGGER.info("silkController finished..");
-
-        } catch (InterruptedException ex) {
-            java.util.logging.Logger.getLogger(SilkSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            LOGGER.info("Cannot initialize Strabon or cannot store datasets into graphs");
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String stacktrace = sw.toString();
+            LOGGER.info("" + stacktrace);
         }
 
+        LOGGER.info("strabonController finished..");
     }
 
     @Override
@@ -197,9 +207,9 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
 
     @Override
     public void close() throws IOException {
-        LOGGER.info("Closing System Adapter...");
+        LOGGER.info("Closing Strabon System Adapter...");
         // Always close the super class after yours!
         super.close();
-        LOGGER.info("System Adapter closed successfully.");
+        LOGGER.info("Strabon System Adapter closed successfully.");
     }
 }

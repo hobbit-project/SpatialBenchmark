@@ -66,8 +66,8 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("Starting receiveGeneratedData..");
 
             ByteBuffer dataBuffer = ByteBuffer.wrap(data);
-            // read the file path
             dataFormat = RabbitMQUtils.readString(dataBuffer);
+            // read the file path
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
