@@ -26,6 +26,39 @@
             <name>University Leipzig, AKSW Maven2 Repository</name>
             <url>http://maven.aksw.org/repository/snapshots</url>
         </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>strabon</id>
+            <name>Strabon - maven repository</name>
+            <url>http://maven.strabon.di.uoa.gr/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>strabon.sesame</id>
+            <name>Strabon - maven repository - sesame artifacts (temporary)</name>
+            <url>http://maven.strabon.di.uoa.gr/content/repositories/strabon.sesame/</url>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>strabon.snapshot</id>
+            <name>Strabon - maven repository - snapshots</name>
+            <url>http://maven.strabon.di.uoa.gr/content/repositories/snapshots</url>
+        </repository>
      
     </repositories>
     
@@ -34,7 +67,7 @@
         <dependency>
             <groupId>org.hobbit</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.10</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -197,6 +230,33 @@
             <version>0.1</version>
             <type>jar</type>
         </dependency>
+        
+        <!-- Strabon start -->
+        <dependency>
+            <groupId>eu.earthobservatory</groupId>
+            <artifactId>strabon</artifactId>
+            <version>3.3.1</version>
+            <type>pom</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.earthobservatory</groupId>
+            <artifactId>strabon-vocabulary</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.earthobservatory</groupId>
+            <artifactId>strabon-runtime</artifactId>
+            <version>3.3.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- Strabon dependencies -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryalgebra-evaluation-spatial</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+                
     </dependencies>
     <build>
 
@@ -239,7 +299,7 @@
                 </executions>
             </plugin>
             
-         <plugin>		
+            <plugin>		
                 <groupId>org.apache.maven.plugins</groupId>		
                 <artifactId>maven-install-plugin</artifactId>		
                 <version>2.5.2</version>		
