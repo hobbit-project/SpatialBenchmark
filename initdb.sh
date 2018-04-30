@@ -30,10 +30,13 @@ psql -d template_postgis -c "VACUUM FREEZE;"
 
 #Allows non-superusers the ability to create from this template.
 psql -d postgres -c "UPDATE pg_database SET datistemplate='true' WHERE datname='template_postgis';"
-psql -d postgres -c "UPDATE pg_database SET datallowconn='false' WHERE datname='template_postgis';"
+psql -d postgres -c "UPDATE pg_database SET datallowconn='true' WHERE datname='template_postgis';" #this was false
 
 #Create a spatially-enabled database named endpoint.
 createdb endpoint -T template_postgis
+
+#Grant privileges on template_postgis
+#psql -c "GRANT ALL PRIVILEGES ON template_postgis TO postgres;"
 
 #stop postgres
 service postgresql stop

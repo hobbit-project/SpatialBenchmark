@@ -231,32 +231,12 @@
             <type>jar</type>
         </dependency>
         
-        <!-- Strabon start -->
         <dependency>
-            <groupId>eu.earthobservatory</groupId>
-            <artifactId>strabon</artifactId>
-            <version>3.3.1</version>
-            <type>pom</type>
-            <scope>compile</scope>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.0-801.jdbc4</version>
         </dependency>
-        <dependency>
-            <groupId>eu.earthobservatory</groupId>
-            <artifactId>strabon-vocabulary</artifactId>
-            <version>3.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.earthobservatory</groupId>
-            <artifactId>strabon-runtime</artifactId>
-            <version>3.3.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Strabon dependencies -->
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-queryalgebra-evaluation-spatial</artifactId>
-            <version>3.3.1</version>
-        </dependency>
-                
+         
     </dependencies>
     <build>
 
