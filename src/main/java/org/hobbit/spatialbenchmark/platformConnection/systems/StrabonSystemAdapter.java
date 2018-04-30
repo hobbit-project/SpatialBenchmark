@@ -184,7 +184,7 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
                 + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
                 + " "+user+ " " +passwd  + " " + source + " " + taskFormat +" "+ G1 + " && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
                 + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
-                + " "+user+ " " +passwd  + " " + target + " " + taskFormat + G1};
+                + " "+user+ " " +passwd  + " " + target + " " + taskFormat + G2};
             Process p = Runtime.getRuntime().exec(command);
             LOGGER.info("[Strabon] store completed in source (G1) and target (G2) graphs");
                         
