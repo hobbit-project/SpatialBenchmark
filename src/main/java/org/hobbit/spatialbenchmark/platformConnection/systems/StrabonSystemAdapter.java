@@ -160,10 +160,12 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
     public void strabonController(String source, String target, String relation) {
         LOGGER.info("Started strabonController.. ");
-//        String db = "endpoint";
-//        String user = "postgres";
-//        String passwd = "postgres";
-//        Integer port = 5432; 
+        String db = "endpoint";
+        String user = "postgres";
+        String passwd = "postgres";
+        Integer port = 5432; 
+        String G1 = "http://G1";
+        String G2 = "http://G2";
         try {
             String[] envVariablesPostgresql = new String[]{};
             String postgresqlContName = this.createContainer("git.project-hobbit.eu:4567/jsaveta1/strabonsystemadapter/strabon:latest", envVariablesPostgresql);
@@ -179,14 +181,13 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 //          http://www.strabon.di.uoa.gr/files/stSPARQL_tutorial.pdf
             
             String[] command = {"/bin/sh", "-c", "cd Strabon/endpoint/jars/target && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
-                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " 5432 endpoint\n"
-                + "postgres postgres " + source + " " + taskFormat + " && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
-                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " 5432 endpoint\n"
-                + "postgres postgres " + target + " " + taskFormat};
+                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
+                + " "+user+ " " +passwd  + " " + source + " " + taskFormat +" "+ G1 + " && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
+                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
+                + " "+user+ " " +passwd  + " " + target + " " + taskFormat + G1};
             Process p = Runtime.getRuntime().exec(command);
-            LOGGER.info("[Strabon] store completed");
-            
-            
+            LOGGER.info("[Strabon] store completed in source (G1) and target (G2) graphs");
+                        
             String line;
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
             while ((line = input.readLine()) != null) {
@@ -194,7 +195,6 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
             }
             input.close();
 
-          
         } catch (Exception e) {
             LOGGER.error("[Strabon] Error during connection or store.", e);
             StringWriter sw = new StringWriter();
@@ -300,17 +300,17 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 //        }
 //    }
 //
-//    private static void help() {
-//        LOGGER.info("Usage: eu.earthobservatory.runtime.postgis.StoreOp <HOST> <PORT> <DATABASE> <USERNAME> <PASSWORD> <FILE> [-f <FORMAT>] [-g <NAMED_GRAPH>] [-i <INFERENCE>]");
-//        LOGGER.info("       where <HOST>       		 is the postgis database host to connect to");
-//        LOGGER.info("             <PORT>       		 is the port to connect to on the database host");
-//        LOGGER.info("             <DATABASE>   		 is the spatially enabled postgis database that Strabon will use as a backend");
-//        LOGGER.info("             <USERNAME>   		 is the username to use when connecting to the database");
-//        LOGGER.info("             <PASSWORD>   		 is the password to use when connecting to the database");
-//        LOGGER.info("             <FILE>       		 is the file to be stored");
-//        LOGGER.info("             [-f <FORMAT>] 		 is the format of the file (default: NTRIPLES)");
-//        LOGGER.info("             [-g <NAMED_GRAPH>]  is the URI of the named graph to store the input file (default: default graph)");
-//        LOGGER.info("             [-i <INFERENCE>] 	 is true when inference is enabled (default: false)");
-//
-//    }
+    private static void help() {
+        LOGGER.info("Usage: eu.earthobservatory.runtime.postgis.StoreOp <HOST> <PORT> <DATABASE> <USERNAME> <PASSWORD> <FILE> [-f <FORMAT>] [-g <NAMED_GRAPH>] [-i <INFERENCE>]");
+        LOGGER.info("       where <HOST>       		 is the postgis database host to connect to");
+        LOGGER.info("             <PORT>       		 is the port to connect to on the database host");
+        LOGGER.info("             <DATABASE>   		 is the spatially enabled postgis database that Strabon will use as a backend");
+        LOGGER.info("             <USERNAME>   		 is the username to use when connecting to the database");
+        LOGGER.info("             <PASSWORD>   		 is the password to use when connecting to the database");
+        LOGGER.info("             <FILE>       		 is the file to be stored");
+        LOGGER.info("             [-f <FORMAT>] 		 is the format of the file (default: NTRIPLES)");
+        LOGGER.info("             [-g <NAMED_GRAPH>]  is the URI of the named graph to store the input file (default: default graph)");
+        LOGGER.info("             [-i <INFERENCE>] 	 is true when inference is enabled (default: false)");
+
+    }
 }
