@@ -91,14 +91,8 @@ RUN hg clone http://hg.strabon.di.uoa.gr/Strabon/ \
  && cd Strabon \
  && mvn clean package
 
-RUN ls /Strabon/endpoint/target/ ####
-
-RUN ls /Strabon/endpoint/target/strabon-endpoint-3.3.2-SNAPSHOT/WEB-INF/lib/
-
-
 RUN cp /Strabon/endpoint/target/strabon-endpoint-3.3.2-SNAPSHOT.war /tomcat/webapps/Strabon.war \
  && rm -rf /Strabon
-
 
 
 # DOWNLOAD AND BUILD ontop-spatial
@@ -126,5 +120,4 @@ RUN chmod -v +x /usr/local/bin/rocket.sh
 EXPOSE $PORT
 
 CMD enable_remote.sh && su - postgres -c "/usr/lib/postgresql/9.4/bin/postgres -D /var/lib/postgresql/9.4/main -c config_file=/etc/postgresql/9.4/main/postgresql.conf"
-
 

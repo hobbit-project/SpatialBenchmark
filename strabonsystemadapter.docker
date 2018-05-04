@@ -2,11 +2,23 @@
 # benchmark
 FROM java
 
+#FROM git.project-hobbit.eu:4567/jsaveta1/strabonsystemadapter/strabon as strabon
+
 ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.jar
 
 WORKDIR /SpatialBenchmark
 
-COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
+#COPY --from=strabon /Strabon/endpoint/target/Strabon.jar /SpatialBenchmark/endpoint/target/Strabon.jar
+
+#COPY lib/Strabon.jar /SpatialBenchmark/lib/Strabon.jar
+#COPY lib/slf4j-api-1.6.1.jar /SpatialBenchmark/lib/slf4j-api-1.6.1.jar
+#COPY lib/slf4j-log4j12-1.6.4.jar /SpatialBenchmark/lib/slf4j-log4j12-1.6.4.jar
+
+#COPY strabon/Strabon.jar /SpatialBenchmark/strabon/Strabon.jar
+
+COPY strabon/* /SpatialBenchmark/strabon/
+
+#COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
 COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
 
