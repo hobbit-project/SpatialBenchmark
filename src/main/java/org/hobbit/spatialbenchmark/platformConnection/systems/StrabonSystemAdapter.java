@@ -7,11 +7,12 @@ package org.hobbit.spatialbenchmark.platformConnection.systems;
 
 import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.ShutdownSignalException;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import org.apache.commons.io.FileUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
 import org.hobbit.core.rabbit.RabbitMQUtils;
@@ -19,27 +20,14 @@ import org.hobbit.core.rabbit.SimpleFileReceiver;
 import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import eu.earthobservatory.runtime.postgis.Strabon;
-//import eu.earthobservatory.utils.Format;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.util.Properties;
-import org.hobbit.spatialbenchmark.util.SesameUtils;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.rio.RDFFormat;
-//import org.openrdf.sail.postgis.PostGISSqlStore;
 
 /**
  *
@@ -63,12 +51,13 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
     private String host = null; // Port to connect to on the database host
     private String url = null;
     private static String PREFIXES
-            = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n"
-            + "PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#>\n"
-            + "PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#>\n"
-            + "PREFIX spaten: <http://www.spaten.com/ontologies/traces#>\n"
-            + "PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#>\n"
-            + "PREFIX strdf: <http://strdf.di.uoa.gr/ontology#>\n"; //fill this and append the query 
+            = "PREFIX geof: <http://www.opengis.net/def/function/geosparql/> "
+            + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+            + "PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> "
+            + "PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> "
+            + "PREFIX spaten: <http://www.spaten.com/ontologies/traces#> "
+            + "PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> "
+            + "PREFIX strdf: <http://strdf.di.uoa.gr/ontology#> "; //fill this and append the query 
 
     @Override
     public void init() throws Exception {
@@ -163,37 +152,57 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         String db = "endpoint";
         String user = "postgres";
         String passwd = "postgres";
-        Integer port = 5432; 
+        Integer port = 5432;
         String G1 = "http://G1";
         String G2 = "http://G2";
+
         try {
+//            String[] envVariablesPostgresql = new String[]{"-p 9999:8080"};
             String[] envVariablesPostgresql = new String[]{};
             String postgresqlContName = this.createContainer("git.project-hobbit.eu:4567/jsaveta1/strabonsystemadapter/strabon:latest", envVariablesPostgresql);
             LOGGER.info("postgresqlContName " + postgresqlContName);
 
             //connect to strabon
-            LOGGER.info("[Strabon] store source and target files to database");
-//            Class.forName("org.postgresql.Driver");
-//            url = "jdbc:postgresql://" + postgresqlContName + ":" + port + "/" + db + "?user=" + user + "&password=" + passwd + "&application_name=strabon";
-//            Connection con = DriverManager.getConnection(url);
-
-
+            LOGGER.info("[Strabon] Store and Query to Strabon");
 //          http://www.strabon.di.uoa.gr/files/stSPARQL_tutorial.pdf
-            
-            String[] command = {"/bin/sh", "-c", "cd Strabon/endpoint/jars/target && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
-                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
-                + " "+user+ " " +passwd  + " " + source + " " + taskFormat +" "+ G1 + " && java -cp $(for file in ‘ls -1 *.jar‘; do myVar=$myVar./$file\":\";\n"
-                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " "+port+" "+db+" \n"
-                + " "+user+ " " +passwd  + " " + target + " " + taskFormat + G2};
-            Process p = Runtime.getRuntime().exec(command);
-            LOGGER.info("[Strabon] store completed in source (G1) and target (G2) graphs");
-                        
-            String line;
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = input.readLine()) != null) {
-                LOGGER.info("* "+line);
+//          queries: http://geographica.di.uoa.gr/queries/joins.txt
+            StringBuilder query = new StringBuilder();
+            query.append(PREFIXES);
+            query.append("\"SELECT ?s1 ?s2"
+                    + " WHERE {GRAPH " + G1 + " {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}"
+                    + " GRAPH " + G2 + " {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}"
+                    + " FILTER(geof:sfEquals(?o1, ?o2))."
+                    + " }\";");
+
+//java.net.UnknownHostException: ..
+//          not all formats are supported! check here:http://hg.strabon.di.uoa.gr/Strabon/file/9ee6935c722a/runtime/src/main/java/eu/earthobservatory/runtime/generaldb/Strabon.java
+            String[] store = {"/bin/sh", "-c", "cd ./strabon/ && java -cp $(for file in `ls -1 *.jar`; do myVar=$myVar./$file\":\";"
+                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " " + port + " " + db
+                + " " + user + " " + passwd + " " + "../" + source + " -f " + taskFormat + " -g " + G1 + " && java -cp $(for file in `ls -1 *.jar`; do myVar=$myVar./$file\":\";"
+                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.StoreOp " + postgresqlContName + " " + port + " " + db
+                + " " + user + " " + passwd + " " + "../" + target + " -f " + taskFormat + " -g " + G2 };
+//                + "&& java -cp $(for file in `ls -1 *.jar`; do myVar=$myVar./$file\":\";"
+//                + "done;echo $myVar;) eu.earthobservatory.runtime.postgis.QueryOp " + postgresqlContName + " " + port + " " + db 
+//                + " " + user + " " + passwd + " " + query.toString() + " SESAME_CSV", "-get t"};
+            Process p = Runtime.getRuntime().exec(store);
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+            // read the output from the command
+            LOGGER.info("Here is the standard output of the command:\n");
+            String out = null;
+            while ((out = stdInput.readLine()) != null) {
+                LOGGER.info(out);
             }
-            input.close();
+
+            // read any errors from the attempted command
+            LOGGER.info("Here is the standard error of the command (if any):\n");
+            while ((out = stdError.readLine()) != null) {
+                LOGGER.info(out);
+            }
+
+            LOGGER.info("[Strabon] Store and Query to Strabon completed.");
 
         } catch (Exception e) {
             LOGGER.error("[Strabon] Error during connection or store.", e);
@@ -226,80 +235,6 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Strabon System Adapter closed successfully.");
     }
 
-//    public void start() {
-//
-//        //sudo /etc/init.d/postgresql restart
-//        //      /etc/postgresql
-//        String[] start_postgres = {"/bin/bash", "-c", "service postgresql start"};
-//
-//        Process pr;
-//
-//        try {
-//            LOGGER.info("Starting Strabon (Postgres) ...");
-//
-//            pr = new ProcessBuilder(start_postgres).redirectErrorStream(true).start();
-//            BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-//            String line;
-//            while ((line = in.readLine()) != null) {
-//                LOGGER.info(line);
-//            }
-//            pr.waitFor();
-//            if (pr.exitValue() != 0) {
-//                LOGGER.error("Something went wrong while starting postgres");
-//
-//            }
-//            strabon = new Strabon(db, user, passwd, port, host, true);
-//            LOGGER.info("Strabon (Postgres) started");
-//        } catch (Exception e) {
-//            LOGGER.info("Cannot start Strabon");
-//            StringWriter sw = new StringWriter();
-//            e.printStackTrace(new PrintWriter(sw));
-//            String stacktrace = sw.toString();
-//            LOGGER.info(stacktrace);
-//        }
-//    }
-//
-//    // Clear caches (to be able to measure times for cold and warm caches)
-//    public void clearCaches() {
-//
-//        String[] stop_postgres = {"/bin/bash", "-c", "service postgresql stop"};
-//        String[] clear_caches = {"/bin/bash", "-c", "sync && echo 3 > /proc/sys/vm/drop_caches"};
-//        String[] start_postgres = {"/bin/bash", "-c", "service postgresql start"};
-//
-//        Process pr;
-//
-//        try {
-//            LOGGER.info("Clearing caches...");
-//
-//            pr = Runtime.getRuntime().exec(stop_postgres);
-//            pr.waitFor();
-//            if (pr.exitValue() != 0) {
-//                LOGGER.error("Something went wrong while stoping postgres");
-//            }
-//
-//            pr = Runtime.getRuntime().exec(clear_caches);
-//            pr.waitFor();
-//            if (pr.exitValue() != 0) {
-//                LOGGER.error("Something went wrong while clearing caches");
-//            }
-//
-//            pr = Runtime.getRuntime().exec(start_postgres);
-//            pr.waitFor();
-//            if (pr.exitValue() != 0) {
-//                LOGGER.error("Something went wrong while clearing caches");
-//            }
-//
-//            Thread.sleep(5000);
-//            LOGGER.info("Caches cleared");
-//        } catch (Exception e) {
-//            LOGGER.info("Cannot clear caches");
-//            StringWriter sw = new StringWriter();
-//            e.printStackTrace(new PrintWriter(sw));
-//            String stacktrace = sw.toString();
-//            LOGGER.info(stacktrace);
-//        }
-//    }
-//
     private static void help() {
         LOGGER.info("Usage: eu.earthobservatory.runtime.postgis.StoreOp <HOST> <PORT> <DATABASE> <USERNAME> <PASSWORD> <FILE> [-f <FORMAT>] [-g <NAMED_GRAPH>] [-i <INFERENCE>]");
         LOGGER.info("       where <HOST>       		 is the postgis database host to connect to");
@@ -312,5 +247,14 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("             [-g <NAMED_GRAPH>]  is the URI of the named graph to store the input file (default: default graph)");
         LOGGER.info("             [-i <INFERENCE>] 	 is true when inference is enabled (default: false)");
 
+        LOGGER.info("Usage: eu.earthobservatory.runtime.postgis.QueryOp <HOST> <PORT> <DATABASE> <USERNAME> <PASSWORD> <QUERY> ");
+        LOGGER.info("       where <HOST>       is the postgis database host to connect to");
+        LOGGER.info("             <PORT>       is the port to connect to on the database host");
+        LOGGER.info("             <DATABASE>   is the spatially enabled postgis database that Strabon will use as a backend, ");
+        LOGGER.info("             <USERNAME>   is the username to use when connecting to the database ");
+        LOGGER.info("             <PASSWORD>   is the password to use when connecting to the database");
+        LOGGER.info("             <QUERY>      is the stSPARQL query to evaluate.");
+        LOGGER.info("             <DELET_LOCK> is true when deletion of \"locked\" table should be enforced (e.g., when Strabon has been ungracefully shutdown).");
+        LOGGER.info("             [<FORMAT>]   is the format of your results (default: XML)");
     }
 }
