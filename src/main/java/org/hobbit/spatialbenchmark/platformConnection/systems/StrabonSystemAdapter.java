@@ -274,6 +274,8 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         //WITHIN, COVERED_BY, CROSSES, OVERLAPS
         
         //TODO: fill queries
+        //http://www.strabon.di.uoa.gr/files/stSPARQL_tutorial.pdf
+        //http://geographica.di.uoa.gr/queries/joins.txt
         String query = null;
         String PREFIXES
                 = "PREFIX geof: <http://www.opengis.net/def/function/geosparql/> "
@@ -287,11 +289,12 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         switch (relation) {
             case "EQUALS":
                 StringBuilder sbQuery = new StringBuilder();
+                sbQuery.append("\"");
                 sbQuery.append(PREFIXES);
-                sbQuery.append("\"SELECT ?s1 ?s2"
+                sbQuery.append("SELECT ?s1 ?s2"
                         + " WHERE {GRAPH " + G1 + " {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}"
                         + " GRAPH " + G2 + " {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}"
-                        + " FILTER(geof:sfEquals(?o1, ?o2))."
+                        + " FILTER(geof:sfEquals(?o1, ?o2)). "
                         + " }\";");
                 query = sbQuery.toString();
                 break;
