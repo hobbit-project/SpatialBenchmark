@@ -26,6 +26,19 @@ FILTER(geof:sfEquals(?o1, ?o2)).
 
 elif("$RELATION" == "DISJOINT")
 then
+QUERY="PREFIX geof: <http://www.opengis.net/def/function/geosparql/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> 
+PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> 
+PREFIX spaten: <http://www.spaten.com/ontologies/traces#> 
+PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> 
+PREFIX strdf: <http://strdf.di.uoa.gr/ontology#>
+SELECT ?s1 ?s2
+WHERE { 
+	GRAPH <$GRAPH1> {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}
+	GRAPH <$GRAPH2> {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2} 
+	FILTER(geof:sfDisjoint(?o1, ?o2)).  
+}";
 
 elif("$RELATION" == "TOUCHES")
 then
@@ -46,9 +59,35 @@ WHERE {
 
 elif("$RELATION" == "CONTAINS")
 then
+QUERY="PREFIX geof: <http://www.opengis.net/def/function/geosparql/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> 
+PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> 
+PREFIX spaten: <http://www.spaten.com/ontologies/traces#> 
+PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> 
+PREFIX strdf: <http://strdf.di.uoa.gr/ontology#>
+SELECT ?s1 ?s2
+WHERE { 
+	GRAPH  <$GRAPH1> {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}
+	GRAPH  <$GRAPH2> {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}
+	FILTER(geof:sfContains(?o1, ?o2)).  
+}";
 
 elif("$RELATION" == "COVERS")
 then
+QUERY="PREFIX geof: <http://www.opengis.net/def/function/geosparql/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> 
+PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> 
+PREFIX spaten: <http://www.spaten.com/ontologies/traces#> 
+PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> 
+PREFIX strdf: <http://strdf.di.uoa.gr/ontology#> 
+SELECT ?s1 ?s2
+WHERE { 
+	GRAPH <$GRAPH1> {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}
+	GRAPH <$GRAPH2> {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}
+	FILTER(geof:ehCovers(?o1, ?o2)).  
+}";
 
 elif("$RELATION" == "INTERSECTS")
 then
@@ -84,6 +123,19 @@ WHERE {
 
 elif("$RELATION" == "COVERED_BY")
 then
+QUERY="PREFIX geof: <http://www.opengis.net/def/function/geosparql/> 
+PREFIX owl: <http://www.w3.org/2002/07/owl#> 
+PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> 
+PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> 
+PREFIX spaten: <http://www.spaten.com/ontologies/traces#> 
+PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> 
+PREFIX strdf: <http://strdf.di.uoa.gr/ontology#> 
+SELECT ?s1 ?s2
+WHERE { 
+	GRAPH <$GRAPH1> {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}
+	GRAPH <$GRAPH2> {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}
+	FILTER(geof:ehCoveredBy(?o1, ?o2)).  
+}";
 
 elif("$RELATION" == "CROSSES")
 then
