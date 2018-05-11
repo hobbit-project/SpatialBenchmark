@@ -206,9 +206,9 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
             //////////////////////////////////
             LOGGER.info("Query for " + relation + " relation between source and target graphs (G1, G2)..");
-            String query = createQuery(relation, G1, G2);
             String queryScriptFilePath = System.getProperty("user.dir") + File.separator + "query.sh";
-            String[] queryCMD = {"/bin/bash", queryScriptFilePath, postgresqlContName, port.toString(), db, user, passwd, query, "SESAME_CSV"};
+            String[] queryCMD = {"/bin/bash", queryScriptFilePath, postgresqlContName, port.toString(), db, user,passwd, G1, G2, relation};
+            
             Process pQ = new ProcessBuilder(queryCMD).redirectErrorStream(true).start(); //= Runtime.getRuntime().exec(command);
             stdInput = new BufferedReader(new InputStreamReader(pQ.getInputStream()));
             stdError = new BufferedReader(new InputStreamReader(pQ.getErrorStream()));
@@ -267,58 +267,6 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
     public static void copy(String sourcePath, String destinationPath) throws IOException {
         Files.copy(Paths.get(sourcePath), new FileOutputStream(destinationPath));
-    }
-
-    private String createQuery(String relation, String G1, String G2) {
-        //EQUALS, DISJOINT, TOUCHES, CONTAINS, COVERS, INTERSECTS, 
-        //WITHIN, COVERED_BY, CROSSES, OVERLAPS
-        
-        //TODO: fill queries
-        //http://www.strabon.di.uoa.gr/files/stSPARQL_tutorial.pdf
-        //http://geographica.di.uoa.gr/queries/joins.txt
-        String query = null;
-        String PREFIXES
-                = "PREFIX geof: <http://www.opengis.net/def/function/geosparql/> "
-                + "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
-                + "PREFIX tomtom: <http://www.tomtom.com/ontologies/traces#> "
-                + "PREFIX tomtomregions: <http://www.tomtom.com/ontologies/regions#> "
-                + "PREFIX spaten: <http://www.spaten.com/ontologies/traces#> "
-                + "PREFIX spatenregions: <http://www.spaten.com/ontologies/regions#> "
-                + "PREFIX strdf: <http://strdf.di.uoa.gr/ontology#> ";
-
-        switch (relation) {
-            case "EQUALS":
-                StringBuilder sbQuery = new StringBuilder();
-                sbQuery.append("\"");
-                sbQuery.append(PREFIXES);
-                sbQuery.append("SELECT ?s1 ?s2"
-                        + " WHERE {GRAPH " + G1 + " {?s1 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o1}"
-                        + " GRAPH " + G2 + " {?s2 <http://strdf.di.uoa.gr/ontology#hasGeometry> ?o2}"
-                        + " FILTER(geof:sfEquals(?o1, ?o2)). "
-                        + " }\";");
-                query = sbQuery.toString();
-                break;
-            case "DISJOINT":
-                break;
-            case "TOUCHES":
-                break;
-            case "CONTAINS":
-                break;
-            case "COVERS":
-                break;
-            case "INTERSECTS":
-                break;
-            case "WITHIN":
-                break;
-            case "COVERED_BY":
-                break;
-            case "CROSSES":
-                break;
-            case "OVERLAPS":
-                break;
-
-        }
-        return query;
     }
 
     private static void help() {

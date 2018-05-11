@@ -24,9 +24,13 @@ for element in "${to_docker[@]}"; do
       echo -e ${YELLOW}Docker build: spatial_evaluation-module${NC}
       docker build -t spatial_evaluation-module -f spatialevaluationmodule.docker .
    fi
-   if [ "$element" == "s"  ] || [ "$element" == "all"  ]; then
+   if [ "$element" == "s1"  ] || [ "$element" == "all"  ]; then
       echo -e ${YELLOW}Docker build: spatial_limes-system${NC}
       docker build -t spatial_limes-system -f limessystemadapter.docker .
+   fi
+   if [ "$element" == "s2"  ] || [ "$element" == "all"  ]; then
+      echo -e ${YELLOW}Docker build: spatial_silk-system${NC}
+      docker build -t spatial_silk-system -f silksystemadapter.docker .
    fi
    
 done

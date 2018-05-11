@@ -35,8 +35,6 @@ psql -d postgres -c "UPDATE pg_database SET datallowconn='true' WHERE datname='t
 #Create a spatially-enabled database named endpoint.
 createdb endpoint -T template_postgis
 
-#Grant privileges on template_postgis
-#psql -c "GRANT ALL PRIVILEGES ON template_postgis TO postgres;"
 
 #stop postgres
 service postgresql stop
