@@ -20,12 +20,19 @@ import org.hobbit.spatialbenchmark.rabbit.SingleFileReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.hobbit.spatialbenchmark.util.SesameUtils;
 
 /**
  *
@@ -40,7 +47,7 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
     private String receivedGeneratedDataFilePath;
     private String dataFormat;
     private String taskFormat;
-    private String resultsFile;
+    private File resultsFile;
     private String db = null; // Spatially enabled PostGIS database where data is stored 
     private String user = null; // Username to connect to database
     private String passwd = null; // Password to connect to database
@@ -85,55 +92,57 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
         LOGGER.info("Starting receiveGeneratedTask..");
         LOGGER.info("Task " + taskId + " received from task generator");
         long time = System.currentTimeMillis();
-//        try {
-
-        ByteBuffer taskBuffer = ByteBuffer.wrap(data);
-        // read the relation
-        String taskRelation = RabbitMQUtils.readString(taskBuffer);
-        LOGGER.info("taskRelation " + taskRelation);
-        // read the target geometry
-        String targetGeom = RabbitMQUtils.readString(taskBuffer);
-        LOGGER.info("targetGeom " + targetGeom);
-        // read namespace
-        String namespace = RabbitMQUtils.readString(taskBuffer);
-        LOGGER.info("namespace " + namespace);
-        // read the file path
-        taskFormat = RabbitMQUtils.readString(taskBuffer);
-        LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
-
-        String receivedGeneratedTaskFilePath = null;
         try {
 
-            targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
-                    "task_target_file");
-            String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
+            ByteBuffer taskBuffer = ByteBuffer.wrap(data);
+            // read the relation
+            String taskRelation = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("taskRelation " + taskRelation);
+            // read the target geometry
+            String targetGeom = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("targetGeom " + targetGeom);
+            // read namespace
+            String namespace = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("namespace " + namespace);
+            // read the file path
+            taskFormat = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("Parsed task " + taskId + ". It took {}ms.", System.currentTimeMillis() - time);
+            time = System.currentTimeMillis();
+
+            String receivedGeneratedTaskFilePath = null;
+            try {
+
+                targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
+                        "task_target_file");
+                String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
 //LOGGER.info("receivedFiles TASK " + Arrays.toString(receivedFiles));
-            receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
+                receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
 
-        } catch (Exception e) {
-            LOGGER.error("Exception while trying to receive data. Aborting.", e);
+            } catch (Exception e) {
+                LOGGER.error("Exception while trying to receive data. Aborting.", e);
+            }
+            LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
+            time = System.currentTimeMillis();
+
+            LOGGER.info("Task " + taskId + " received from task generator");
+
+            strabonController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
+
+            byte[][] resultsArray = new byte[1][];
+
+            resultsArray[0] = FileUtils.readFileToByteArray(resultsFile);
+            byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
+            try {
+
+                sendResultToEvalStorage(taskId, results);
+                LOGGER.info("Results sent to evaluation storage.");
+            } catch (IOException e) {
+                LOGGER.error("Exception while sending storage space cost to evaluation storage.", e);
+            }
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(SilkSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        LOGGER.info("Received task data. It took {}ms.", System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
 
-        LOGGER.info("Task " + taskId + " received from task generator");
-
-        strabonController(receivedGeneratedDataFilePath, receivedGeneratedTaskFilePath, taskRelation);
-//            byte[][] resultsArray = new byte[1][];
-//
-//            resultsArray[0] = FileUtils.readFileToByteArray(new File(resultsFile));
-//            byte[] results = RabbitMQUtils.writeByteArrays(resultsArray);
-//            try {
-//
-//                sendResultToEvalStorage(taskId, results);
-//                LOGGER.info("Results sent to evaluation storage.");
-//            } catch (IOException e) {
-//                LOGGER.error("Exception while sending storage space cost to evaluation storage.", e);
-//            }
-//        } catch (IOException ex) {
-//            java.util.logging.Logger.getLogger(StrabonSystemAdapter.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
 
     public void strabonController(String source, String target, String relation) {
@@ -206,32 +215,60 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
             //////////////////////////////////
             LOGGER.info("Query for " + relation + " relation between source and target graphs (G1, G2)..");
+
             String queryScriptFilePath = System.getProperty("user.dir") + File.separator + "query.sh";
-            String[] queryCMD = {"/bin/bash", queryScriptFilePath, postgresqlContName, port.toString(), db, user,passwd, G1, G2, relation};
-            
-            Process pQ = new ProcessBuilder(queryCMD).redirectErrorStream(true).start(); //= Runtime.getRuntime().exec(command);
+            String[] queryCMD = {"/bin/bash", queryScriptFilePath, postgresqlContName, port.toString(), db, user, passwd, G1, G2, relation};
+            Process pQ = new ProcessBuilder(queryCMD).redirectErrorStream(true).start();
+
+            //use the file parameter from strabon and not the BufferedReader, it might crash for large results! 
+
             stdInput = new BufferedReader(new InputStreamReader(pQ.getInputStream()));
             stdError = new BufferedReader(new InputStreamReader(pQ.getErrorStream()));
 
             LOGGER.info("Here is the standard output of the command for the query:\n");
+            LOGGER.info("Copying output to results file..");
+            resultsFile = new File("mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
+            BufferedWriter writer = new BufferedWriter(new FileWriter(resultsFile));
+
             out = null;
             while ((out = stdInput.readLine()) != null) {
-                LOGGER.info(out);
+                if (!out.startsWith("http:")) {
+                    LOGGER.info("SKIPPED THIS LINE: " + out);
+                    continue;
+                } else {
+//                    LOGGER.info("stdInput: " + out);
+                    LOGGER.info("line about to copy: " + out);
+                    //http://www.tomtom.com/trace-data/10001.ttl#trace	http://www.hobbit.e2d76d61f-b866-4199-be4b-ba85bc97acc8
+                    String lines[] = out.split("\\s+");
+                    String newLine = "<" + lines[0] + "> " + "<" + lines[1] + ">";
+                    writer.write(newLine);
+                    writer.newLine();   // Write system dependent end of line.
+                }
             }
-
+            writer.close();
             // read any errors from the attempted command
             LOGGER.info("Here is the standard error of the command for the query (if any):\n");
             while ((out = stdError.readLine()) != null) {
-                LOGGER.info(out);
+                LOGGER.info("stdError: " + out);
             }
 
+            if (resultsFile.exists()) {
+                LOGGER.info("PRINTING RESULTS FILE:");
+                BufferedReader br = new BufferedReader(new FileReader(resultsFile));
+                String line1 = null;
+                while ((line1 = br.readLine()) != null) {
+                    LOGGER.info("result: " + line1);
+                }
+            } else {
+                LOGGER.info("file doesn't exist");
+            }
             pQ.waitFor();
             stdInput.close();
-            stdInput.close();
+            stdError.close();
+
             LOGGER.info("Query for " + relation + " relation between source and target graphs (G1, G2) completed...");
 
             //TODO: save results in file.. 
-            
             LOGGER.info("[Strabon] Store and Query to Strabon completed.");
 
         } catch (Exception e) {
