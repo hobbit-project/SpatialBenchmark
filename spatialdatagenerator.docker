@@ -10,7 +10,11 @@ COPY definitions.properties /SpatialBenchmark/
 
 COPY datasets/* /SpatialBenchmark/datasets/
 
-COPY datasets/givenDatasets/ /SpatialBenchmark/datasets/givenDatasets/
+COPY datasets/givenDatasets/tomtom/ /SpatialBenchmark/datasets/givenDatasets/tomtom/
+
+COPY datasets/givenDatasets/spaten/ /SpatialBenchmark/datasets/givenDatasets/spaten/
+
+COPY datasets/givenDatasets/debs/ /SpatialBenchmark/datasets/givenDatasets/debs/
 
 COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
 

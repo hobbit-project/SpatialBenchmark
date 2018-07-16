@@ -124,6 +124,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
             List values = null;
             for (String answer : dataAnswers) {
                 answer = answer.trim();
+                
 //                LOGGER.info("expected answer " + answer);
                 if (answer != null && !answer.equals("")) {
                     String source_temp = answer.split(">")[0];
@@ -145,6 +146,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
 //            LOGGER.info("expected data  " + RabbitMQUtils.readString(expected));
             }
 
+            //comment out this after checking if works correctly!
 //            LOGGER.info("expected data into the map: " + expectedMap.toString());
         }
 
@@ -166,6 +168,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
 //      LOGGER.info("received answer " + answer);
                 answer = answer.trim();
                 answer = answer.replaceAll("<http://www.w3.org/2002/07/owl#sameAs>", "");
+                
                 if (answer != null && !answer.equals("")) {
                     String source_temp = answer.split(">")[0];
                     String source = source_temp.substring(source_temp.indexOf("<") + 1);
@@ -186,7 +189,7 @@ public class EvaluationModule extends AbstractEvaluationModule {
 //            LOGGER.info("receivedData data  " + RabbitMQUtils.readString(receivedData));
 
             }
-
+//comment out this after checking if works correctly!
 //            LOGGER.info("received data into the map: " + receivedMap.toString());
         }
 

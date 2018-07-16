@@ -173,6 +173,8 @@ COPY strabon/store.sh /SpatialBenchmark/
 
 COPY strabon/query.sh /SpatialBenchmark/
 
+COPY strabon/mappings.nt /SpatialBenchmark/
+
 ##CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter #org.hobbit.spatialbenchmark.platformConnection.systems.StrabonSystemAdapter
 
 

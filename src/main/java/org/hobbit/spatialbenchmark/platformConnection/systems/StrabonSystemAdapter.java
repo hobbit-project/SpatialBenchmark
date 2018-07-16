@@ -177,6 +177,7 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
             // read any errors from the attempted command
             LOGGER.info("Here is the standard error of the command for storing source dataset into G1 graph (if any):\n");
+            out = null;
             while ((out = stdError.readLine()) != null) {
                 LOGGER.info(out);
             }
@@ -204,6 +205,7 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
 
             // read any errors from the attempted command
             LOGGER.info("Here is the standard error of the command for storing target dataset into G2 graph (if any):\n");
+            out = null;
             while ((out = stdError.readLine()) != null) {
                 LOGGER.info(out);
             }
@@ -216,55 +218,70 @@ public class StrabonSystemAdapter extends AbstractSystemAdapter {
             //////////////////////////////////
             LOGGER.info("Query for " + relation + " relation between source and target graphs (G1, G2)..");
 
+//            java.io.FileNotFoundException: File 'mappings.nt' does not exist: when trying file argument to query.sh
+//            try System.getProperty("user.dir") + File.separator + ..... - I think this will work!
+//            also the results do not contain < > fix evaluation module in order to split on space/tab/whatever
+//            and not in < > I am triming the answer before.. REMOVE ALSO < > and split on http: 
+//            remove < > also from gold standard
+            resultsFile = new File("mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
+
             String queryScriptFilePath = System.getProperty("user.dir") + File.separator + "query.sh";
             String[] queryCMD = {"/bin/bash", queryScriptFilePath, postgresqlContName, port.toString(), db, user, passwd, G1, G2, relation};
-            Process pQ = new ProcessBuilder(queryCMD).redirectErrorStream(true).start();
+            Process pQ = new ProcessBuilder(queryCMD).start();//.redirectErrorStream(true).start();
 
             //use the file parameter from strabon and not the BufferedReader, it might crash for large results! 
+//            stdInput = new BufferedReader(new InputStreamReader(pQ.getInputStream()));
+//            stdError = new BufferedReader(new InputStreamReader(pQ.getErrorStream()));
+//
+//            LOGGER.info("Here is the standard output of the command for the query:\n");
+//            LOGGER.info("Copying output to results file..");
+//            BufferedWriter writer = new BufferedWriter(new FileWriter(resultsFile));
+//
+//            out = null;
+//            while ((out = stdInput.readLine()) != null) {
+//                if (!out.startsWith("http:")) {
+////                    LOGGER.info("SKIPPED THIS LINE: " + out);
+//                    continue;
+//                } else {
+////                    LOGGER.info("stdInput: " + out);
+////                    LOGGER.info("line about to copy: " + out);
+//                    //http://www.tomtom.com/trace-data/10001.ttl#trace	http://www.hobbit.e2d76d61f-b866-4199-be4b-ba85bc97acc8
+////                    String lines[] = out.split("\\s+");
+////                    String newLine = "<" + lines[0] + "> " + "<" + lines[1] + ">";
+////                    writer.write(newLine);
+//
+//                    writer.write(out);
+//                    writer.newLine();   // Write system dependent end of line.
+//                }
+//            }
+//            writer.close();
 
-            stdInput = new BufferedReader(new InputStreamReader(pQ.getInputStream()));
-            stdError = new BufferedReader(new InputStreamReader(pQ.getErrorStream()));
-
-            LOGGER.info("Here is the standard output of the command for the query:\n");
-            LOGGER.info("Copying output to results file..");
-            resultsFile = new File("mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension());
-            BufferedWriter writer = new BufferedWriter(new FileWriter(resultsFile));
-
-            out = null;
-            while ((out = stdInput.readLine()) != null) {
-                if (!out.startsWith("http:")) {
-                    LOGGER.info("SKIPPED THIS LINE: " + out);
-                    continue;
-                } else {
-//                    LOGGER.info("stdInput: " + out);
-                    LOGGER.info("line about to copy: " + out);
-                    //http://www.tomtom.com/trace-data/10001.ttl#trace	http://www.hobbit.e2d76d61f-b866-4199-be4b-ba85bc97acc8
-                    String lines[] = out.split("\\s+");
-                    String newLine = "<" + lines[0] + "> " + "<" + lines[1] + ">";
-                    writer.write(newLine);
-                    writer.newLine();   // Write system dependent end of line.
-                }
-            }
-            writer.close();
+//        LOGGER.info("Here is the standard output of the command for the query (if any):\n");
+//               out = null;
+//            while ((out = stdInput.readLine()) != null) {
+//                LOGGER.info(out);
+//            }
+            
             // read any errors from the attempted command
-            LOGGER.info("Here is the standard error of the command for the query (if any):\n");
-            while ((out = stdError.readLine()) != null) {
-                LOGGER.info("stdError: " + out);
-            }
+//            out = null;
+//            LOGGER.info("Here is the standard error of the command for the query (if any):\n");
+//            while ((out = stdError.readLine()) != null) {
+//                LOGGER.info("stdError: " + out);
+//            }
 
-            if (resultsFile.exists()) {
-                LOGGER.info("PRINTING RESULTS FILE:");
-                BufferedReader br = new BufferedReader(new FileReader(resultsFile));
-                String line1 = null;
-                while ((line1 = br.readLine()) != null) {
-                    LOGGER.info("result: " + line1);
-                }
-            } else {
-                LOGGER.info("file doesn't exist");
-            }
+//            if (resultsFile.exists()) {
+//                LOGGER.info("PRINTING RESULTS FILE:");
+//                BufferedReader br = new BufferedReader(new FileReader(resultsFile));
+//                String line1 = null;
+//                while ((line1 = br.readLine()) != null) {
+//                    LOGGER.info("result: " + line1);
+//                }
+//            } else {
+//                LOGGER.info("file doesn't exist");
+//            }
             pQ.waitFor();
-            stdInput.close();
-            stdError.close();
+//            stdInput.close();
+//            stdError.close();
 
             LOGGER.info("Query for " + relation + " relation between source and target graphs (G1, G2) completed...");
 

@@ -37,9 +37,9 @@ import org.hobbit.spatialbenchmark.transformations.RelationsCall.targetGeometry;
  * @author jsaveta
  */
 public class DataGenerator extends AbstractDataGenerator {
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(DataGenerator.class);
-
+    
     private int numberOfDataGenerators; //TODO: use this
     private int population;
     private int seed;
@@ -49,16 +49,16 @@ public class DataGenerator extends AbstractDataGenerator {
     private String targetGeom;
     private String dataGen;
     private int taskId = 0;
-
+    
     public static Generator dataGeneration = new Generator();
-
+    
     public static String testPropertiesFile = System.getProperty("user.dir") + File.separator + "test.properties";
     public static String definitionsPropertiesFile = System.getProperty("user.dir") + File.separator + "definitions.properties";
     public static String datasetsPath = System.getProperty("user.dir") + File.separator + "datasets";
     public static String givenDatasetsPath = System.getProperty("user.dir") + File.separator + "datasets" + File.separator + "givenDatasets";
-
+    
     private Task task;
-
+    
     @Override
     public void init() throws Exception {
         LOGGER.info("Initializing Data Generator '" + getGeneratorId() + "'");
@@ -71,12 +71,15 @@ public class DataGenerator extends AbstractDataGenerator {
         reInitializeProperties();
 
         // call mimicking algorithm
-//      runMimicking();
-
+//        LOGGER.info("dataGen: " + dataGen);
+//        if (dataGen.toLowerCase().equals("tomtom")) {
+//            runMimicking();
+//        }
+        
         task = new Task(Integer.toString(taskId++), null, null, null, null, null);
-
+        
     }
-
+    
     @Override
     protected void generateData() throws Exception {
         // Create your data inside this method. You might want to use the
@@ -88,19 +91,19 @@ public class DataGenerator extends AbstractDataGenerator {
         LOGGER.info("Generate data.. ");
         SimpleFileSender sender = null;
         try {
-
+            
             Worker worker = new Worker();
             worker.execute();
-
+            
             File sourcePath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
             ArrayList<File> sourceFiles = new ArrayList<File>(Arrays.asList(sourcePath.listFiles()));
-
+            
             File targetPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "TargetDatasets");
             ArrayList<File> targetFiles = new ArrayList<File>(Arrays.asList(targetPath.listFiles()));
-
+            
             File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
-
+            
             for (File file : gsFiles) {
                 byte[][] generatedFileArray = new byte[3][];
                 // send the file name and its content
@@ -126,7 +129,7 @@ public class DataGenerator extends AbstractDataGenerator {
 
                 // create the senderfile to System Adapter or Task Generator(s).
                 sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
-
+                
                 InputStream is = null;
                 try {
                     // create input stream, e.g., by opening a file
@@ -144,7 +147,7 @@ public class DataGenerator extends AbstractDataGenerator {
                 // send data to system
                 sendDataToSystemAdapter(generatedFile);
                 LOGGER.info(file.getAbsolutePath() + " (" + (double) file.length() / 1000 + " KB) sent to System Adapter.");
-
+                
             }
 
             // send generated tasks along with their expected answers to task generator
@@ -159,14 +162,14 @@ public class DataGenerator extends AbstractDataGenerator {
                 task.setRelation(relation);
                 task.setTargetGeom(targetGeom);
                 task.setDataGen(dataGen);
-
+                
                 byte[] data = SerializationUtils.serialize(task);
 
                 // define a queue name, e.g., read it from the environment
                 String queueName = "target_file";
                 // create the sender
                 sender = SimpleFileSender.create(this.outgoingDataQueuefactory, queueName);
-
+                
                 InputStream is = null;
                 try {
                     // create input stream, e.g., by opening a file
@@ -181,20 +184,20 @@ public class DataGenerator extends AbstractDataGenerator {
 
                 // close the sender
                 IOUtils.closeQuietly(sender);
-
+                
                 sendDataToTaskGenerator(data);
                 LOGGER.info("Target data successfully sent to Task Generator.");
             }
-
+            
         } catch (Exception e) {
             LOGGER.error("Exception while sending file to System Adapter or Task Generator(s).", e);
         }
-
+        
     }
-
+    
     public void initFromEnv() {
         LOGGER.info("Getting Data Generator's properites from the environment...");
-
+        
         Map<String, String> env = System.getenv();
         serializationFormat = (String) getFromEnv(env, PlatformConstants.GENERATED_DATA_FORMAT, "");
         population = (Integer) getFromEnv(env, PlatformConstants.GENERATED_POPULATION, 0);
@@ -202,7 +205,7 @@ public class DataGenerator extends AbstractDataGenerator {
         numberOfDataGenerators = (Integer) getFromEnv(env, PlatformConstants.NUMBER_OF_DATA_GENERATORS, 0);
         relation = (String) getFromEnv(env, PlatformConstants.SPATIAL_RELATION, "");
         keepPoints = (double) getFromEnv(env, PlatformConstants.KEEP_POINTS, 0.0);
-        targetGeom =  getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, "");
+        targetGeom = getFromEnv(env, PlatformConstants.TARGET_GEOMETRY, "");
         dataGen = (String) getFromEnv(env, PlatformConstants.DATA_GENERATOR, "");
     }
 
@@ -238,13 +241,13 @@ public class DataGenerator extends AbstractDataGenerator {
         }
         return paramType;
     }
-
+    
     public void reInitializeProperties() throws IOException {
 
 //        int numberOfGenerators = getNumberOfGenerators();
 //        int generatorId = getGeneratorId();
         loadPropertiesConfigurationFiles();
-
+        
         getDefinitions().initializeAllocations(getRandom());
 
         // re-initialize test.properties file that is required for data generation
@@ -260,36 +263,34 @@ public class DataGenerator extends AbstractDataGenerator {
         points.add(1.0 - keepPoints);
         Random random = new Random();
         Definitions.keepPointsAllocation = new AllocationsUtil(points, random);
-        
+
         //target geometry
         ArrayList<Double> targetGeometryArrayList = new ArrayList<Double>();
         for (int i = 0; i < 2; i++) {
             targetGeometryArrayList.add(0.0);
         }
-
+        
         int ind = targetGeometry.valueOf(targetGeom).ordinal();
         targetGeometryArrayList.add(ind, 1.0);
         Definitions.targetGeometryAllocation = new AllocationsUtil(targetGeometryArrayList, random);
-
+        
         getRelationsCall().targetGeometryCases();
         setTargetGeometryType(getRelationsCall().getTargetGeometryType());
         
-        
-
         ArrayList<Double> relationArrayList = new ArrayList<Double>();
         for (int i = 0; i < 10; i++) {
             relationArrayList.add(0.0);
         }
-
+        
         int index = spatialRelation.valueOf(relation).ordinal();
         relationArrayList.add(index, 1.0);
         Definitions.spatialRelationsAllocation = new AllocationsUtil(relationArrayList, random);
-
+        
         getRelationsCall().spatialRelationsCases();
         setSpatialTransformation(getRelationsCall().getSpatialRelationsConfiguration());
-
+        
     }
-
+    
     public static void loadPropertiesConfigurationFiles() throws IOException {
         getConfigurations().loadFromFile(testPropertiesFile);
         getDefinitions().loadFromFile(definitionsPropertiesFile);
@@ -365,28 +366,33 @@ public class DataGenerator extends AbstractDataGenerator {
 //        LOGGER.info("Mimicking data has been received.");
 //
 //    }
-
     public void runMimicking() {
         LOGGER.info("Running mimicking algorithm ");
 //        DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator");
         DockerBasedMimickingAlg alg = new DockerBasedMimickingAlg(this, "git.project-hobbit.eu:4567/filipe.teixeira/synthetic-trace-generator/64kb-traces");
-
+        
         try {
             String[] TomTomDataArguments = new String[3];
             TomTomDataArguments[0] = "HOBBIT_NUM_TRACES=" + population;
             TomTomDataArguments[1] = "HOBBIT_SEED=" + seed;
             TomTomDataArguments[2] = "HOBBIT_OUTPUT_FORMAT=rdf"; //what else can be ?
-
-            alg.generateData(givenDatasetsPath, TomTomDataArguments);
+            LOGGER.info("population: " + population);
+            LOGGER.info("PATH" + givenDatasetsPath + File.separator + "tomtom/");
+            alg.generateData(givenDatasetsPath + File.separator + "tomtom/", TomTomDataArguments);
             //print files in folder
-            File[] files = new File(givenDatasetsPath).listFiles();
+            File[] files = new File(givenDatasetsPath + File.separator + "tomtom/").listFiles();
             //If this pathname does not denote a directory, then listFiles() returns null. 
             LOGGER.info("files generated from mimicking: " + files.length);
+            
+            File[] Sfiles = new File(givenDatasetsPath + File.separator + "spaten/").listFiles();
+            //If this pathname does not denote a directory, then listFiles() returns null. 
+            LOGGER.info("SPATEN files: " + Sfiles.length);
+            
             for (File file : files) {
                 if (file.isFile()) {
                     LOGGER.info("file from mimicking: " + file.getName());
                     double bytes = file.length();
-                    LOGGER.info("file bytes "+bytes);
+                    LOGGER.info("file bytes " + bytes);
                     
                 }
             }
@@ -395,12 +401,10 @@ public class DataGenerator extends AbstractDataGenerator {
             LOGGER.error("TOMTOM_DATA script terminated.");
             throw new RuntimeException();
         }
-
+        
         LOGGER.info("Mimicking data has been received.");
-
+        
     }
-    
-    
     
     @Override
     public void close() throws IOException {
@@ -408,5 +412,5 @@ public class DataGenerator extends AbstractDataGenerator {
         super.close();
         LOGGER.info("Data Generator closed successfully.");
     }
-
+    
 }

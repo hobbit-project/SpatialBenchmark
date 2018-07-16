@@ -37,6 +37,9 @@ public class RADONController extends Controller {
     private ResultMappings mappings;
 
     public RADONController(RDFFormat rdfFormat, String generator) throws IOException {
+        
+//        generator = "tomtom"; //this is only for the experiments of ontoidea
+        
         String[] args = new String[1];
         args[0] = getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
 

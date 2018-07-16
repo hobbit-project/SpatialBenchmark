@@ -38,41 +38,49 @@ public class Area {
     private static final Value spatenRegion = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/regions#Region");
     private static final String stRDF = "http://strdf.di.uoa.gr/ontology#";
     private static final URI WKT = ValueFactoryImpl.getInstance().createURI(stRDF + "WKT");
-    
 
     public Area(Resource id, ArrayList<Coordinate> pointsOfArea, String generator) {
-        this.id = id;
+        this.id = id; //this is commented out ONLY to let OntoIdea run experiments with different URI from TomTom
+        
+//        this.id = ValueFactoryImpl.getInstance().createURI(id.toString().replace("spaten", "tomtom"));
+        
         this.pointsOfArea = pointsOfArea;
         this.generator = generator;
     }
 
     public Area(Resource id, Coordinate[] pointsOfArea, String generator) {
-        this.id = id;
+        this.id = id; //this is commented out ONLY to let OntoIdea run experiments with different URI from TomTom
+        
+//        this.id = ValueFactoryImpl.getInstance().createURI(id.toString().replace("spaten", "tomtom"));
+        
         this.pointsOfArea = new ArrayList<Coordinate>(Arrays.asList(pointsOfArea));
         this.generator = generator;
     }
 
     public Area(Resource id, Geometry geometry, String generator) {
-        this.id = id;
+        this.id = id; //this is commented out ONLY to let OntoIdea run experiments with different URI from TomTom
+        
+//        this.id = ValueFactoryImpl.getInstance().createURI(id.toString().replace("spaten", "tomtom"));
+        
         this.geometry = geometry;
         this.generator = generator;
     }
 
     public Model getSourceModel() {
-       
+
         GeometryFactory geometryFactory = new GeometryFactory();
         Model trace = new LinkedHashModel();
+        
         if (generator.equals("tomtom")) {
             trace.add(id, rdfType, tomtomTrace);
         } else {
             trace.add(id, rdfType, spatenTrace);
         }
-
         LineString line = geometryFactory.createLineString(pointsOfArea.toArray(new Coordinate[]{}));
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(line.toText(), WKT);
 
         trace.add(id, ValueFactoryImpl.getInstance().createURI(stRDF + "hasGeometry"), geometryValue);
-
+       
         return trace;
     }
 
@@ -92,7 +100,6 @@ public class Area {
                 trace.add(id, rdfType, spatenRegion);
             }
         } 
-
         Geometry target = this.geometry;
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(target.toText(), WKT);
 

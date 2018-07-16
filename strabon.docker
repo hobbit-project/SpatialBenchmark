@@ -91,8 +91,9 @@ RUN hg clone http://hg.strabon.di.uoa.gr/Strabon/ \
  && cd Strabon \
  && mvn clean package
 
-RUN cp /Strabon/endpoint/target/strabon-endpoint-3.3.2-SNAPSHOT.war /tomcat/webapps/Strabon.war \
- && rm -rf /Strabon
+RUN cp /Strabon/endpoint/target/strabon-endpoint-3.3.2-SNAPSHOT.war /tomcat/webapps/Strabon.war 
+#\
+# && rm -rf /Strabon
 
 
 # DOWNLOAD AND BUILD ontop-spatial

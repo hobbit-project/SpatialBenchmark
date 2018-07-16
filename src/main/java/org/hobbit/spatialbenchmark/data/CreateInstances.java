@@ -30,6 +30,9 @@ public class CreateInstances extends Generator {
     private Model sourceTrace = null;
     private String generator = "";
 
+    private static int sumOfPoints = 0;
+    private static int maxValue = 0;
+
     public CreateInstances(String generator) {
         this.generator = generator;
     }
@@ -59,6 +62,13 @@ public class CreateInstances extends Generator {
                 }
             }
             if (points.size() >= 2) {
+                sumOfPoints = sumOfPoints + points.size();
+//                System.out.println("points.size() " + points.size());
+//                System.out.println("sumOfPoints " + sumOfPoints);
+                if (points.size() > maxValue) {
+                    maxValue = points.size();
+                }
+//                System.out.println("maxValue " +maxValue);
                 this.sourceTrace = new Area(id, points, generator).getSourceModel();
             }
         } catch (OutOfMemoryError e) {
@@ -86,7 +96,7 @@ public class CreateInstances extends Generator {
                             targetURI = URIMap.get(statement.getSubject());
                         }
                     } else {
-                      targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue(), getRelationsCall().getTargetGeometryType());
+                        targetGeometry = (Geometry) getSpatialTransformation().execute(statement.getObject().stringValue(), getRelationsCall().getTargetGeometryType());
                     }
                 }
 

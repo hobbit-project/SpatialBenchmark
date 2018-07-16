@@ -14,9 +14,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.hobbit.spatialbenchmark.platformConnection.DataGenerator;
 import org.hobbit.spatialbenchmark.transformations.SpatialTransformation;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,9 +33,11 @@ public class OVERLAPS implements SpatialTransformation {
             result = (LineString) geo;
             if (geo instanceof LineString) {
                 LineString line = (LineString) geo;
+//                System.out.println("dim line " + line.getDimension());
                 if (line.getCoordinates().length >= 4) {
                     CreateOverlapsGeometryObject instance = new CreateOverlapsGeometryObject(line, type);
                     result = instance.generateGeometry();
+//                    System.out.println("dim poly " + result.getDimension());
                 }
             }
         } catch (ParseException ex) {

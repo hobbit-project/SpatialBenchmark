@@ -9,20 +9,6 @@ COPY test.properties /SpatialBenchmark/
 
 COPY definitions.properties /SpatialBenchmark/
 
-COPY datasets/* /SpatialBenchmark/datasets/
-
-COPY datasets/givenDatasets/ /SpatialBenchmark/datasets/givenDatasets/tomtom/
-
-COPY datasets/givenDatasets/ /SpatialBenchmark/datasets/givenDatasets/spaten/
-
-COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
-
-COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
-
-COPY datasets/GoldStandards/ /SpatialBenchmark/datasets/GoldStandards/
-
-COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
-
 CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.BenchmarkController
 
 

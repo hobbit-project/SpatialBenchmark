@@ -94,6 +94,9 @@ public class Worker extends AbstractWorker {
         } else if (getConfigurations().getString(Configurations.DATA_GENERATOR).toLowerCase().equals("spaten")) {
             path = path + "/spaten";
             generator = "spaten";
+        } else if (getConfigurations().getString(Configurations.DATA_GENERATOR).toLowerCase().equals("debs")) {
+            path = path + "/debs";
+            generator = "debs";
         }
 
         List<File> collectedFiles = new ArrayList<File>();
@@ -120,7 +123,7 @@ public class Worker extends AbstractWorker {
                 repository.initialize();
                 con = repository.getConnection();
                 con.add(collectedFiles.get(i), "", format);
-                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
+//                System.out.println("i " + i + " " + collectedFiles.get(i).getName());
 
                 //ids of traces for defined number of instances 
                 String queryNumInstances = "SELECT ?s WHERE {"

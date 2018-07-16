@@ -27,7 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.hobbit.spatialbenchmark.AreaPoint;
 import static org.hobbit.spatialbenchmark.data.Generator.getAtomicLong;
-import org.joda.time.DateTimeZone;
 import org.openrdf.model.Model;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
