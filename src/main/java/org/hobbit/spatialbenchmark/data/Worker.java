@@ -98,6 +98,8 @@ public class Worker extends AbstractWorker {
             path = path + "/debs";
             generator = "debs";
         }
+        
+        System.out.println("generator " + generator);
 
         List<File> collectedFiles = new ArrayList<File>();
         RepositoryConnection con = null;

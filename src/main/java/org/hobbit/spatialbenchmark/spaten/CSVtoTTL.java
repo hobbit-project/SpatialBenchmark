@@ -40,7 +40,7 @@ import org.openrdf.rio.Rio;
  *
  * @author jsaveta
  */
-public class CSVtoWKT {
+public class CSVtoTTL {
 
     private static final URI spatenTrace = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/traces#Trace");
     private static final URI spatenURI = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/trace-data/");
@@ -107,7 +107,7 @@ public class CSVtoWKT {
                             new File(sourceFileName).delete();
                         }
                     } catch (RDFHandlerException ex) {
-                        Logger.getLogger(CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                     values = new ArrayList<Coordinate>();
@@ -137,9 +137,9 @@ public class CSVtoWKT {
             return traces;
 
         } catch (IOException ex) {
-            Logger.getLogger(CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
-            Logger.getLogger(CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

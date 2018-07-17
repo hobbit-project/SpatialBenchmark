@@ -36,6 +36,8 @@ public class Area {
     private static final Value tomtomRegion = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/regions#Region");
     private static final Value spatenTrace = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/traces#Trace");
     private static final Value spatenRegion = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/regions#Region");
+    private static final Value debsTrace = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace");
+    private static final Value debsRegion = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/regions#Region");
     private static final String stRDF = "http://strdf.di.uoa.gr/ontology#";
     private static final URI WKT = ValueFactoryImpl.getInstance().createURI(stRDF + "WKT");
 
@@ -73,8 +75,10 @@ public class Area {
         
         if (generator.equals("tomtom")) {
             trace.add(id, rdfType, tomtomTrace);
-        } else {
+        } else if (generator.equals("spaten")) {
             trace.add(id, rdfType, spatenTrace);
+        } else if (generator.equals("debs")) {
+            trace.add(id, rdfType, debsTrace);
         }
         LineString line = geometryFactory.createLineString(pointsOfArea.toArray(new Coordinate[]{}));
         Value geometryValue = ValueFactoryImpl.getInstance().createLiteral(line.toText(), WKT);
@@ -93,11 +97,18 @@ public class Area {
                 trace.add(id, rdfType, tomtomRegion);
             }
         } 
-        else{
+        else if (generator.equals("spaten")) {
             if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString)) {
                 trace.add(id, rdfType, spatenTrace);
             } else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon)) {
                 trace.add(id, rdfType, spatenRegion);
+            }
+        } 
+        else if (generator.equals("debs")) {
+            if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.LineString)) {
+                trace.add(id, rdfType, debsTrace);
+            } else if (getRelationsCall().getTargetGeometryType().equals(GeometryTypes.Polygon)) {
+                trace.add(id, rdfType, debsRegion);
             }
         } 
         Geometry target = this.geometry;

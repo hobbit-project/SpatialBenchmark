@@ -34,7 +34,7 @@ import org.openrdf.rio.Rio;
  *
  * @author jsaveta
  */
-public class CSVtoWKT {
+public class CSVtoTTL {
 
     private static final URI debsTrace = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace");
     private static final URI debsURI = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data/");
@@ -76,7 +76,7 @@ public class CSVtoWKT {
                         String shipId = raw.getValue("ship_id").toString();
                         String tupleDepPortName = raw.getValue("departure_port_name").toString();
                         String tripId = shipId.substring(0, 7) + "_" + tupleDepPortName + "_" + (shipTrips.size() + 1);
-
+                        tripId = tripId.replace(" ", "_");
                         //fix trip id
                         System.out.println("tripId: " + tripId);
                         String[] split = raw.toString().split(",");
@@ -108,14 +108,14 @@ public class CSVtoWKT {
                             values = new ArrayList<Coordinate>();
                             currentFilesCount = getAtomicLong().incrementAndGet();
                             sourceFileName = String.format("./datasets/givenDatasets/debs/trace" + currentFilesCount + ".ttl");
-                            givenFos = new FileOutputStream(sourceFileName);                            
+                            givenFos = new FileOutputStream(sourceFileName);
                             givenTraceModel = new LinkedHashModel();
-                            
+
                         }
                         if (values.isEmpty()) {
-                           givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data#" + tripId), rdfs, ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace"));
+                            givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data#" + tripId), rdfs, ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace"));
                         }
-                        
+
                         if (!values.contains(coordinate)) {
                             values.add(coordinate); //skip duplicates
 
@@ -145,11 +145,11 @@ public class CSVtoWKT {
             return traces;
 
         } catch (IOException ex) {
-            Logger.getLogger(org.hobbit.spatialbenchmark.debs.CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(org.hobbit.spatialbenchmark.debs.CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ParseException ex) {
-            Logger.getLogger(org.hobbit.spatialbenchmark.debs.CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(org.hobbit.spatialbenchmark.debs.CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(CSVtoWKT.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CSVtoTTL.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

@@ -37,7 +37,7 @@ public class RADONController extends Controller {
     private ResultMappings mappings;
 
     public RADONController(RDFFormat rdfFormat, String generator) throws IOException {
-        
+         LOGGER.info("generator " +generator);
 //        generator = "tomtom"; //this is only for the experiments of ontoidea
         
         String[] args = new String[1];
