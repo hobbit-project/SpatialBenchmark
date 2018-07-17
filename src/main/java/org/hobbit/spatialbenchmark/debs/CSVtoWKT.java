@@ -83,7 +83,6 @@ public class CSVtoWKT {
                         String lon = split[8];
                         String lat = split[9];
 
-                        //tsekare an einai ontos long lat kai oxi lat long
                         double longitude = Double.parseDouble(lon);
                         double latitude = Double.parseDouble(lat);
 //                        System.out.println("split[8] " + lon);
@@ -100,7 +99,7 @@ public class CSVtoWKT {
                             System.out.println("givenTraceModel.size() " + givenTraceModel.size());
                             if (givenTraceModel.size() > 4) { //avoid files that contain only one point, a traces should have > 2 points
                                 Rio.write(givenTraceModel, givenFos, RDFFormat.TURTLE);
-//                                System.out.println("givenTraceModel------ " + givenTraceModel.toString());
+                                System.out.println("givenTraceModel------ " + givenTraceModel.toString());
 
                             } else {
                                 new File(sourceFileName).delete();
@@ -109,14 +108,15 @@ public class CSVtoWKT {
                             values = new ArrayList<Coordinate>();
                             currentFilesCount = getAtomicLong().incrementAndGet();
                             sourceFileName = String.format("./datasets/givenDatasets/debs/trace" + currentFilesCount + ".ttl");
-                            givenFos = new FileOutputStream(sourceFileName);
+                            givenFos = new FileOutputStream(sourceFileName);                            
                             givenTraceModel = new LinkedHashModel();
-                            givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data#" + tripId), rdfs, ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace"));
-
+                            
                         }
+                        if (values.isEmpty()) {
+                           givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data#" + tripId), rdfs, ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace"));
+                        }
+                        
                         if (!values.contains(coordinate)) {
-//                            System.out.println(" if (!values.contains(coordinate))");
-//                            System.out.println("coordinate " + coordinate);
                             values.add(coordinate); //skip duplicates
 
                             givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/trace-data#" + tripId), ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#hasPoint"), ValueFactoryImpl.getInstance().createURI("http://www.debs.com/point#" + values.size()));
@@ -124,15 +124,12 @@ public class CSVtoWKT {
                             givenTraceModel.add((Resource) ValueFactoryImpl.getInstance().createURI("http://www.debs.com/point#" + values.size()), ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#long"), ValueFactoryImpl.getInstance().createLiteral(longitude));
 
                         }
-                        //ta traces pou exoun apla ena point paraleipontai etsi ki allios edo 
                         traces.put(tripId, values);
                     }
 
                 }
 
             }
-//            System.out.println("givenTraceModel " + givenTraceModel.toString());
-
             givenFos.flush();
             givenFos.close();
 
