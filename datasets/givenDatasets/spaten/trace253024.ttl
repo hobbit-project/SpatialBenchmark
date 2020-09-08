@@ -1,0 +1,450 @@
+@prefix trace: <http://www.spaten.com/trace-data#> .
+@prefix prop: <http://www.spaten.com/ontologies/traces#> .
+@prefix point: <http://www.spaten.com/point#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+trace:884521 a prop:Trace ;
+	prop:hasPoint point:1 .
+
+point:1 prop:lat "-74.2251"^^xsd:double ;
+	prop:long "40.76194"^^xsd:double .
+
+trace:884521 prop:hasPoint point:2 .
+
+point:2 prop:lat "-74.22512"^^xsd:double ;
+	prop:long "40.76192"^^xsd:double .
+
+trace:884521 prop:hasPoint point:3 .
+
+point:3 prop:lat "-74.22527"^^xsd:double ;
+	prop:long "40.76203"^^xsd:double .
+
+trace:884521 prop:hasPoint point:4 .
+
+point:4 prop:lat "-74.22565"^^xsd:double ;
+	prop:long "40.76224"^^xsd:double .
+
+trace:884521 prop:hasPoint point:5 .
+
+point:5 prop:lat "-74.2257"^^xsd:double ;
+	prop:long "40.76227"^^xsd:double .
+
+trace:884521 prop:hasPoint point:6 .
+
+point:6 prop:lat "-74.22573"^^xsd:double ;
+	prop:long "40.76229"^^xsd:double .
+
+trace:884521 prop:hasPoint point:7 .
+
+point:7 prop:lat "-74.22579"^^xsd:double ;
+	prop:long "40.76231"^^xsd:double .
+
+trace:884521 prop:hasPoint point:8 .
+
+point:8 prop:lat "-74.22581"^^xsd:double ;
+	prop:long "40.76232"^^xsd:double .
+
+trace:884521 prop:hasPoint point:9 .
+
+point:9 prop:lat "-74.22591"^^xsd:double ;
+	prop:long "40.76233"^^xsd:double .
+
+trace:884521 prop:hasPoint point:10 .
+
+point:10 prop:lat "-74.22604"^^xsd:double ;
+	prop:long "40.76241"^^xsd:double .
+
+trace:884521 prop:hasPoint point:11 .
+
+point:11 prop:lat "-74.2272"^^xsd:double ;
+	prop:long "40.76307"^^xsd:double .
+
+trace:884521 prop:hasPoint point:12 .
+
+point:12 prop:lat "-74.22751"^^xsd:double ;
+	prop:long "40.76325"^^xsd:double .
+
+trace:884521 prop:hasPoint point:13 .
+
+point:13 prop:lat "-74.22786"^^xsd:double ;
+	prop:long "40.76345"^^xsd:double .
+
+trace:884521 prop:hasPoint point:14 .
+
+point:14 prop:lat "-74.22822"^^xsd:double ;
+	prop:long "40.76366"^^xsd:double .
+
+trace:884521 prop:hasPoint point:15 .
+
+point:15 prop:lat "-74.22891"^^xsd:double ;
+	prop:long "40.76405"^^xsd:double .
+
+trace:884521 prop:hasPoint point:16 .
+
+point:16 prop:lat "-74.22951"^^xsd:double ;
+	prop:long "40.7644"^^xsd:double .
+
+trace:884521 prop:hasPoint point:17 .
+
+point:17 prop:lat "-74.22958"^^xsd:double ;
+	prop:long "40.76444"^^xsd:double .
+
+trace:884521 prop:hasPoint point:18 .
+
+point:18 prop:lat "-74.22951"^^xsd:double ;
+	prop:long "40.76451"^^xsd:double .
+
+trace:884521 prop:hasPoint point:19 .
+
+point:19 prop:lat "-74.22948"^^xsd:double ;
+	prop:long "40.76454"^^xsd:double .
+
+trace:884521 prop:hasPoint point:20 .
+
+point:20 prop:lat "-74.22946"^^xsd:double ;
+	prop:long "40.76456"^^xsd:double .
+
+trace:884521 prop:hasPoint point:21 .
+
+point:21 prop:lat "-74.22945"^^xsd:double ;
+	prop:long "40.76457"^^xsd:double .
+
+trace:884521 prop:hasPoint point:22 .
+
+point:22 prop:lat "-74.22944"^^xsd:double ;
+	prop:long "40.76459"^^xsd:double .
+
+trace:884521 prop:hasPoint point:23 .
+
+point:23 prop:lat "-74.22942"^^xsd:double ;
+	prop:long "40.76461"^^xsd:double .
+
+trace:884521 prop:hasPoint point:24 .
+
+point:24 prop:lat "-74.22883"^^xsd:double ;
+	prop:long "40.76547"^^xsd:double .
+
+trace:884521 prop:hasPoint point:25 .
+
+point:25 prop:lat "-74.22839"^^xsd:double ;
+	prop:long "40.76607"^^xsd:double .
+
+trace:884521 prop:hasPoint point:26 .
+
+point:26 prop:lat "-74.22796"^^xsd:double ;
+	prop:long "40.76668"^^xsd:double .
+
+trace:884521 prop:hasPoint point:27 .
+
+point:27 prop:lat "-74.22751"^^xsd:double ;
+	prop:long "40.76732"^^xsd:double .
+
+trace:884521 prop:hasPoint point:28 .
+
+point:28 prop:lat "-74.2273"^^xsd:double ;
+	prop:long "40.76755"^^xsd:double .
+
+trace:884521 prop:hasPoint point:29 .
+
+point:29 prop:lat "-74.22727"^^xsd:double ;
+	prop:long "40.76759"^^xsd:double .
+
+trace:884521 prop:hasPoint point:30 .
+
+point:30 prop:lat "-74.22723"^^xsd:double ;
+	prop:long "40.76764"^^xsd:double .
+
+trace:884521 prop:hasPoint point:31 .
+
+point:31 prop:lat "-74.22722"^^xsd:double ;
+	prop:long "40.76765"^^xsd:double .
+
+trace:884521 prop:hasPoint point:32 .
+
+point:32 prop:lat "-74.22713"^^xsd:double ;
+	prop:long "40.76776"^^xsd:double .
+
+trace:884521 prop:hasPoint point:33 .
+
+point:33 prop:lat "-74.22709"^^xsd:double ;
+	prop:long "40.76781"^^xsd:double .
+
+trace:884521 prop:hasPoint point:34 .
+
+point:34 prop:lat "-74.22707"^^xsd:double ;
+	prop:long "40.76783"^^xsd:double .
+
+trace:884521 prop:hasPoint point:35 .
+
+point:35 prop:lat "-74.227"^^xsd:double ;
+	prop:long "40.76791"^^xsd:double .
+
+trace:884521 prop:hasPoint point:36 .
+
+point:36 prop:lat "-74.22699"^^xsd:double ;
+	prop:long "40.76793"^^xsd:double .
+
+trace:884521 prop:hasPoint point:37 .
+
+point:37 prop:lat "-74.22697"^^xsd:double ;
+	prop:long "40.76795"^^xsd:double .
+
+trace:884521 prop:hasPoint point:38 .
+
+point:38 prop:lat "-74.22695"^^xsd:double ;
+	prop:long "40.76797"^^xsd:double .
+
+trace:884521 prop:hasPoint point:39 .
+
+point:39 prop:lat "-74.22693"^^xsd:double ;
+	prop:long "40.76799"^^xsd:double .
+
+trace:884521 prop:hasPoint point:40 .
+
+point:40 prop:lat "-74.22686"^^xsd:double ;
+	prop:long "40.76808"^^xsd:double .
+
+trace:884521 prop:hasPoint point:41 .
+
+point:41 prop:lat "-74.22682"^^xsd:double ;
+	prop:long "40.76813"^^xsd:double .
+
+trace:884521 prop:hasPoint point:42 .
+
+point:42 prop:lat "-74.22678"^^xsd:double ;
+	prop:long "40.76817"^^xsd:double .
+
+trace:884521 prop:hasPoint point:43 .
+
+point:43 prop:lat "-74.22644"^^xsd:double ;
+	prop:long "40.7686"^^xsd:double .
+
+trace:884521 prop:hasPoint point:44 .
+
+point:44 prop:lat "-74.22601"^^xsd:double ;
+	prop:long "40.76911"^^xsd:double .
+
+trace:884521 prop:hasPoint point:45 .
+
+point:45 prop:lat "-74.22598"^^xsd:double ;
+	prop:long "40.76915"^^xsd:double .
+
+trace:884521 prop:hasPoint point:46 .
+
+point:46 prop:lat "-74.22594"^^xsd:double ;
+	prop:long "40.76918"^^xsd:double .
+
+trace:884521 prop:hasPoint point:47 .
+
+point:47 prop:lat "-74.22533"^^xsd:double ;
+	prop:long "40.76979"^^xsd:double .
+
+trace:884521 prop:hasPoint point:48 .
+
+point:48 prop:lat "-74.22524"^^xsd:double ;
+	prop:long "40.76988"^^xsd:double .
+
+trace:884521 prop:hasPoint point:49 .
+
+point:49 prop:lat "-74.22518"^^xsd:double ;
+	prop:long "40.76997"^^xsd:double .
+
+trace:884521 prop:hasPoint point:50 .
+
+point:50 prop:lat "-74.22519"^^xsd:double ;
+	prop:long "40.77029"^^xsd:double .
+
+trace:884521 prop:hasPoint point:51 .
+
+point:51 prop:lat "-74.22534"^^xsd:double ;
+	prop:long "40.77038"^^xsd:double .
+
+trace:884521 prop:hasPoint point:52 .
+
+point:52 prop:lat "-74.22616"^^xsd:double ;
+	prop:long "40.77075"^^xsd:double .
+
+trace:884521 prop:hasPoint point:53 .
+
+point:53 prop:lat "-74.2264"^^xsd:double ;
+	prop:long "40.77085"^^xsd:double .
+
+trace:884521 prop:hasPoint point:54 .
+
+point:54 prop:lat "-74.22667"^^xsd:double ;
+	prop:long "40.77097"^^xsd:double .
+
+trace:884521 prop:hasPoint point:55 .
+
+point:55 prop:lat "-74.22693"^^xsd:double ;
+	prop:long "40.77109"^^xsd:double .
+
+trace:884521 prop:hasPoint point:56 .
+
+point:56 prop:lat "-74.227"^^xsd:double ;
+	prop:long "40.77112"^^xsd:double .
+
+trace:884521 prop:hasPoint point:57 .
+
+point:57 prop:lat "-74.22716"^^xsd:double ;
+	prop:long "40.77119"^^xsd:double .
+
+trace:884521 prop:hasPoint point:58 .
+
+point:58 prop:lat "-74.2274"^^xsd:double ;
+	prop:long "40.77128"^^xsd:double .
+
+trace:884521 prop:hasPoint point:59 .
+
+point:59 prop:lat "-74.22758"^^xsd:double ;
+	prop:long "40.77135"^^xsd:double .
+
+trace:884521 prop:hasPoint point:60 .
+
+point:60 prop:lat "-74.22843"^^xsd:double ;
+	prop:long "40.7717"^^xsd:double .
+
+trace:884521 prop:hasPoint point:61 .
+
+point:61 prop:lat "-74.22966"^^xsd:double ;
+	prop:long "40.7722"^^xsd:double .
+
+trace:884521 prop:hasPoint point:62 .
+
+point:62 prop:lat "-74.22879"^^xsd:double ;
+	prop:long "40.77345"^^xsd:double .
+
+trace:884521 prop:hasPoint point:63 .
+
+point:63 prop:lat "-74.22801"^^xsd:double ;
+	prop:long "40.77452"^^xsd:double .
+
+trace:884521 prop:hasPoint point:64 .
+
+point:64 prop:lat "-74.22778"^^xsd:double ;
+	prop:long "40.77485"^^xsd:double .
+
+trace:884521 prop:hasPoint point:65 .
+
+point:65 prop:lat "-74.2272"^^xsd:double ;
+	prop:long "40.77566"^^xsd:double .
+
+trace:884521 prop:hasPoint point:66 .
+
+point:66 prop:lat "-74.22653"^^xsd:double ;
+	prop:long "40.77661"^^xsd:double .
+
+trace:884521 prop:hasPoint point:67 .
+
+point:67 prop:lat "-74.22567"^^xsd:double ;
+	prop:long "40.77781"^^xsd:double .
+
+trace:884521 prop:hasPoint point:68 .
+
+point:68 prop:lat "-74.22496"^^xsd:double ;
+	prop:long "40.77879"^^xsd:double .
+
+trace:884521 prop:hasPoint point:69 .
+
+point:69 prop:lat "-74.22478"^^xsd:double ;
+	prop:long "40.77902"^^xsd:double .
+
+trace:884521 prop:hasPoint point:70 .
+
+point:70 prop:lat "-74.22439"^^xsd:double ;
+	prop:long "40.77954"^^xsd:double .
+
+trace:884521 prop:hasPoint point:71 .
+
+point:71 prop:lat "-74.22395"^^xsd:double ;
+	prop:long "40.78014"^^xsd:double .
+
+trace:884521 prop:hasPoint point:72 .
+
+point:72 prop:lat "-74.22387"^^xsd:double ;
+	prop:long "40.7802"^^xsd:double .
+
+trace:884521 prop:hasPoint point:73 .
+
+point:73 prop:lat "-74.22374"^^xsd:double ;
+	prop:long "40.78028"^^xsd:double .
+
+trace:884521 prop:hasPoint point:74 .
+
+point:74 prop:lat "-74.22393"^^xsd:double ;
+	prop:long "40.78058"^^xsd:double .
+
+trace:884521 prop:hasPoint point:75 .
+
+point:75 prop:lat "-74.22399"^^xsd:double ;
+	prop:long "40.78069"^^xsd:double .
+
+trace:884521 prop:hasPoint point:76 .
+
+point:76 prop:lat "-74.22402"^^xsd:double ;
+	prop:long "40.78077"^^xsd:double .
+
+trace:884521 prop:hasPoint point:77 .
+
+point:77 prop:lat "-74.22405"^^xsd:double ;
+	prop:long "40.78085"^^xsd:double .
+
+trace:884521 prop:hasPoint point:78 .
+
+point:78 prop:lat "-74.22428"^^xsd:double ;
+	prop:long "40.78229"^^xsd:double .
+
+trace:884521 prop:hasPoint point:79 .
+
+point:79 prop:lat "-74.22433"^^xsd:double ;
+	prop:long "40.78262"^^xsd:double .
+
+trace:884521 prop:hasPoint point:80 .
+
+point:80 prop:lat "-74.22438"^^xsd:double ;
+	prop:long "40.78269"^^xsd:double .
+
+trace:884521 prop:hasPoint point:81 .
+
+point:81 prop:lat "-74.22451"^^xsd:double ;
+	prop:long "40.78288"^^xsd:double .
+
+trace:884521 prop:hasPoint point:82 .
+
+point:82 prop:lat "-74.22454"^^xsd:double ;
+	prop:long "40.78292"^^xsd:double .
+
+trace:884521 prop:hasPoint point:83 .
+
+point:83 prop:lat "-74.22466"^^xsd:double ;
+	prop:long "40.78304"^^xsd:double .
+
+trace:884521 prop:hasPoint point:84 .
+
+point:84 prop:lat "-74.22478"^^xsd:double ;
+	prop:long "40.78314"^^xsd:double .
+
+trace:884521 prop:hasPoint point:85 .
+
+point:85 prop:lat "-74.22492"^^xsd:double ;
+	prop:long "40.78324"^^xsd:double .
+
+trace:884521 prop:hasPoint point:86 .
+
+point:86 prop:lat "-74.22504"^^xsd:double ;
+	prop:long "40.7833"^^xsd:double .
+
+trace:884521 prop:hasPoint point:87 .
+
+point:87 prop:lat "-74.22559"^^xsd:double ;
+	prop:long "40.78359"^^xsd:double .
+
+trace:884521 prop:hasPoint point:88 .
+
+point:88 prop:lat "-74.22566"^^xsd:double ;
+	prop:long "40.78352"^^xsd:double .
+
+trace:884521 prop:hasPoint point:89 .
+
+point:89 prop:lat "-74.22583"^^xsd:double ;
+	prop:long "40.78332"^^xsd:double .

@@ -1,0 +1,26 @@
+@base <http://www.tomtom.com/trace-data/35398.ttl> .
+@prefix : <http://www.tomtom.com/ontologies/traces#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<#trace> a :Trace .
+<#trace> :hasPoint <#point0> .
+<#point0> :hasTimestamp "2017-01-04T09:59:45.000000"^^xsd:dateTime ;
+	:lat 51.999448 ;
+	:long 13.346352 ;
+	:hasSpeed <#speed0> .
+<#speed0> :velocityValue 70.00 ;
+	:velocityMetric :kilometers_perHour .
+<#trace> :hasPoint <#point1> .
+<#point1> :hasTimestamp "2017-01-04T10:00:07.000000"^^xsd:dateTime ;
+	:lat 51.995868 ;
+	:long 13.348505 ;
+	:hasSpeed <#speed1> .
+<#speed1> :velocityValue 70.00 ;
+	:velocityMetric :kilometers_perHour .
+<#trace> :hasPoint <#point2> .
+<#point2> :hasTimestamp "2017-01-04T10:00:29.000000"^^xsd:dateTime ;
+	:lat 51.993208 ;
+	:long 13.352964 ;
+	:hasSpeed <#speed2> .
+<#speed2> :velocityValue 70.00 ;
+	:velocityMetric :kilometers_perHour .
