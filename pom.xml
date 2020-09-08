@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.hobbit</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.10</version> <!-- 1.0.10 1.0.9-SNAPSHOT -->
+            <version>1.0.19</version> <!-- 1.0.10 1.0.9-SNAPSHOT -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
