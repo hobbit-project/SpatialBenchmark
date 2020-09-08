@@ -26,39 +26,7 @@
             <name>University Leipzig, AKSW Maven2 Repository</name>
             <url>http://maven.aksw.org/repository/snapshots</url>
         </repository>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>strabon</id>
-            <name>Strabon - maven repository</name>
-            <url>http://maven.strabon.di.uoa.gr/content/repositories/releases</url>
-        </repository>
-        <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>strabon.sesame</id>
-            <name>Strabon - maven repository - sesame artifacts (temporary)</name>
-            <url>http://maven.strabon.di.uoa.gr/content/repositories/strabon.sesame/</url>
-        </repository>
-        <repository>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>strabon.snapshot</id>
-            <name>Strabon - maven repository - snapshots</name>
-            <url>http://maven.strabon.di.uoa.gr/content/repositories/snapshots</url>
-        </repository>
+        
      
     </repositories>
     
@@ -67,7 +35,7 @@
         <dependency>
             <groupId>org.hobbit</groupId>
             <artifactId>core</artifactId>
-            <version>1.0.10</version>
+            <version>1.0.10</version> <!-- 1.0.10 1.0.9-SNAPSHOT -->
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -77,8 +45,12 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>jcl-over-slf4j</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
             </exclusions>
-        </dependency>
+		</dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -168,6 +140,13 @@
             <version>2.4</version>
             <type>jar</type>           
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-validator/commons-validator -->
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.6</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -205,10 +184,17 @@
             </exclusions>
         </dependency>
         <!--RADON-->
+        
+        <!-- http://maven.aksw.org/repository/internal/org/aksw/limes/limes-core/ 
+        http://maven.aksw.org/repository/internal/org/aksw/limes/core/
+        edo fainetai na exei neoteres ekdoseis! einai ok? poia na xrisimopoiiso? -->
+        <!-- http://maven.aksw.org/repository/internal/org/aksw/limes/core/ edo exei mono 
+        tin 1.1.2        -->
         <dependency>
             <groupId>org.aksw.limes.core</groupId>
             <artifactId>limes-core</artifactId>
-            <version>1.1.2</version>
+            <!--<version>1.1.2</version>-->
+            <version>1.5.0</version>
             <type>jar</type>
             <exclusions>
                 <exclusion>
@@ -231,12 +217,13 @@
             <type>jar</type>
         </dependency>
         
+        
+        
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.0-801.jdbc4</version>
+            <groupId>org.hobbit</groupId>
+            <artifactId>hobbit-java-sdk</artifactId>
+            <version>1.1.9</version>
         </dependency>
-         
     </dependencies>
     <build>
 
@@ -282,8 +269,25 @@
             <plugin>		
                 <groupId>org.apache.maven.plugins</groupId>		
                 <artifactId>maven-install-plugin</artifactId>		
-                <version>2.5.2</version>		
-                <executions>		
+                <version>2.5.2</version>	
+               
+                    	
+                <executions>	
+<!--                    <execution>
+                        <id>strabon</id>		
+                        <phase>clean</phase>
+                        <configuration>                        	
+                            <file>${basedir}/strabon/strabon-runtime-3.3.2-SNAPSHOT.jar</file>
+                            <repositoryLayout>default</repositoryLayout>		
+                            <artifactId>strabon</artifactId> 
+                            <version>3.3.2</version> 		
+                            <packaging>jar</packaging>	  
+                        
+                        </configuration>    
+                        <goals>		
+                            <goal>install-file</goal>		
+                        </goals>
+                    </execution>	-->
                     <execution>		
                         <id>install-external</id>		
                         <phase>clean</phase>		
@@ -304,7 +308,7 @@
                             <goal>install-file</goal>		
                         </goals>		
                     </execution>		
-                    <execution>		
+                    <execution>	
                          		
                         <configuration>                            		
                             <file>${basedir}/lib/silk.jar</file>		
@@ -317,7 +321,8 @@
                         <goals>		
                             <goal>install-file</goal>		
                         </goals>		
-                    </execution>		
+                    </execution>
+                    
                 </executions>		
             </plugin>             
    
@@ -326,3 +331,4 @@
     </build>
     <name>SpatialBenchmark</name>
 </project>
+
