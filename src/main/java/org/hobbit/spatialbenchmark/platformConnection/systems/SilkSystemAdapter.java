@@ -49,7 +49,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
         sourceReceiver = SimpleFileReceiver.create(this.incomingDataQueueFactory, "source_file");
         LOGGER.info("Receivers initialized. It took {}ms.", System.currentTimeMillis() - time);
         LOGGER.info("Silk initialized successfully.");
-
     }
 
     @Override
