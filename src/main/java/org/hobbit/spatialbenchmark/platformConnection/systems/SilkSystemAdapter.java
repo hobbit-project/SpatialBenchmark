@@ -63,7 +63,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             receivedGeneratedDataFilePath = RabbitMQUtils.readString(dataBuffer);
 
             String[] receivedFiles = sourceReceiver.receiveData("./datasets/SourceDatasets/");
-//LOGGER.info("receivedFiles DATA " + Arrays.toString(receivedFiles));
             receivedGeneratedDataFilePath = "./datasets/SourceDatasets/" + receivedFiles[0];
             LOGGER.info("Received data from receiveGeneratedData..");
 
@@ -101,7 +100,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
                 targetReceiver = SingleFileReceiver.create(this.incomingDataQueueFactory,
                         "task_target_file");
                 String[] receivedFiles = targetReceiver.receiveData("./datasets/TargetDatasets/");
-//LOGGER.info("receivedFiles TASK " + Arrays.toString(receivedFiles));
                 receivedGeneratedTaskFilePath = "./datasets/TargetDatasets/" + receivedFiles[0];
 
             } catch (Exception e) {
@@ -136,30 +134,17 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             LOGGER.info("Started silkController.. ");
             String config = "./configs/topologicalConfigs/silkConfig" + relation + ".xml";
             String newConfig = "./configs/topologicalConfigs/silkNewConfig" + relation + ".xml";
-//Supported formats are: 'RDF/XML', 'N-Triples', 'N-Quads', 'Turtle'
             try {
                 resultsFile = "./datasets/SilkSystemAdapterResults/" + relation + "mappings." + SesameUtils.parseRdfFormat(dataFormat).getDefaultFileExtension();
 
                 String content = FileUtils.readFileToString(new File(config), "UTF-8");
                 content = content.replaceAll("source-clear-for-silk.nt", "../../" + source);
                 content = content.replaceAll("target-clear-for-silk.nt", "../../" + target);
-//                content = content.replaceAll("N-TRIPLE", SesameUtils.parseRdfFormat(dataFormat).toString());
-//                content = content.replaceAll("N-TRIPLES", "N-TRIPLE");
-
-//  TODO             CORRECT FORMAT.. Now only gets nt, find how the have defined it
-//or maybe they only return .nt resutls! I should fix that if so
                 content = content.replaceAll("mappings.nt", "../../" + resultsFile);
 
                 File tempFile = new File(newConfig);
                 FileUtils.writeStringToFile(tempFile, content, "UTF-8");
 
-//                LOGGER.info("------------CONFIG");
-//                try (BufferedReader br = new BufferedReader(new FileReader(newConfig))) {
-//                    String line = null;
-//                    while ((line = br.readLine()) != null) {
-//                        LOGGER.info("" + line);
-//                    }
-//                }
             } catch (IOException e) {
                 throw new RuntimeException("Generating file failed", e);
             }
@@ -187,10 +172,6 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
         if (Commands.DATA_GENERATION_FINISHED == command) {
             LOGGER.info("my receiveCommand for source");
             sourceReceiver.terminate();
-
-//        } else if (Commands.TASK_GENERATION_FINISHED == command) {
-//            LOGGER.info("my receiveCommand for target");
-//            targetReceiver.terminate();
         }
         super.receiveCommand(command, data);
     }
