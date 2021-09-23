@@ -4,7 +4,7 @@ ADD target/SpatialBenchmark-1.0-SNAPSHOT.jar /SpatialBenchmark/SpatialBenchmark.
 
 WORKDIR /SpatialBenchmark
 
-COPY lib/silk.jar /SpatialBenchmark/lib/silk.jar
+COPY lib/* /SpatialBenchmark/lib/
 
 COPY configs/topologicalConfigs/* /SpatialBenchmark/configs/topologicalConfigs/
 
@@ -12,6 +12,5 @@ COPY datasets/SourceDatasets/ /SpatialBenchmark/datasets/SourceDatasets/
 
 COPY datasets/TargetDatasets/ /SpatialBenchmark/datasets/TargetDatasets/
 
+
 CMD java -cp SpatialBenchmark.jar org.hobbit.core.run.ComponentStarter org.hobbit.spatialbenchmark.platformConnection.systems.SilkSystemAdapter
-
-
