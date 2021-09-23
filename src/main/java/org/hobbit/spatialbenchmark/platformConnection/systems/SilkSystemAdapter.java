@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SilkSystemAdapter extends AbstractSystemAdapter {
 
-    private static final Logger LOGGER_SILK = LoggerFactory.getLogger(org.silkframework.execution.GenerateLinks.class);
+//    private static final Logger LOGGER_SILK = LoggerFactory.getLogger(org.silkframework.execution.GenerateLinks.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(SilkSystemAdapter.class);
     protected File folder = new File("");
     private SimpleFileReceiver sourceReceiver;
@@ -81,6 +81,7 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
             ByteBuffer taskBuffer = ByteBuffer.wrap(data);
             // read the relation
             String taskRelation = RabbitMQUtils.readString(taskBuffer);
+            LOGGER.info("Silk version 3.5.0");
             LOGGER.info("taskRelation " + taskRelation);
             // read the target geometry
             String targetGeom = RabbitMQUtils.readString(taskBuffer);
@@ -148,11 +149,11 @@ public class SilkSystemAdapter extends AbstractSystemAdapter {
                 throw new RuntimeException("Generating file failed", e);
             }
 
-            Process p = Runtime.getRuntime().exec("java -DconfigFile=" + newConfig + "  -jar ./lib/silk.jar ");
+            Process p = Runtime.getRuntime().exec("java -DconfigFile=" + newConfig + "  -jar ./lib/SilkSingleMachine-assembly-3.1.0-SNAPSHOT.jar ");
             p.waitFor();
 
-            LOGGER_SILK.info(IOUtils.toString(p.getInputStream()));
-            LOGGER_SILK.info(IOUtils.toString(p.getErrorStream()));
+//            LOGGER_SILK.info(IOUtils.toString(p.getInputStream()));
+//            LOGGER_SILK.info(IOUtils.toString(p.getErrorStream()));
 
             //delete cache folder 
             File folder = new File("./cache/");

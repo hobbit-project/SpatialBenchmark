@@ -92,8 +92,10 @@ public class DataGenerator extends AbstractDataGenerator {
         SimpleFileSender sender = null;
         try {
             
+            LOGGER.info("Before worker ");
             Worker worker = new Worker();
             worker.execute();
+            LOGGER.info("After worker ");
             
             File sourcePath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "SourceDatasets");
             ArrayList<File> sourceFiles = new ArrayList<File>(Arrays.asList(sourcePath.listFiles()));
@@ -103,6 +105,11 @@ public class DataGenerator extends AbstractDataGenerator {
             
             File gsPath = new File(getConfigurations().getString(Configurations.DATASETS_PATH) + File.separator + "GoldStandards");
             ArrayList<File> gsFiles = new ArrayList<File>(Arrays.asList(gsPath.listFiles()));
+            
+            LOGGER.info("sourceFiles: "+ Arrays.asList(sourcePath.listFiles().length));
+            LOGGER.info("targetPath: "+ Arrays.asList(targetPath.listFiles().length));
+            LOGGER.info("gsFiles: "+ Arrays.asList(gsPath.listFiles().length));
+
             
             for (File file : gsFiles) {
                 byte[][] generatedFileArray = new byte[3][];

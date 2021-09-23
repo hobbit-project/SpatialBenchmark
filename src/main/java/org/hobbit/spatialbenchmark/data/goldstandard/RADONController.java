@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import org.aksw.limes.core.controller.Controller;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.aksw.limes.core.io.config.Configuration;
+import org.aksw.limes.core.io.config.reader.AConfigurationReader;
+import org.aksw.limes.core.io.config.reader.xml.XMLConfigurationReader;
 import org.aksw.limes.core.io.serializer.ISerializer;
 import org.aksw.limes.core.io.serializer.SerializerFactory;
 import org.apache.commons.cli.CommandLine;
@@ -37,14 +39,19 @@ public class RADONController extends Controller {
     private ResultMappings mappings;
 
     public RADONController(RDFFormat rdfFormat, String generator) throws IOException {
-         LOGGER.info("generator " +generator);
+//        generator = "tomtom"; ////////////////
+        LOGGER.info("generator " + generator);
 //        generator = "tomtom"; //this is only for the experiments of ontoidea
-        
-        String[] args = new String[1];
-        args[0] = getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
 
-        CommandLine cmd = parseCommandLine(args);
-        Configuration config = getConfig(cmd);
+        AConfigurationReader reader = new XMLConfigurationReader(getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml");
+        Configuration config = reader.read();
+//
+//        String[] args = new String[1];
+//        args[0] = getConfigurations().getString(Configurations.CONFIGS_PATH) + File.separator + "topologicalConfigs/config" + RELATION + ".xml";
+//
+//        CommandLine cmd = parseCommandLine(args);
+//        Configuration config = getConfig(cmd);
+
         String sourceFile = config.getSourceInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
         String targetFile = config.getTargetInfo().getEndpoint() + "." + rdfFormat.getDefaultFileExtension();
 

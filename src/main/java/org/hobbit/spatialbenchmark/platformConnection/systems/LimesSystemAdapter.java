@@ -11,16 +11,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.logging.Level;
-import static org.aksw.limes.core.controller.Controller.getConfig;
 import static org.aksw.limes.core.controller.Controller.getMapping;
-import static org.aksw.limes.core.controller.Controller.parseCommandLine;
 import org.aksw.limes.core.controller.ResultMappings;
 import org.aksw.limes.core.io.config.Configuration;
+import org.aksw.limes.core.io.config.reader.AConfigurationReader;
+import org.aksw.limes.core.io.config.reader.xml.XMLConfigurationReader;
 import org.aksw.limes.core.io.serializer.ISerializer;
 import org.aksw.limes.core.io.serializer.SerializerFactory;
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.hobbit.core.Commands;
 import org.hobbit.core.components.AbstractSystemAdapter;
@@ -138,12 +136,15 @@ public class LimesSystemAdapter extends AbstractSystemAdapter {
     public void limesController(String source, String target, String relation, String targetGeom, String namespace) throws IOException {
 
         LOGGER.info("Started limesController.. ");
-
-        String[] args = new String[1];
-        args[0] = "./configs/topologicalConfigs/config" + relation + ".xml";
-
-        CommandLine cmd = parseCommandLine(args);
-        Configuration config = getConfig(cmd);
+        AConfigurationReader reader = new XMLConfigurationReader("./configs/topologicalConfigs/config" + relation + ".xml");
+        Configuration config = reader.read();
+        
+        
+//        String[] args = new String[1];
+//        args[0] = "./configs/topologicalConfigs/config" + relation + ".xml";
+//
+//        CommandLine cmd = parseCommandLine(args);
+//        Configuration config = getConfig(cmd);
 
         config.getSourceInfo().setEndpoint(source);
         config.getTargetInfo().setEndpoint(target);

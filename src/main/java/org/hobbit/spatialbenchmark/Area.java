@@ -38,6 +38,10 @@ public class Area {
     private static final Value spatenRegion = ValueFactoryImpl.getInstance().createURI("http://www.spaten.com/ontologies/regions#Region");
     private static final Value debsTrace = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/traces#Trace");
     private static final Value debsRegion = ValueFactoryImpl.getInstance().createURI("http://www.debs.com/ontologies/regions#Region");
+    
+//        private static final Value debsTrace = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/traces#Trace");
+//    private static final Value debsRegion = ValueFactoryImpl.getInstance().createURI("http://www.tomtom.com/ontologies/regions#Region");
+    
     private static final String stRDF = "http://strdf.di.uoa.gr/ontology#";
     private static final URI WKT = ValueFactoryImpl.getInstance().createURI(stRDF + "WKT");
 
